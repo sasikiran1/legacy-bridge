@@ -1,0 +1,103 @@
+# Model registry.
+# Prices are notional: published paid list prices, used to cost free-tier calls (docs/adr/0007-notional-pricing.md).
+# Every price and limit records its source and the date it was read. Re-verify before recording or running experiments.
+# Prices are USD per 1M tokens, standard tier.
+
+schema_version: 1
+
+providers:
+  groq:
+    base_url: https://api.groq.com/openai/v1
+    api_key_env: GROQ_API_KEY
+    trust: remote_untrusted
+    data_use: unverified        # treated as untrusted regardless; see docs/threat-model.md
+  gemini:
+    base_url: https://generativelanguage.googleapis.com/v1beta/openai/
+    api_key_env: GEMINI_API_KEY
+    trust: remote_untrusted
+    data_use: trains_on_free_tier_inputs_with_human_review
+  ollama:
+    base_url_env: OLLAMA_BASE_URL
+    trust: local
+
+models:
+  # Groq: prices from https://console.groq.com/docs/models, limits from https://console.groq.com/docs/rate-limits, read 2026-10-21.
+  # The rate-limit page labels its table as Developer-plan base limits, so the free numbers below are unconfirmed.
+  - id: openai/gpt-oss-20b
+    provider: groq
+    status: production
+    context_tokens: 131072
+    max_output_tokens: 65536
+    prices:
+      - {effective_from: 2026-10-21, input: 0.075, output: 0.30, source: https://console.groq.com/docs/models, read: 2026-10-21}
+    free_limits: {rpm: 30, rpd: 1000, tpm: 8000, tpd: 200000, confirmed_in_console: false, read: 2026-10-21}
+
+  - id: openai/gpt-oss-120b
+    provider: groq
+    status: production
+    context_tokens: 131072
+    max_output_tokens: 65536
+    prices:
+      - {effective_from: 2026-10-21, input: 0.15, output: 0.60, source: https://console.groq.com/docs/models, read: 2026-10-21}
+    free_limits: {rpm: 30, rpd: 1000, tpm: 8000, tpd: 200000, confirmed_in_console: false, read: 2026-10-21}
+
+  - id: qwen/qwen3.8-27b
+    provider: groq
+    status: preview             # "evaluation purposes only"; fallback chain only
+    context_tokens: 131072
+    max_output_tokens: 16384
+    prices:
+      - {effective_from: 2026-10-21, input: 0.80, output: 4.00, source: https://console.groq.com/docs/models, read: 2026-10-21}
+    free_limits: {rpm: 30, rpd: 1000, tpm: 8000, tpd: 200000, confirmed_in_console: false, read: 2026-10-21}
+
+  # Gemini: prices from https://ai.google.dev/gemini-api/docs/pricing (page updated 2026-10-19), read 2026-10-21.
+  # Free limits are only shown in the AI Studio console: https://aistudio.google.com/rate-limit
+  # Thinking tokens bill as output.
+  - id: gemini-3.5-flash-lite
+    provider: gemini
+    status: stable
+    prices:
+      - {effective_from: 2026-10-21, input: 0.30, output: 2.50, source: https://ai.google.dev/gemini-api/docs/pricing, read: 2026-10-21}
+    free_limits: {rpm: null, rpd: null, tpm: null, confirmed_in_console: false}
+
+  - id: gemini-3.1-flash-lite
+    provider: gemini
+    status: stable
+    prices:
+      - {effective_from: 2026-10-21, input: 0.25, output: 1.50, source: https://ai.google.dev/gemini-api/docs/pricing, read: 2026-10-21}
+    free_limits: {rpm: null, rpd: null, tpm: null, confirmed_in_console: false}
+
+  - id: gemini-3.8-flash
+    provider: gemini
+    status: stable
+    prices:
+      - {effective_from: 2026-10-21, effective_to: 2026-12-31, input: 0.75, output: 3.75, source: https://ai.google.dev/gemini-api/docs/pricing, read: 2026-10-21}
+      - {effective_from: 2027-01-01, input: 1.50, output: 7.50, source: https://ai.google.dev/gemini-api/docs/pricing, read: 2026-10-21}
+    free_limits: {rpm: null, rpd: null, tpm: null, confirmed_in_console: false}
+
+  - id: gemini-3.6-flash
+    provider: gemini
+    status: stable
+    prices:
+      - {effective_from: 2026-10-21, effective_to: 2026-12-31, input: 0.75, output: 3.75, source: https://ai.google.dev/gemini-api/docs/pricing, read: 2026-10-21}
+      - {effective_from: 2027-01-01, input: 1.50, output: 7.50, source: https://ai.google.dev/gemini-api/docs/pricing, read: 2026-10-21}
+    free_limits: {rpm: null, rpd: null, tpm: null, confirmed_in_console: false}
+
+  # Local (Ollama): $0 notional; GPU-seconds recorded separately (ADR 0007).
+  - id: qwen3-vl:8b
+    provider: ollama
+    license: Apache-2.0
+    source: https://ollama.com/library/qwen3-vl
+  - id: qwen3-vl:4b
+    provider: ollama
+    license: Apache-2.0
+    source: https://ollama.com/library/qwen3-vl
+
+# Role → ordered fallback chain. A 429 or provider error moves to the next entry.
+# local_text is chosen in M3 by a small tool-calling bake-off; candidates are verified then.
+roles:
+  plan:        [openai/gpt-oss-20b, gemini-3.5-flash-lite, gemini-3.1-flash-lite]
+  api_tier:    [openai/gpt-oss-20b, gemini-3.5-flash-lite, gemini-3.1-flash-lite]
+  explore:     [openai/gpt-oss-120b, gemini-3.8-flash, gemini-3.6-flash, qwen/qwen3.8-27b]
+  local_text:  []
+  vision:      [qwen3-vl:8b]
