@@ -8,7 +8,7 @@ Every version, license, price, and free-tier limit below was read from its sourc
 |---|---|---|---|
 | JDK | 25 (LTS, GA 2025-09-16) | JDK 27 (GA 2026-09-15) is non-LTS; Boot 4.1 supports up to 26 | https://openjdk.org/projects/jdk/ |
 | Spring Boot | 4.1.1 | 4.0.8 is the 4.0 maintenance line; 4.2.0-M2 is a milestone | https://github.com/spring-projects/spring-boot/releases |
-| Spring Boot Java/Maven support | Java 17–26, Maven ≥ 3.6.3, Tomcat 11 | No JSP in executable jars → Thymeleaf | https://docs.spring.io/spring-boot/system-requirements.html |
+| Spring Boot Java/Maven support | Java 17–26, Maven ≥ 3.6.3, Tomcat 11 | | https://docs.spring.io/spring-boot/system-requirements.html |
 | springdoc-openapi | 3.1.1 | Built against Boot 4.1.0 | https://repo1.maven.org/maven2/org/springdoc/springdoc-openapi-starter-webmvc-ui/maven-metadata.xml |
 | Testcontainers (Java) | 2.0.5 | 2.x prefixes modules: `testcontainers-postgresql` | https://repo1.maven.org/maven2/org/testcontainers/testcontainers/maven-metadata.xml |
 | Flyway | 13.11.1 | Use the Boot-managed version unless it lags | https://repo1.maven.org/maven2/org/flywaydb/flyway-core/maven-metadata.xml |
@@ -18,7 +18,7 @@ Every version, license, price, and free-tier limit below was read from its sourc
 | OpenBao | 2.7.1 | Considered in ADR 0002, not used | https://github.com/openbao/openbao/releases |
 | Python | 3.14.9 | 3.15 is out (2026-10-09), but presidio and arize-phoenix cap at `<3.15`; 3.13 is security-only | https://www.python.org/downloads/ |
 | uv | 0.12.9 (installed) | | local `uv --version` |
-| Node.js | 26.5.0 (installed) | `@playwright/mcp` needs ≥ 18 | local `node --version` |
+| Node.js | 26.5.0 (installed); build image `node:26.9.0` | Node 26 becomes LTS on 2026-10-28; Node 24 entered maintenance on 2026-10-20. `@playwright/mcp` needs ≥ 18; Vite 8 needs ≥ 22.12. | local `node --version`, https://github.com/nodejs/Release/blob/main/schedule.json |
 | Ollama | 0.40.7 (installed) | qwen3-vl needs ≥ 0.12.7 | local `ollama --version` |
 | GitHub Actions | free for public repos on standard hosted runners | Larger runners are always billed; don't use them | https://docs.github.com/en/billing/concepts/product-billing/github-actions |
 
@@ -57,6 +57,18 @@ Latest versions on PyPI as of the date above (`https://pypi.org/pypi/<name>/json
 | pytest-asyncio | 1.4.0 | Apache-2.0 | |
 | hypothesis | 6.170.5 | MPL-2.0 | |
 
+## Portal frontend packages
+
+Latest versions on npm as of the date above (`https://registry.npmjs.org/<name>/latest`). Exact versions are locked in `portal/web/package-lock.json`. See ADR 0010.
+
+| Package | Version | License | Note |
+|---|---|---|---|
+| react / react-dom | 19.3.1 | MIT | |
+| vite | 8.3.5 | MIT | Published 2026-10-21; if it misbehaves, drop to the previous patch |
+| @vitejs/plugin-react | 6.1.2 | MIT | |
+| typescript | 7.0.2 | Apache-2.0 | Native (Go) compiler line |
+| react-router | 8.5.0 | MIT | Needs Node ≥ 22.22 |
+
 ## Containers
 
 | Image | Pin | Source |
@@ -64,6 +76,7 @@ Latest versions on PyPI as of the date above (`https://pypi.org/pypi/<name>/json
 | `grafana/otel-lgtm` | `0.37.0` (2026-10-16, digest `sha256:57b5ab1ca661…`); bundles a collector, Prometheus, Tempo, Loki, and Grafana | https://hub.docker.com/r/grafana/otel-lgtm |
 | `arizephoenix/phoenix` | `version-20.24.0` | https://hub.docker.com/r/arizephoenix/phoenix |
 | `postgres` | `18.6` | https://hub.docker.com/_/postgres |
+| `node` (frontend build stage only) | `26.9.0` | https://hub.docker.com/_/node |
 | `redis` | `8.10.2` | https://hub.docker.com/_/redis |
 
 ## Models and datasets

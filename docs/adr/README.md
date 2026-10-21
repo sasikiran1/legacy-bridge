@@ -13,3 +13,4 @@ Short records: context, decision, alternatives, consequences. A decision is chan
 | [0007](0007-notional-pricing.md) | Notional pricing | Accepted |
 | [0008](0008-vision-fallback-and-redaction.md) | Vision fallback model and screenshot redaction | Proposed (decide in M4) |
 | [0009](0009-injection-detection.md) | Injection detection on page content | Accepted |
+| [0010](0010-portal-frontend.md) | Portal frontend: React SPA over internal endpoints | Accepted |

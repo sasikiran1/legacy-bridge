@@ -7,7 +7,7 @@ Each milestone ends with green tests, a demo command, and an interview brief (wh
 | Change | Reason |
 |---|---|
 | Python 3.14, not 3.13 | 3.13 became security-only when 3.15 shipped (2026-10-09). Presidio and Phoenix cap at `<3.15`, so 3.14 is the newest usable. |
-| Thymeleaf, no JSP | Boot 4.1 with an executable jar doesn't support JSP |
+| React SPA (Vite + TypeScript) instead of server-rendered HTML (ADR 0010) | Sasi's choice of a modern frontend. The legacy premise is kept by the public/internal API split: the SPA uses its own internal endpoints, the agent only the degraded public API. |
 | Groq models are `gpt-oss-20b` / `gpt-oss-120b` | Groq's free tier no longer offers Llama chat models |
 | Gemini models are the 3.x Flash and Flash-Lite lines | 2.5 models are limited to past users |
 | **Local-first exploration**, plus a smaller hosted arm | Budget: 50 tasks × 7 scenarios × ~10 steps × ~4K tokens ≈ 14M tokens, against ~200K tokens/day per Groq model |
@@ -30,10 +30,12 @@ Each milestone ends with green tests, a demo command, and an interview brief (wh
 ## M1: Portal and testbed
 
 - **Portal:**
-  - Spring Boot 4.1, Thymeleaf, JPA, Flyway, Postgres 18; a 2008-intranet look
+  - Spring Boot 4.1, JPA, Flyway, Postgres 18
+  - React SPA in `portal/web/`, styled as a dated intranet, built in a multi-stage Docker image and served by Spring Boot (ADR 0010)
   - members, policies, claims, reimbursements, notes
   - session login with per-user test accounts
-- **Partial REST API, documented with springdoc:** some endpoints work, some return 404/410, some drift in schema.
+- **Public REST API** `/api/v1/**`, documented with springdoc: some endpoints work, some return 404/410, some drift in schema.
+- **Internal API** `/internal/**` for the SPA: undocumented, and not degraded by API chaos.
 - **Chaos admin endpoint** (admin-token protected), with toggles:
   - API removal or deprecation per endpoint
   - schema drift
@@ -52,7 +54,8 @@ Each milestone ends with green tests, a demo command, and an interview brief (wh
 - **Tests:** JUnit 5 + Testcontainers (portal). pytest (oracles against the Compose stack).
 - **CI:** Maven build and tests, Python lint/type/test, oracle suite in Docker.
 - **Demo:** `make portal-up && make oracles`
-- **Dependency approvals needed:** Thymeleaf and Flyway starters; Faker, PyYAML, mypy, Playwright.
+- **CI also runs** `npm ci && npm run build` for the SPA.
+- **Dependency approvals needed:** Flyway starter; Faker, PyYAML, mypy, Playwright. React, Vite, TypeScript, and React Router are already approved (ADR 0010). Vitest only if needed.
 
 ## M2: PII proxy
 
