@@ -1,0 +1,55 @@
+[project]
+name = "legacy-bridge"
+version = "0.1.0"
+description = "API-first agent with browser fallback and a reversible PII proxy"
+requires-python = ">=3.14,<3.15"
+dependencies = [
+    "faker>=40.43.0",
+    "httpx>=0.28.1",
+    "playwright>=1.64.0",
+    "psycopg[binary]>=3.3.6",
+    "pydantic>=2.14.1",
+    "pyyaml>=6.0.3",
+]
+
+[dependency-groups]
+dev = [
+    "hypothesis>=6.170.5",
+    "mypy>=2.4.0",
+    "pytest>=9.1.1",
+    "pytest-asyncio>=1.4.0",
+    "ruff>=0.17.1",
+    "types-pyyaml>=6.0.12",
+]
+
+[tool.uv]
+package = false
+
+[tool.ruff]
+line-length = 110
+target-version = "py314"
+extend-exclude = ["portal"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "SIM", "RUF", "ASYNC", "PT", "N", "S"]
+ignore = ["S101", "S311", "RUF001", "RUF003"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S105", "S106"]
+
+[tool.mypy]
+strict = true
+python_version = "3.14"
+files = ["testbed", "tests"]
+plugins = ["pydantic.mypy"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "session"
+asyncio_default_test_loop_scope = "session"
+markers = [
+    "oracle: drives the running portal stack with Playwright (needs `docker compose up`)",
+]
+addopts = "-m 'not oracle'"
