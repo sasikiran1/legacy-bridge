@@ -1,0 +1,33 @@
+spring:
+  application:
+    name: portal
+  datasource:
+    url: ${PORTAL_JDBC_URL:jdbc:postgresql://localhost:5432/portal}
+    username: ${POSTGRES_USER:legacy}
+    password: ${POSTGRES_PASSWORD:}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+  flyway:
+    # /admin/reset restores the seed by cleaning and re-migrating; never enable this outside the testbed.
+    clean-disabled: false
+  threads:
+    virtual:
+      enabled: true
+
+server:
+  servlet:
+    session:
+      timeout: 30m
+
+portal:
+  admin-token: ${PORTAL_ADMIN_TOKEN:}
+  test-user-password: ${PORTAL_TEST_USER_PASSWORD:}
+
+springdoc:
+  paths-to-match: /api/v1/**
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
