@@ -1,0 +1,120 @@
+# Environment
+
+Every version, license, price, and free-tier limit below was read from its source on **2026-10-21** unless a row says otherwise. Free tiers and prices change without notice, so re-verify before each recording or experiment run and update the date. Model IDs, prices, and limits live in [`config/models.yaml`](../config/models.yaml); this file records where they came from.
+
+## Runtimes and platforms
+
+| Component | Version | Notes | Source |
+|---|---|---|---|
+| JDK | 25 (LTS, GA 2025-09-16) | JDK 27 (GA 2026-09-15) is non-LTS; Boot 4.1 supports up to 26 | https://openjdk.org/projects/jdk/ |
+| Spring Boot | 4.1.1 | 4.0.8 is the 4.0 maintenance line; 4.2.0-M2 is a milestone | https://github.com/spring-projects/spring-boot/releases |
+| Spring Boot Java/Maven support | Java 17–26, Maven ≥ 3.6.3, Tomcat 11 | No JSP in executable jars → Thymeleaf | https://docs.spring.io/spring-boot/system-requirements.html |
+| springdoc-openapi | 3.1.1 | Built against Boot 4.1.0 | https://repo1.maven.org/maven2/org/springdoc/springdoc-openapi-starter-webmvc-ui/maven-metadata.xml |
+| Testcontainers (Java) | 2.0.5 | 2.x prefixes modules: `testcontainers-postgresql` | https://repo1.maven.org/maven2/org/testcontainers/testcontainers/maven-metadata.xml |
+| Flyway | 13.11.1 | Use the Boot-managed version unless it lags | https://repo1.maven.org/maven2/org/flywaydb/flyway-core/maven-metadata.xml |
+| Docker base image | `eclipse-temurin:25-jdk` | | https://hub.docker.com/_/eclipse-temurin |
+| PostgreSQL | 18.6 (`postgres:18.6`) | Supported until 2030-11-14 | https://www.postgresql.org/support/versioning/ |
+| Redis | 8.10.2 (`redis:8.10.2`) | Tri-licensed RSALv2 / SSPLv1 / AGPLv3 since 8.0; we run it unmodified | https://github.com/redis/redis/releases, https://github.com/redis/redis/blob/unstable/LICENSE.txt |
+| OpenBao | 2.7.1 | Considered in ADR 0002, not used | https://github.com/openbao/openbao/releases |
+| Python | 3.14.9 | 3.15 is out (2026-10-09), but presidio and arize-phoenix cap at `<3.15`; 3.13 is security-only | https://www.python.org/downloads/ |
+| uv | 0.12.9 (installed) | | local `uv --version` |
+| Node.js | 26.5.0 (installed) | `@playwright/mcp` needs ≥ 18 | local `node --version` |
+| Ollama | 0.40.7 (installed) | qwen3-vl needs ≥ 0.12.7 | local `ollama --version` |
+| GitHub Actions | free for public repos on standard hosted runners | Larger runners are always billed; don't use them | https://docs.github.com/en/billing/concepts/product-billing/github-actions |
+
+## Python packages
+
+Latest versions on PyPI as of the date above (`https://pypi.org/pypi/<name>/json`). Each package is added to `pyproject.toml` only when its milestone needs it, after approval.
+
+| Package | Version | License | Note |
+|---|---|---|---|
+| langgraph | 1.2.16 | MIT | |
+| langgraph-checkpoint-postgres | 3.1.1 | MIT | |
+| mcp | 2.3.0 | MIT | New major line; don't use 1.x examples |
+| playwright | 1.64.0 | Apache-2.0 | |
+| presidio-analyzer / presidio-anonymizer | 2.2.364 | MIT | `[gliner]` extra; requires Python `<3.15` |
+| gliner | 0.2.29 | Apache-2.0 | Pins `transformers<5.17.0` (latest is 5.20.2) |
+| transformers | 5.20.2 (resolves below 5.17 via gliner) | Apache-2.0 | |
+| torch | 2.14.1 | BSD-3-Clause | Lists Python 3.14 |
+| spacy | 3.8.16 | MIT | Presidio's default NLP engine; model chosen in M2 |
+| fastapi | 0.159.1 | MIT | |
+| uvicorn | 0.54.0 | BSD-3-Clause | |
+| sse-starlette | 3.5.0 | BSD-3-Clause | |
+| httpx | 0.28.1 | BSD-3-Clause | |
+| pydantic | 2.14.1 | MIT | |
+| redis (redis-py) | 8.1.0 | MIT | |
+| cryptography | 50.0.2 | Apache-2.0 OR BSD-3-Clause | AES-GCM for the vault |
+| Faker | 40.43.0 | MIT | |
+| PyYAML | 6.0.3 | MIT | |
+| tenacity | 9.2.1 | Apache-2.0 | |
+| langchain-openai | 1.7.2 | MIT | OpenAI-compatible client for Groq, Gemini, Ollama, via the proxy |
+| opentelemetry-sdk / exporter-otlp-proto-http | 1.45.1 | Apache-2.0 | |
+| arize-phoenix | 20.24.0 | Elastic License 2.0 | ADR 0006 |
+| polars | 2.0.0 | MIT | New major line |
+| ruff | 0.17.1 | MIT | |
+| mypy | 2.4.0 | MIT | |
+| pytest | 9.1.1 | MIT | |
+| pytest-asyncio | 1.4.0 | Apache-2.0 | |
+| hypothesis | 6.170.5 | MPL-2.0 | |
+
+## Containers
+
+| Image | Pin | Source |
+|---|---|---|
+| `grafana/otel-lgtm` | `0.37.0` (2026-10-16, digest `sha256:57b5ab1ca661…`); bundles a collector, Prometheus, Tempo, Loki, and Grafana | https://hub.docker.com/r/grafana/otel-lgtm |
+| `arizephoenix/phoenix` | `version-20.24.0` | https://hub.docker.com/r/arizephoenix/phoenix |
+| `postgres` | `18.6` | https://hub.docker.com/_/postgres |
+| `redis` | `8.10.2` | https://hub.docker.com/_/redis |
+
+## Models and datasets
+
+| Artifact | License / access | Constraints that affect us | Source |
+|---|---|---|---|
+| `urchade/gliner_multi_pii-v1` | Apache-2.0 | Fine-tuned from `gliner_multi-v2.1` on synthetic PII | https://huggingface.co/urchade/gliner_multi_pii-v1 |
+| `meta-llama/Llama-Prompt-Guard-2-86M` / `-22M` | Llama 4 Community License, **gated** | Access form asks for legal name, DOB, and organization; Sasi submits it. 512-token input, so chunk. Binary benign/malicious. "Built with Llama" attribution. Run locally; never send page text to Groq's hosted copy. | https://huggingface.co/meta-llama/Llama-Prompt-Guard-2-86M |
+| `qwen3-vl:8b` (Ollama) / `Qwen/Qwen3-VL-8B-Instruct` | Apache-2.0 | 6.2 GB, fits the 12 GB GPU; documents GUI understanding and OCR | https://ollama.com/library/qwen3-vl, https://huggingface.co/Qwen/Qwen3-VL-8B-Instruct |
+| `ai4privacy/open-pii-masking-500k-ai4privacy` | Metadata: CC BY 4.0. README: **also subject to the Llama Community License** | Eval only. Download at run time into `analysis/data/raw/` (gitignored). Never commit or publish rows; publish aggregate metrics only. Show "Built with Llama" and the citation on the report page. The README says redistribution "beyond the permitted scope may require explicit written permission". ~580k rows, 8 languages. | https://huggingface.co/datasets/ai4privacy/open-pii-masking-500k-ai4privacy |
+
+## Hosted LLM providers
+
+### Groq
+
+- **Free chat models:** `openai/gpt-oss-20b` and `openai/gpt-oss-120b` (production), plus `qwen/qwen3.8-27b` (preview: "evaluation purposes only").
+- **Llama chat models** (`llama-3.1-8b-instant`, `llama-3.3-70b-versatile`) are listed as "Contact Sales", with no public price and no free limits. Don't use them.
+- **Published limits** for each of the three chat models: 30 RPM, 1K RPD, 8K TPM, 200K TPD.
+  - The page also says the shown limits are "base limits for the Developer plan" and puts free and Developer in separate tabs. **Sasi confirms the free numbers in the console** and updates `models.yaml`.
+- **Groq also hosts Prompt Guard 2.** We don't use it, because page text must stay local.
+- **Sources:**
+  - https://console.groq.com/docs/models
+  - https://console.groq.com/docs/rate-limits
+
+### Google AI Studio (Gemini API)
+
+- **Current free-tier text models** (code strings from the models page): `gemini-3.8-flash`, `gemini-3.6-flash`, `gemini-3.5-flash-lite`, `gemini-3.1-flash-lite`, `gemini-3-flash-preview`.
+- **The 2.5 models** are "legacy, access limited to past users", so don't plan on them.
+- **Per-model free limits are no longer in the public docs.** The rate-limit page defers to the AI Studio console. **Sasi copies them from https://aistudio.google.com/rate-limit** into `models.yaml`.
+- **Unpaid-services terms** (effective 2026-03-23, modified 2026-04-28):
+  - inputs and outputs are used "to provide, improve, and develop" Google products
+  - "human reviewers may read, annotate, and process your API input and output"
+  - "Do not submit sensitive, confidential, or personal information to the Unpaid Services"
+
+  This is why only tokenized synthetic text goes to Gemini.
+- **Prices change on 2027-01-01** for `gemini-3.8-flash` and `gemini-3.6-flash` (input $0.75 → $1.50, output $3.75 → $7.50 per 1M). `models.yaml` stores effective-dated prices.
+- **Thinking tokens bill as output** on the paid tier, and the cost ledger counts them.
+- **Sources:**
+  - https://ai.google.dev/gemini-api/docs/models (updated 2026-10-21)
+  - https://ai.google.dev/gemini-api/docs/pricing (updated 2026-10-19)
+  - https://ai.google.dev/gemini-api/docs/rate-limits (updated 2026-10-15)
+  - https://ai.google.dev/gemini-api/terms
+
+## Observability conventions
+
+The OTel GenAI semantic conventions moved to https://github.com/open-telemetry/semantic-conventions-genai, which has no tagged release yet. We pin commit `9ffc7e00c639be7712e544e3e54331e885dccf84` (2026-10-21) in ADR 0006. Phoenix ≥ 15.10.0 converts `gen_ai.*` span attributes to OpenInference on ingest (https://arize.com/docs/phoenix/release-notes/05-2026/05-15-2026-otel-semconv-conversion).
+
+## Development host
+
+- Windows 11, Intel Core Ultra 9 275HX, 31 GB RAM
+- NVIDIA RTX 5070 Ti Laptop GPU, 12 GB VRAM (driver 581.80)
+- about 75 GB free disk
+- Docker Desktop with the WSL2 backend; Ubuntu in WSL for `make`
+- not installed on the host: `make` (use WSL), `gh`, Tesseract (it lives in the proxy image)
