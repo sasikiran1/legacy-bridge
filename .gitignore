@@ -1,0 +1,36 @@
+# Secrets
+.env
+*.storage-state.json
+
+# Owner's private notes
+notes/
+
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.hypothesis/
+.mypy_cache/
+*.egg-info/
+
+# Java
+portal/target/
+portal/.mvn/wrapper/maven-wrapper.jar
+*.class
+
+# Data and model caches (downloaded at run time, never committed)
+analysis/data/raw/
+.cache/
+hf_cache/
+
+# Runtime artifacts
+playwright-report/
+test-results/
+*.log
+
+# IDE
+.idea/
+.vscode/
+*.iml
