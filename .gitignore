@@ -17,6 +17,11 @@ __pycache__/
 
 # Java
 portal/target/
+portal/src/main/resources/static/
+
+# Frontend
+portal/web/node_modules/
+portal/web/dist/
 portal/.mvn/wrapper/maven-wrapper.jar
 *.class
 

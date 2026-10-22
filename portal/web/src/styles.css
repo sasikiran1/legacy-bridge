@@ -1,0 +1,106 @@
+/* Member Services Portal: deliberately styled after a mid-2000s intranet. */
+
+:root {
+  --chrome: #d4d0c8;
+  --chrome-dark: #808080;
+  --navy: #0a246a;
+  --navy-light: #a6caf0;
+  --paper: #ffffff;
+  --ink: #000000;
+  --link: #0000cc;
+  --ok: #006600;
+  --error: #cc0000;
+}
+
+body {
+  margin: 0;
+  background: #ece9d8;
+  color: var(--ink);
+  font: 11px Tahoma, Verdana, Arial, sans-serif;
+}
+
+a { color: var(--link); }
+h1 { font-size: 16px; color: var(--navy); margin: 8px 0 10px; }
+h2 {
+  font-size: 12px;
+  margin: 0 0 6px;
+  padding: 3px 6px;
+  color: #fff;
+  background: linear-gradient(to right, var(--navy), var(--navy-light));
+}
+
+.page { max-width: 980px; margin: 0 auto; background: var(--paper); border: 1px solid var(--chrome-dark); }
+.banner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 10px;
+  color: #fff;
+  background: linear-gradient(to bottom, #3a6ea5, var(--navy));
+}
+.banner-title { font: bold 15px Verdana, sans-serif; letter-spacing: 1px; }
+.banner-user { font-size: 11px; }
+
+.nav { background: var(--chrome); border-bottom: 1px solid var(--chrome-dark); padding: 4px 8px; }
+.nav a, .nav .link-button { margin-right: 14px; font-weight: bold; }
+.with-sidebar { display: flex; }
+.with-sidebar .content { flex: 1; }
+.sidebar { width: 160px; background: var(--chrome); border-left: 1px solid var(--chrome-dark); }
+.sidebar .nav { border: 0; display: flex; flex-direction: column; gap: 8px; }
+
+.content { padding: 8px 12px 16px; }
+.footer { padding: 4px 10px; color: #444; background: var(--chrome); border-top: 1px solid var(--chrome-dark); font-size: 10px; }
+
+.section { margin: 12px 0; border: 1px solid var(--chrome-dark); padding-bottom: 6px; }
+.section > *:not(h2) { margin-left: 6px; margin-right: 6px; }
+.box { border: 1px solid var(--chrome-dark); background: #f7f7f7; padding: 8px; margin: 8px 0; }
+
+button, .link-button {
+  font: 11px Tahoma, Verdana, sans-serif;
+  background: var(--chrome);
+  border: 2px outset #fff;
+  padding: 2px 10px;
+  cursor: pointer;
+}
+.link-button { border: 0; background: none; color: var(--link); text-decoration: underline; padding: 0; }
+button:active { border-style: inset; }
+input, textarea { font: 11px Tahoma, Verdana, sans-serif; border: 2px inset #fff; padding: 2px; }
+
+table.grid { border-collapse: collapse; width: 100%; margin: 4px 0; }
+table.grid th { background: var(--chrome); text-align: left; border: 1px solid var(--chrome-dark); padding: 2px 4px; }
+table.grid td { border: 1px solid #c0c0c0; padding: 2px 4px; vertical-align: top; }
+table.grid tbody tr:nth-child(even) { background: #eef3fb; }
+table.form th, table.summary th { text-align: right; padding: 2px 6px; font-weight: normal; color: #333; }
+table.summary { margin: 4px 0; }
+.num { text-align: right; }
+.nowrap { white-space: nowrap; }
+.actions { margin: 6px 0; }
+
+dl.detail { display: grid; grid-template-columns: 160px auto; gap: 3px 10px; }
+dl.detail dt { text-align: right; color: #333; }
+dl.detail dd { margin: 0; font-weight: bold; }
+
+.msg { margin: 6px 0; padding: 4px 8px; border: 1px solid; }
+.msg-ok { color: var(--ok); background: #eaffea; }
+.msg-error { color: var(--error); background: #fff0f0; }
+.loading { color: #666; }
+.fine-print { color: #666; font-size: 10px; }
+
+.login { max-width: 420px; margin: 60px auto; background: var(--paper); border: 1px solid var(--chrome-dark); }
+.login .box { margin: 10px; }
+
+.overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.35); display: flex; align-items: center; justify-content: center; }
+.dialog { width: 380px; background: var(--chrome); border: 2px outset #fff; }
+.dialog-title { color: #fff; font-weight: bold; padding: 3px 6px; background: linear-gradient(to right, var(--navy), var(--navy-light)); }
+.dialog-body { padding: 8px; background: var(--paper); margin: 4px; }
+.dialog-actions { padding: 6px; text-align: right; }
+
+.captcha { background: #f0f0e0; border: 1px solid var(--chrome-dark); display: block; margin: 8px 0; }
+.captcha text { font: italic bold 28px Georgia, serif; fill: #334; }
+.captcha path { stroke: #556; fill: none; stroke-width: 2; }
+
+.pa-form { border: 1px solid var(--chrome-dark); padding: 8px; background: #f7f7f7; }
+.pa-row { display: flex; align-items: center; gap: 8px; margin: 4px 0; }
+.pa-input { width: 220px; }
+.pa-button { cursor: pointer; }
+.pa-error { color: var(--error); }
