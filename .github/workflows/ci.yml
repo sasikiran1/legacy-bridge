@@ -1,0 +1,79 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  portal:
+    name: portal (maven, testcontainers)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: "25"
+          cache: maven
+      - name: Build and test
+        working-directory: portal
+        run: ./mvnw -B -ntp verify
+
+  web:
+    name: portal web (typecheck, build)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "26"
+          cache: npm
+          cache-dependency-path: portal/web/package-lock.json
+      - working-directory: portal/web
+        run: npm ci --no-audit --no-fund && npm run build
+
+  python:
+    name: python (ruff, mypy, pytest)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v10
+        with:
+          version: "0.12.9"
+          enable-cache: true
+      - run: uv sync --frozen
+      - run: uv run ruff check .
+      - run: uv run ruff format --check .
+      - run: uv run mypy
+      - run: uv run pytest
+
+  oracles:
+    name: oracle suite (docker compose, playwright)
+    needs: [portal, web, python]
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+      - name: Create .env with throwaway secrets
+        run: |
+          cp .env.example .env
+          pg="$(openssl rand -hex 16)"
+          sed -i "s/^POSTGRES_PASSWORD=.*/POSTGRES_PASSWORD=${pg}/" .env
+          sed -i "s/change-me@/${pg}@/g" .env
+          sed -i "s/^PORTAL_ADMIN_TOKEN=.*/PORTAL_ADMIN_TOKEN=$(openssl rand -hex 24)/" .env
+          sed -i "s/^PORTAL_TEST_USER_PASSWORD=.*/PORTAL_TEST_USER_PASSWORD=$(openssl rand -hex 12)/" .env
+      - run: docker compose up -d --build postgres portal
+      - run: docker compose --profile test build testbed
+      - run: docker compose --profile test run --rm testbed uv run python -m testbed.probe
+      - run: docker compose --profile test run --rm testbed uv run pytest -m oracle
+      - name: Portal logs
+        if: failure()
+        run: docker compose logs portal
