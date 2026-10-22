@@ -26,6 +26,20 @@ public final class ApiViews {
     public record Address(String street, String city, String state, String postalCode) {
     }
 
+    /** Request bodies as documented in the OpenAPI schema. Handlers read raw maps so drift can reject old fields. */
+    public record AddressBody(String street, String city, String state, String postalCode) {
+    }
+
+    public record ContactBody(String email, String phone) {
+    }
+
+    public record NoteBody(String body) {
+    }
+
+    public record ReimbursementBody(String memberNumber, String claimNumber, String amount, String payeeName,
+                                    String bankRouting, String bankAccount) {
+    }
+
     public record MemberView(String memberNumber, String firstName, String lastName, LocalDate dateOfBirth,
                              String email, String phone, Address address) {
 

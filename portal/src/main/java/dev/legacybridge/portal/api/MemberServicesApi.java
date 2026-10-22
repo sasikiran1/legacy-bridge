@@ -2,20 +2,28 @@ package dev.legacybridge.portal.api;
 
 import static dev.legacybridge.portal.auth.AuthInterceptors.actor;
 
+import dev.legacybridge.portal.api.ApiViews.AddressBody;
 import dev.legacybridge.portal.api.ApiViews.ClaimDrift;
 import dev.legacybridge.portal.api.ApiViews.ClaimView;
+import dev.legacybridge.portal.api.ApiViews.ContactBody;
 import dev.legacybridge.portal.api.ApiViews.MemberDrift;
 import dev.legacybridge.portal.api.ApiViews.MemberView;
+import dev.legacybridge.portal.api.ApiViews.NoteBody;
 import dev.legacybridge.portal.api.ApiViews.NoteDrift;
 import dev.legacybridge.portal.api.ApiViews.NoteView;
 import dev.legacybridge.portal.api.ApiViews.PolicyDrift;
 import dev.legacybridge.portal.api.ApiViews.PolicyView;
+import dev.legacybridge.portal.api.ApiViews.ReimbursementBody;
 import dev.legacybridge.portal.api.ApiViews.ReimbursementView;
 import dev.legacybridge.portal.chaos.ApiChaosInterceptor;
 import dev.legacybridge.portal.chaos.ChaosState;
 import dev.legacybridge.portal.service.PortalErrors.Invalid;
 import dev.legacybridge.portal.service.PortalService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
@@ -55,6 +63,7 @@ public class MemberServicesApi {
     }
 
     @GetMapping("/members")
+    @ApiResponse(responseCode = "200", content = @Content(array = @ArraySchema(schema = @Schema(implementation = MemberView.class))))
     @Operation(operationId = "searchMembers", summary = "Find members by last name, optionally narrowed by date of birth")
     public List<?> searchMembers(@RequestParam String lastName,
                                  @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
@@ -67,6 +76,7 @@ public class MemberServicesApi {
     }
 
     @GetMapping("/members/{memberNumber}")
+    @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = MemberView.class)))
     @Operation(operationId = "getMember", summary = "Get a member's demographics, contact details and address")
     public Object getMember(@PathVariable String memberNumber, HttpServletRequest request) {
         var member = portal.member(memberNumber);
@@ -74,9 +84,11 @@ public class MemberServicesApi {
     }
 
     @PutMapping("/members/{memberNumber}/address")
-    @Operation(operationId = "updateAddress", summary = "Replace a member's mailing address",
-            description = "Body: {street, city, state, postalCode}")
-    public Object updateAddress(@PathVariable String memberNumber, @RequestBody Map<String, Object> body,
+    @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = MemberView.class)))
+    @Operation(operationId = "updateAddress", summary = "Replace a member's mailing address")
+    public Object updateAddress(@PathVariable String memberNumber,
+                                @io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(schema = @Schema(implementation = AddressBody.class)))
+                                @RequestBody Map<String, Object> body,
                                 HttpServletRequest request) {
         var drift = ApiChaosInterceptor.drift(request);
         var fields = drift
@@ -91,9 +103,12 @@ public class MemberServicesApi {
     }
 
     @PatchMapping("/members/{memberNumber}/contact")
+    @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = MemberView.class)))
     @Operation(operationId = "updateContact", summary = "Change a member's email address and/or phone number",
-            description = "Body: {email?, phone?}. Phone format: (555) 555-0100")
-    public MemberView updateContact(@PathVariable String memberNumber, @RequestBody Map<String, Object> body,
+            description = "Send email, phone or both. Phone format: (555) 555-0100")
+    public MemberView updateContact(@PathVariable String memberNumber,
+                                    @io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(schema = @Schema(implementation = ContactBody.class)))
+                                @RequestBody Map<String, Object> body,
                                     HttpServletRequest request) {
         var fields = Body.of(body, "email", "phone");
         return MemberView.of(portal.updateContact(
@@ -101,6 +116,7 @@ public class MemberServicesApi {
     }
 
     @GetMapping("/members/{memberNumber}/policies")
+    @ApiResponse(responseCode = "200", content = @Content(array = @ArraySchema(schema = @Schema(implementation = PolicyView.class))))
     @Operation(operationId = "listPolicies", summary = "List a member's policies")
     public List<?> listPolicies(@PathVariable String memberNumber, HttpServletRequest request) {
         var policies = portal.policiesOf(memberNumber);
@@ -110,6 +126,7 @@ public class MemberServicesApi {
     }
 
     @GetMapping("/policies/{policyNumber}")
+    @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = PolicyView.class)))
     @Operation(operationId = "getPolicy", summary = "Get a policy by number")
     public Object getPolicy(@PathVariable String policyNumber, HttpServletRequest request) {
         var policy = portal.policy(policyNumber);
@@ -117,6 +134,7 @@ public class MemberServicesApi {
     }
 
     @GetMapping("/members/{memberNumber}/claims")
+    @ApiResponse(responseCode = "200", content = @Content(array = @ArraySchema(schema = @Schema(implementation = ClaimView.class))))
     @Operation(operationId = "listClaims", summary = "List a member's claims, newest service date first")
     public List<?> listClaims(@PathVariable String memberNumber, HttpServletRequest request) {
         var claims = portal.claimsOf(memberNumber);
@@ -126,6 +144,7 @@ public class MemberServicesApi {
     }
 
     @GetMapping("/claims/{claimNumber}")
+    @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = ClaimView.class)))
     @Operation(operationId = "getClaim", summary = "Get a claim, including its adjudication status")
     public Object getClaim(@PathVariable String claimNumber, HttpServletRequest request) {
         var claim = portal.claim(claimNumber);
@@ -133,6 +152,7 @@ public class MemberServicesApi {
     }
 
     @PostMapping("/claims/{claimNumber}/reconsideration")
+    @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = ClaimView.class)))
     @Operation(operationId = "requestReconsideration", summary = "Request reconsideration of a denied claim")
     public ClaimView requestReconsideration(@PathVariable String claimNumber, HttpServletRequest request) {
         return ClaimView.of(portal.requestReconsideration(claimNumber, actor(request)));
@@ -140,9 +160,12 @@ public class MemberServicesApi {
 
     @PostMapping("/reimbursements")
     @ResponseStatus(HttpStatus.CREATED)
+    @ApiResponse(responseCode = "201", content = @Content(schema = @Schema(implementation = ReimbursementView.class)))
     @Operation(operationId = "submitReimbursement", summary = "Submit a reimbursement to a member's bank account",
-            description = "Body: {memberNumber, claimNumber?, amount, payeeName, bankRouting, bankAccount}")
-    public ReimbursementView submitReimbursement(@RequestBody Map<String, Object> body, HttpServletRequest request) {
+            description = "claimNumber is optional; amount is a decimal string such as 125.40")
+    public ReimbursementView submitReimbursement(@io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(schema = @Schema(implementation = ReimbursementBody.class)))
+                                @RequestBody Map<String, Object> body,
+                                                 HttpServletRequest request) {
         var fields = Body.of(body, "memberNumber", "claimNumber", "amount", "payeeName", "bankRouting", "bankAccount");
         return ReimbursementView.of(portal.submitReimbursement(
                 fields.text("memberNumber"), fields.optionalText("claimNumber"), fields.decimal("amount"),
@@ -150,6 +173,7 @@ public class MemberServicesApi {
     }
 
     @GetMapping("/members/{memberNumber}/notes")
+    @ApiResponse(responseCode = "200", content = @Content(array = @ArraySchema(schema = @Schema(implementation = NoteView.class))))
     @Operation(operationId = "listNotes", summary = "List the case notes on a member's record, newest first")
     public List<?> listNotes(@PathVariable String memberNumber, HttpServletRequest request) {
         var notes = portal.notesOf(memberNumber, chaos.config().injectedNotes());
@@ -160,8 +184,11 @@ public class MemberServicesApi {
 
     @PostMapping("/members/{memberNumber}/notes")
     @ResponseStatus(HttpStatus.CREATED)
-    @Operation(operationId = "addNote", summary = "Add a case note to a member's record", description = "Body: {body}")
-    public Object addNote(@PathVariable String memberNumber, @RequestBody Map<String, Object> body,
+    @ApiResponse(responseCode = "201", content = @Content(schema = @Schema(implementation = NoteView.class)))
+    @Operation(operationId = "addNote", summary = "Add a case note to a member's record")
+    public Object addNote(@PathVariable String memberNumber,
+                          @io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(schema = @Schema(implementation = NoteBody.class)))
+                                @RequestBody Map<String, Object> body,
                           HttpServletRequest request) {
         var drift = ApiChaosInterceptor.drift(request);
         var key = drift ? "text" : "body";

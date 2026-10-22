@@ -38,7 +38,7 @@ public class Reimbursement {
     }
 
     public Reimbursement(String reference, Member member, Claim claim, BigDecimal amount, String payeeName,
-                         String bankRouting, String bankAccount, String submittedBy) {
+                         String bankRouting, String bankAccount, String submittedBy, OffsetDateTime submittedAt) {
         this.reference = reference;
         this.member = member;
         this.claim = claim;
@@ -47,7 +47,7 @@ public class Reimbursement {
         this.bankRouting = bankRouting;
         this.bankAccount = bankAccount;
         this.status = "SUBMITTED";
-        this.submittedAt = OffsetDateTime.now();
+        this.submittedAt = submittedAt;
         this.submittedBy = submittedBy;
     }
 

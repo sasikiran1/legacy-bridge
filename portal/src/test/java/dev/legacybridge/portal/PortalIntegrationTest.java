@@ -166,6 +166,7 @@ class PortalIntegrationTest {
         var doc = send("GET", "/v3/api-docs", null, null);
         assertThat(doc.statusCode()).isEqualTo(200);
         assertThat(doc.body()).contains("\"operationId\":\"submitReimbursement\"", "\"operationId\":\"getClaim\"")
+                .contains("\"MemberView\"", "\"AddressBody\"", "\"ReimbursementBody\"")
                 .doesNotContain("/internal/", "/admin/");
     }
 

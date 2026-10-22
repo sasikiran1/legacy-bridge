@@ -24,6 +24,7 @@ server:
 portal:
   admin-token: ${PORTAL_ADMIN_TOKEN:}
   test-user-password: ${PORTAL_TEST_USER_PASSWORD:}
+  deterministic: ${PORTAL_DETERMINISTIC:false}
 
 springdoc:
   paths-to-match: /api/v1/**

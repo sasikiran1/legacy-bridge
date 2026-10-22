@@ -42,9 +42,9 @@ public class Claim {
     protected Claim() {
     }
 
-    public void requestReconsideration(String actor) {
+    public void requestReconsideration(String actor, OffsetDateTime at) {
         this.reconsiderationRequested = true;
-        this.updatedAt = OffsetDateTime.now();
+        this.updatedAt = at;
         this.updatedBy = actor;
     }
 

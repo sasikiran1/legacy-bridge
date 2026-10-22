@@ -38,26 +38,27 @@ public class Member {
     protected Member() {
     }
 
-    public void changeAddress(String street, String city, String state, String postalCode, String actor) {
+    public void changeAddress(String street, String city, String state, String postalCode, String actor,
+                              OffsetDateTime at) {
         this.street = street;
         this.city = city;
         this.state = state;
         this.postalCode = postalCode;
-        touch(actor);
+        touch(actor, at);
     }
 
-    public void changeContact(String email, String phone, String actor) {
+    public void changeContact(String email, String phone, String actor, OffsetDateTime at) {
         if (email != null) {
             this.email = email;
         }
         if (phone != null) {
             this.phone = phone;
         }
-        touch(actor);
+        touch(actor, at);
     }
 
-    private void touch(String actor) {
-        this.updatedAt = OffsetDateTime.now();
+    private void touch(String actor, OffsetDateTime at) {
+        this.updatedAt = at;
         this.updatedBy = actor;
     }
 

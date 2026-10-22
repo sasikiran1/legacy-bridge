@@ -33,15 +33,15 @@ public class MemberNote {
     protected MemberNote() {
     }
 
-    public MemberNote(Member member, String author, String body) {
+    public MemberNote(Member member, String author, String body, OffsetDateTime createdAt) {
         this.member = member;
         this.author = author;
         this.body = body;
-        this.createdAt = OffsetDateTime.now();
+        this.createdAt = createdAt;
     }
 
-    public void softDelete(String actor) {
-        this.deletedAt = OffsetDateTime.now();
+    public void softDelete(String actor, OffsetDateTime at) {
+        this.deletedAt = at;
         this.deletedBy = actor;
     }
 

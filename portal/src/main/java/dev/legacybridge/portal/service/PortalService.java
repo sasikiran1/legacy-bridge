@@ -14,7 +14,6 @@ import dev.legacybridge.portal.service.PortalErrors.Conflict;
 import dev.legacybridge.portal.service.PortalErrors.Invalid;
 import dev.legacybridge.portal.service.PortalErrors.NotFound;
 import java.math.BigDecimal;
-import java.security.SecureRandom;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -39,15 +38,17 @@ public class PortalService {
     private final ClaimRepository claims;
     private final MemberNoteRepository notes;
     private final ReimbursementRepository reimbursements;
-    private final SecureRandom random = new SecureRandom();
+    private final Determinism determinism;
 
     public PortalService(MemberRepository members, PolicyRepository policies, ClaimRepository claims,
-                         MemberNoteRepository notes, ReimbursementRepository reimbursements) {
+                         MemberNoteRepository notes, ReimbursementRepository reimbursements,
+                         Determinism determinism) {
         this.members = members;
         this.policies = policies;
         this.claims = claims;
         this.notes = notes;
         this.reimbursements = reimbursements;
+        this.determinism = determinism;
     }
 
     @Transactional(readOnly = true)
@@ -82,7 +83,7 @@ public class PortalService {
         require(state != null && STATE.matcher(state).matches(), "state must be a two-letter code");
         require(postalCode != null && POSTAL_CODE.matcher(postalCode).matches(), "postal code must be 5 digits");
         var member = member(memberNumber);
-        member.changeAddress(street.strip(), city.strip(), state, postalCode, actor);
+        member.changeAddress(street.strip(), city.strip(), state, postalCode, actor, determinism.now());
         return member;
     }
 
@@ -91,7 +92,7 @@ public class PortalService {
         require(email == null || EMAIL.matcher(email).matches(), "email is not valid");
         require(phone == null || PHONE.matcher(phone).matches(), "phone must look like (555) 555-0100");
         var member = member(memberNumber);
-        member.changeContact(email, phone, actor);
+        member.changeContact(email, phone, actor, determinism.now());
         return member;
     }
 
@@ -125,7 +126,7 @@ public class PortalService {
         if (claim.isReconsiderationRequested()) {
             throw new Conflict("Reconsideration has already been requested for this claim");
         }
-        claim.requestReconsideration(actor);
+        claim.requestReconsideration(actor, determinism.now());
         return claim;
     }
 
@@ -139,14 +140,14 @@ public class PortalService {
     public MemberNote addNote(String memberNumber, String body, String actor) {
         require(body != null && !body.isBlank(), "note text is required");
         require(body.length() <= 2000, "note text is limited to 2000 characters");
-        return notes.save(new MemberNote(member(memberNumber), actor, body.strip()));
+        return notes.save(new MemberNote(member(memberNumber), actor, body.strip(), determinism.now()));
     }
 
     public void deleteNote(long noteId, boolean includeInjected, String actor) {
         var note = notes.findById(noteId)
                 .filter(n -> !n.isDeleted() && (includeInjected || !n.isInjected()))
                 .orElseThrow(() -> new NotFound("No note with id " + noteId));
-        note.softDelete(actor);
+        note.softDelete(actor, determinism.now());
     }
 
     public Reimbursement submitReimbursement(String memberNumber, String claimNumber, BigDecimal amount,
@@ -171,13 +172,14 @@ public class PortalService {
 
         var reference = nextReference();
         return reimbursements.save(
-                new Reimbursement(reference, member, claim, amount, payeeName.strip(), routing, account, actor));
+                new Reimbursement(reference, member, claim, amount, payeeName.strip(), routing, account, actor,
+                        determinism.now()));
     }
 
     private String nextReference() {
         String reference;
         do {
-            reference = "RB-%06d".formatted(random.nextInt(1_000_000));
+            reference = "RB-%06d".formatted(determinism.nextInt(1_000_000));
         } while (reimbursements.existsByReference(reference));
         return reference;
     }

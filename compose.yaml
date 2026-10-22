@@ -40,6 +40,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       PORTAL_ADMIN_TOKEN: ${PORTAL_ADMIN_TOKEN:?set in .env}
       PORTAL_TEST_USER_PASSWORD: ${PORTAL_TEST_USER_PASSWORD:?set in .env}
+      PORTAL_DETERMINISTIC: ${PORTAL_DETERMINISTIC:-true}
     ports:
       - "127.0.0.1:8080:8080"
     depends_on:

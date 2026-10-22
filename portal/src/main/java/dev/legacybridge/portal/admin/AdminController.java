@@ -3,6 +3,7 @@ package dev.legacybridge.portal.admin;
 import dev.legacybridge.portal.auth.AuthService;
 import dev.legacybridge.portal.chaos.ChaosConfig;
 import dev.legacybridge.portal.chaos.ChaosState;
+import dev.legacybridge.portal.service.Determinism;
 import org.flywaydb.core.Flyway;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,11 +22,13 @@ public class AdminController {
     private final ChaosState chaos;
     private final Flyway flyway;
     private final AuthService auth;
+    private final Determinism determinism;
 
-    public AdminController(ChaosState chaos, Flyway flyway, AuthService auth) {
+    public AdminController(ChaosState chaos, Flyway flyway, AuthService auth, Determinism determinism) {
         this.chaos = chaos;
         this.flyway = flyway;
         this.auth = auth;
+        this.determinism = determinism;
     }
 
     @GetMapping("/chaos")
@@ -59,6 +62,7 @@ public class AdminController {
         flyway.clean();
         flyway.migrate();
         auth.assignTestUserPasswords();
+        determinism.reset();
         chaos.expireSessions();
     }
 
