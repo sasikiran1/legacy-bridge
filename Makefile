@@ -15,7 +15,7 @@ NODE_IMAGE := node:26.9.0
 .DEFAULT_GOAL := help
 .PHONY: help up down reset-db logs seed lint typecheck test portal-test web-build check probe oracles demo \
 	proxy-up leak proxy-demo bench-pii bench-latency bench-tokens audit-verify agent-stack record replay-check \
-	demo-fallback traces
+	demo-fallback traces bakeoff
 
 help: ## List targets
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*## "} {printf "  %-12s %s\n", $$1, $$2}'
@@ -116,3 +116,30 @@ traces: agent-stack ## Replay recorded healthy tasks with tracing to Phoenix (ht
 	$(COMPOSE) up -d phoenix
 	$(TESTBED) sh -c "OTEL_EXPORTER_OTLP_ENDPOINT=http://phoenix:6006 uv run python -W ignore -m agent.runner \
 		--scenario healthy --check-replay --label traces && uv run pytest -m phoenix tests/leak/test_traces.py"
+
+# Local-model bake-off (M3). Each candidate runs as a num_ctx 16384 variant, like the baseline, created through
+# the Ollama API. Runs are live (cassettes untouched) and labelled `bakeoff`; analysis.bakeoff compares them.
+OLLAMA_URL ?= http://localhost:11434
+BAKEOFF_BASES ?= qwen3:14b gemma4:12b qwen3.5:9b
+BAKEOFF_MODELS ?= qwen2.5-14b-16k qwen3-14b-16k gemma4-12b-16k qwen3.5-9b-16k
+BAKEOFF_SCENARIOS ?= healthy api_degraded
+BAKEOFF_TASK_LIST = update_address-01 update_contact-01 claim_status-01 policy_lookup-01 submit_reimbursement-01 \
+	add_note-01 request_reconsideration-01 delete_note-01 update_contact-02 policy_lookup-02
+comma := ,
+BAKEOFF_TASKS ?= $(subst $() ,$(comma),$(strip $(BAKEOFF_TASK_LIST)))
+
+bakeoff: .env ## Run each local model on the dev subset under BAKEOFF_SCENARIOS, then compare (pull the bases first)
+	for base in $(BAKEOFF_BASES); do \
+		curl -sf $(OLLAMA_URL)/api/create -d "{\"model\": \"$$(echo $$base | tr ':' '-')-16k\", \"from\": \"$$base\", \
+			\"parameters\": {\"num_ctx\": 16384}, \"stream\": false}" || exit 1; \
+	done
+	LLM_MODE=live $(COMPOSE) up -d --build --wait postgres portal redis
+	for model in $(BAKEOFF_MODELS); do \
+		LLM_MODE=live LOCAL_TEXT_MODEL=$$model $(COMPOSE) up -d --force-recreate --wait proxy || exit 1; \
+		for s in $(BAKEOFF_SCENARIOS); do \
+			$(TESTBED) uv run python -W ignore -m agent.runner --scenario $$s --tasks $(BAKEOFF_TASKS) \
+				--label bakeoff || exit 1; \
+		done; \
+	done
+	LLM_MODE=replay $(COMPOSE) up -d --force-recreate --wait proxy
+	$(TESTBED) uv run python -m analysis.bakeoff
