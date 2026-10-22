@@ -92,3 +92,14 @@ async def test_credentials_are_never_rehydrated(tmp_path: Path) -> None:
     token = masked.split('"')[3]
     with pytest.raises(RehydrationDenied):
         await k.resolver.resolve("t1", "addNote", {"body": token})
+
+
+async def test_ui_fields_receive_only_the_types_their_label_allows(tmp_path: Path) -> None:
+    k = kit(tmp_path)
+    account = await k.masker.mask_text("account number 4400917733", "t1", "agent")
+    token = account.split()[-1]
+    assert await k.resolver.resolve_field("t1", "browser_type", "Bank account number", token) == "4400917733"
+    with pytest.raises(RehydrationDenied):
+        await k.resolver.resolve_field("t1", "browser_type", "New note", token)
+    with pytest.raises(RehydrationDenied):
+        await k.resolver.resolve_field("t1", "browser_type", None, token)

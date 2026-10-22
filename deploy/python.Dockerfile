@@ -1,9 +1,17 @@
-# Python services and tooling: the PII proxy, lint/type checks, tests, the Playwright oracle suite, analysis.
+# Python services and tooling: the PII proxy, the agent, lint/type checks, tests, oracles, analysis.
 # The Playwright base image carries Chromium and its system libraries; uv installs Python 3.14 and the lockfile
-# (CPU-only torch). Source is bind-mounted at /repo by compose; model weights live in the hf-cache volume.
+# (CPU-only torch). Node and @playwright/mcp come from the official Node image so the agent can drive the browser
+# over MCP. Source is bind-mounted at /repo by compose; model weights live in the hf-cache volume.
+FROM node:26.9.0-slim AS mcp
+RUN npm install -g @playwright/mcp@0.0.83 --no-audit --no-fund
+
 FROM mcr.microsoft.com/playwright/python:v1.64.0-noble
 
 COPY --from=astral/uv:0.12.9 /uv /uvx /bin/
+COPY --from=mcp /usr/local/bin/node /usr/local/bin/node
+COPY --from=mcp /usr/local/lib/node_modules/@playwright/mcp /usr/local/lib/node_modules/@playwright/mcp
+RUN ln -s /usr/local/lib/node_modules/@playwright/mcp/cli.js /usr/local/bin/playwright-mcp \
+    && node --version
 
 ENV UV_PROJECT_ENVIRONMENT=/opt/venv \
     UV_PYTHON_INSTALL_DIR=/opt/python \

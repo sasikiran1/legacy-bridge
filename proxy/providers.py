@@ -34,7 +34,7 @@ class Registry:
         return sorted(self._models)
 
 
-def load_registry(path: Path = MODELS_YAML) -> Registry:
+def load_registry(path: Path = MODELS_YAML, local_text: str | None = None) -> Registry:
     raw = yaml.safe_load(path.read_text(encoding="utf-8"))
     providers = {}
     for name, spec in raw["providers"].items():
@@ -49,4 +49,6 @@ def load_registry(path: Path = MODELS_YAML) -> Registry:
             trust=spec["trust"],
         )
     models = {m["id"]: m["provider"] for m in raw["models"] if m["provider"] in providers}
+    if local_text and "ollama" in providers:
+        models[local_text] = "ollama"
     return Registry(providers, models)

@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 import asyncio
+import hashlib
 import json
+from collections import OrderedDict
 from collections.abc import Sequence
 
 from proxy.audit import Action, AuditLog
@@ -14,6 +16,10 @@ from proxy.vault import Vault, VaultEntry
 
 MIN_KNOWN_VALUE_LENGTH = 4
 """Shorter vault values (e.g. a two-letter state) are not re-matched as free text; too many false hits."""
+
+CACHE_SIZE = 4096
+"""Masked results kept per (task, text). Executors mask tool results and the proxy masks the same text again
+when it reaches an LLM; the cache keeps that second pass from re-running detection."""
 
 JsonValue = None | bool | int | float | str | list["JsonValue"] | dict[str, "JsonValue"]
 
@@ -27,10 +33,22 @@ class Masker:
         self._vault = vault
         self._audit = audit
         self._policy = policy
+        self._cache: OrderedDict[tuple[str, str], str] = OrderedDict()
 
     async def mask_text(self, text: str, task_id: str, destination: str) -> str:
         if not text:
             return text
+        key = (task_id, hashlib.sha256(text.encode()).hexdigest())
+        if key in self._cache:
+            self._cache.move_to_end(key)
+            return self._cache[key]
+        masked = await self._mask_uncached(text, task_id, destination)
+        self._cache[key] = masked
+        if len(self._cache) > CACHE_SIZE:
+            self._cache.popitem(last=False)
+        return masked
+
+    async def _mask_uncached(self, text: str, task_id: str, destination: str) -> str:
         detected = await asyncio.to_thread(self._detector.detect, text)
         candidates = [
             s

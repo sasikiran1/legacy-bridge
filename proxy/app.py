@@ -3,9 +3,15 @@
     uv run uvicorn proxy.app:app --port 8090
 
 Headers:
-    X-LB-Task-Id      required; scopes tokens, the vault and the audit trail
+    X-LB-Task-Id      required; scopes tokens, the vault, the audit trail and cassettes
+    X-LB-Call         the caller's 0-based LLM call index within the task (cassette position)
     X-LB-Rehydrate    `final` restores real values in the returned text (operator-facing output only);
                       by default responses keep tokens, since the agent loop itself stays in token space
+
+`model` may be a concrete model id or a role from config/models.yaml; roles fall back along their chain
+on 429, 5xx or a spent rate budget (proxy/routing.py). LLM_MODE selects live, record or replay
+(proxy/cassettes.py).
+Responses carry `x-lb-model` (who answered) and, in replay, `x-lb-cassette: hit|mismatch`.
 
 Fails closed: if detection or the vault is unavailable, the request is not forwarded (503).
 """
@@ -13,9 +19,10 @@ Fails closed: if detection or the vault is unavailable, the request is not forwa
 from __future__ import annotations
 
 import json
+import os
 from collections.abc import AsyncIterator, Awaitable, Callable
 from contextlib import asynccontextmanager
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any
 
 import httpx
@@ -24,18 +31,25 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse, Response, StreamingResponse
 
 from proxy.audit import AuditLog
+from proxy.cassettes import CassetteMiss, CassetteStore, LlmMode, request_digest
 from proxy.detection import DetectionError, build_detector
 from proxy.masking import Masker
 from proxy.policy import load_policy
 from proxy.providers import Provider, Registry, load_registry
 from proxy.rehydrate import Rehydrator, StreamRehydrator
+from proxy.routing import Router, estimate_tokens, load_router
 from proxy.settings import load_settings
 from proxy.tokens import TokenMinter
 from proxy.vault import RedisVault, Sealer, TokenCollision, Vault, VaultUnavailable
 
 TASK_HEADER = "x-lb-task-id"
+CALL_HEADER = "x-lb-call"
 REHYDRATE_HEADER = "x-lb-rehydrate"
 CLIENT_DESTINATION = "client"
+AGENT_DESTINATION = "agent-state"
+RETRYABLE = {429, 500, 502, 503, 504}
+
+Recording = tuple[str, int, dict[str, Any], str]
 
 
 @dataclass
@@ -46,6 +60,9 @@ class Services:
     registry: Registry
     http: httpx.AsyncClient
     audit: AuditLog
+    router: Router = field(default_factory=lambda: Router({}, {}))
+    mode: LlmMode = LlmMode.LIVE
+    cassettes: CassetteStore = field(default_factory=CassetteStore)
 
 
 class UnsupportedContent(Exception):
@@ -108,8 +125,35 @@ def create_app(build: Callable[[], Awaitable[Services]]) -> FastAPI:
         except VaultUnavailable as e:
             return _error(503, f"vault unavailable: {e}", "fail_closed")
         return JSONResponse(
-            {"status": "ok", "models": services.registry.models, "audit_head": services.audit.head}
+            {
+                "status": "ok",
+                "mode": services.mode.value,
+                "models": services.registry.models,
+                "audit_head": services.audit.head,
+            }
         )
+
+    @app.post("/v1/mask")
+    async def mask(request: Request) -> Response:
+        """Masks tool results for the executors, so agent state, checkpoints and traces hold tokens only.
+
+        Body: {"content": "<text or JSON document>"} or {"value": <any JSON value>}.
+        """
+        services: Services = request.app.state.services
+        task_id = request.headers.get(TASK_HEADER)
+        if not task_id:
+            return _error(400, f"missing {TASK_HEADER} header", "invalid_request_error")
+        payload = await request.json()
+        try:
+            if "value" in payload:
+                masked = await services.masker.mask_value(payload["value"], task_id, AGENT_DESTINATION)
+            else:
+                masked = await services.masker.mask_content(
+                    str(payload.get("content", "")), task_id, AGENT_DESTINATION
+                )
+        except (DetectionError, VaultUnavailable, TokenCollision) as e:
+            return _error(503, f"PII protection unavailable: {e}", "fail_closed")
+        return JSONResponse({"masked": masked})
 
     @app.post("/v1/chat/completions")
     async def chat_completions(request: Request) -> Response:
@@ -117,38 +161,57 @@ def create_app(build: Callable[[], Awaitable[Services]]) -> FastAPI:
         task_id = request.headers.get(TASK_HEADER)
         if not task_id:
             return _error(400, f"missing {TASK_HEADER} header", "invalid_request_error")
+        call = int(request.headers.get(CALL_HEADER, "0"))
         body = await request.json()
-        provider = services.registry.provider_for(str(body.get("model", "")))
-        if provider is None:
-            return _error(400, f"unknown model {body.get('model')!r}", "invalid_request_error")
+        requested = str(body.get("model", ""))
+        candidates = [
+            (model, provider)
+            for model in services.router.chain(requested)
+            if (provider := services.registry.provider_for(model)) is not None
+        ]
+        if not candidates and services.mode is not LlmMode.REPLAY:
+            return _error(400, f"unknown model or role {requested!r}", "invalid_request_error")
+        destination = candidates[0][1].name if candidates else "replay"
         rehydrate = request.headers.get(REHYDRATE_HEADER) == "final"
 
         try:
-            masked = await mask_request(body, services.masker, task_id, provider.name)
+            masked = await mask_request(body, services.masker, task_id, destination)
         except UnsupportedContent as e:
             return _error(422, str(e), "invalid_request_error")
         except (DetectionError, VaultUnavailable, TokenCollision) as e:
             return _error(503, f"PII protection unavailable, request not forwarded: {e}", "fail_closed")
 
-        upstream = services.http.build_request(
-            "POST", f"{provider.base_url}/chat/completions", json=masked, headers=_auth(provider)
-        )
-        if masked.get("stream"):
-            return await _stream(services, upstream, task_id, rehydrate)
-        response = await services.http.send(upstream)
-        if response.status_code != 200 or not rehydrate:
-            return Response(response.content, status_code=response.status_code, media_type="application/json")
-        payload = response.json()
-        try:
-            for choice in payload.get("choices", []):
-                message = choice.get("message", {})
-                if isinstance(message.get("content"), str):
-                    message["content"] = await services.rehydrator.text(
-                        message["content"], task_id, CLIENT_DESTINATION
-                    )
-        except VaultUnavailable as e:
-            return _error(503, f"vault unavailable during rehydration: {e}", "fail_closed")
-        return JSONResponse(payload)
+        if services.mode is LlmMode.REPLAY:
+            return await _replay(services, task_id, call, masked, rehydrate)
+
+        tokens = estimate_tokens(masked)
+        for model, provider in candidates:
+            if not await services.router.acquire(model, tokens):
+                continue
+            upstream = services.http.build_request(
+                "POST",
+                f"{provider.base_url}/chat/completions",
+                json={**masked, "model": model},
+                headers=_auth(provider),
+            )
+            response = await services.http.send(upstream, stream=bool(masked.get("stream")))
+            if response.status_code in RETRYABLE:
+                await response.aclose()
+                continue
+            record: Recording | None = (
+                (task_id, call, masked, model) if services.mode is LlmMode.RECORD else None
+            )
+            headers = {"x-lb-model": model}
+            if masked.get("stream") and response.status_code == 200:
+                return _sse(services, _upstream_lines(response), task_id, rehydrate, headers, record)
+            content = await response.aread()
+            await response.aclose()
+            if record:
+                services.cassettes.save(
+                    task_id, call, masked, model, response.status_code, False, content.decode()
+                )
+            return await _completion(services, response.status_code, content, task_id, rehydrate, headers)
+        return _error(429, f"every model for {requested!r} is rate-limited or failing", "rate_limit_exceeded")
 
     return app
 
@@ -157,51 +220,97 @@ def _auth(provider: Provider) -> dict[str, str]:
     return {"Authorization": f"Bearer {provider.api_key}"} if provider.api_key else {}
 
 
-async def _stream(services: Services, upstream: httpx.Request, task_id: str, rehydrate: bool) -> Response:
-    response = await services.http.send(upstream, stream=True)
-    if response.status_code != 200:
-        content = await response.aread()
-        await response.aclose()
-        return Response(content, status_code=response.status_code, media_type="application/json")
+async def _replay(
+    services: Services, task_id: str, call: int, masked: dict[str, Any], rehydrate: bool
+) -> Response:
+    try:
+        exchange = services.cassettes.load(task_id, call)
+    except CassetteMiss as e:
+        return _error(424, str(e), "cassette_miss")
+    headers = {
+        "x-lb-model": exchange.served_by,
+        "x-lb-cassette": "hit" if exchange.request_sha256 == request_digest(masked) else "mismatch",
+    }
+    if exchange.stream:
 
+        async def lines() -> AsyncIterator[str]:
+            for line in exchange.body.split("\n"):
+                yield line
+
+        return _sse(services, lines(), task_id, rehydrate, headers, None)
+    return await _completion(services, exchange.status, exchange.body.encode(), task_id, rehydrate, headers)
+
+
+async def _completion(
+    services: Services, status: int, content: bytes, task_id: str, rehydrate: bool, headers: dict[str, str]
+) -> Response:
+    if status != 200 or not rehydrate:
+        return Response(content, status_code=status, media_type="application/json", headers=headers)
+    payload = json.loads(content)
+    try:
+        for choice in payload.get("choices", []):
+            message = choice.get("message", {})
+            if isinstance(message.get("content"), str):
+                message["content"] = await services.rehydrator.text(
+                    message["content"], task_id, CLIENT_DESTINATION
+                )
+    except VaultUnavailable as e:
+        return _error(503, f"vault unavailable during rehydration: {e}", "fail_closed")
+    return JSONResponse(payload, headers=headers)
+
+
+async def _upstream_lines(response: httpx.Response) -> AsyncIterator[str]:
+    try:
+        async for line in response.aiter_lines():
+            yield line
+    finally:
+        await response.aclose()
+
+
+def _sse(
+    services: Services,
+    lines: AsyncIterator[str],
+    task_id: str,
+    rehydrate: bool,
+    headers: dict[str, str],
+    record: Recording | None,
+) -> StreamingResponse:
     async def events() -> AsyncIterator[bytes]:
         streams: dict[int, StreamRehydrator] = {}
-        try:
-            async for line in response.aiter_lines():
-                if not rehydrate or not line.startswith("data: "):
-                    yield (line + "\n").encode()
-                    continue
-                data = line[len("data: ") :]
-                if data.strip() == "[DONE]":
-                    leftover = {i: await s.finish() for i, s in streams.items()}
-                    if any(leftover.values()):
-                        flush = {
-                            "choices": [
-                                {"index": i, "delta": {"content": t}} for i, t in leftover.items() if t
-                            ]
-                        }
-                        yield f"data: {json.dumps(flush, ensure_ascii=False)}\n\n".encode()
-                    yield (line + "\n").encode()
-                    continue
-                event = json.loads(data)
-                for choice in event.get("choices", []):
-                    index = choice.get("index", 0)
-                    stream = streams.setdefault(
-                        index, StreamRehydrator(services.rehydrator, task_id, CLIENT_DESTINATION)
-                    )
-                    delta = choice.setdefault("delta", {})
-                    text = (
-                        await stream.feed(delta["content"]) if isinstance(delta.get("content"), str) else ""
-                    )
-                    if choice.get("finish_reason"):
-                        text += await stream.finish()
-                    if "content" in delta or text:
-                        delta["content"] = text
-                yield f"data: {json.dumps(event, ensure_ascii=False)}\n".encode()
-        finally:
-            await response.aclose()
+        raw: list[str] = []
+        async for line in lines:
+            raw.append(line)
+            if not rehydrate or not line.startswith("data: "):
+                yield (line + "\n").encode()
+                continue
+            data = line[len("data: ") :]
+            if data.strip() == "[DONE]":
+                leftover = {i: await s.finish() for i, s in streams.items()}
+                if any(leftover.values()):
+                    flush = {
+                        "choices": [{"index": i, "delta": {"content": t}} for i, t in leftover.items() if t]
+                    }
+                    yield f"data: {json.dumps(flush, ensure_ascii=False)}\n\n".encode()
+                yield (line + "\n").encode()
+                continue
+            event = json.loads(data)
+            for choice in event.get("choices", []):
+                index = choice.get("index", 0)
+                stream = streams.setdefault(
+                    index, StreamRehydrator(services.rehydrator, task_id, CLIENT_DESTINATION)
+                )
+                delta = choice.setdefault("delta", {})
+                text = await stream.feed(delta["content"]) if isinstance(delta.get("content"), str) else ""
+                if choice.get("finish_reason"):
+                    text += await stream.finish()
+                if "content" in delta or text:
+                    delta["content"] = text
+            yield f"data: {json.dumps(event, ensure_ascii=False)}\n".encode()
+        if record:
+            task, call, masked, model = record
+            services.cassettes.save(task, call, masked, model, 200, True, "\n".join(raw))
 
-    return StreamingResponse(events(), media_type="text/event-stream")
+    return StreamingResponse(events(), media_type="text/event-stream", headers=headers)
 
 
 async def build_services() -> Services:
@@ -220,13 +329,16 @@ async def build_services() -> Services:
         audit,
         policy,
     )
+    local_text = os.environ.get("LOCAL_TEXT_MODEL") or None
     return Services(
         masker=masker,
         rehydrator=Rehydrator(vault, audit),
         vault=vault,
-        registry=load_registry(),
-        http=httpx.AsyncClient(timeout=httpx.Timeout(120.0, connect=10.0)),
+        registry=load_registry(local_text=local_text),
+        http=httpx.AsyncClient(timeout=httpx.Timeout(300.0, connect=10.0)),
         audit=audit,
+        router=load_router(local_text=local_text),
+        mode=LlmMode(os.environ.get("LLM_MODE", LlmMode.REPLAY.value)),
     )
 
 

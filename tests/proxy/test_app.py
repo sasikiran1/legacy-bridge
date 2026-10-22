@@ -134,3 +134,18 @@ async def test_rejects_requests_it_cannot_protect(
     h, client = harness
     assert (await client.post("/v1/chat/completions", json=body, headers=headers)).status_code == status
     assert h.upstream.bodies == []
+
+
+async def test_mask_endpoint_tokenizes_tool_results_for_agent_state(
+    harness: tuple[Harness, httpx.AsyncClient],
+) -> None:
+    h, client = harness
+    response = await client.post(
+        "/v1/mask",
+        json={"content": '{"memberNumber": "M1234567", "lastName": "Lovelace"}'},
+        headers={"X-LB-Task-Id": "t1"},
+    )
+    masked = response.json()["masked"]
+    assert "M1234567" not in masked
+    assert "Lovelace" not in masked
+    assert h.upstream.bodies == []

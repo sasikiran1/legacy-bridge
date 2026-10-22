@@ -120,7 +120,19 @@ class ToolArgumentResolver:
                 return {k: await self._value(task_id, tool, argument, v) for k, v in value.items()}
         return value
 
-    async def _string(self, task_id: str, tool: str, argument: str, text: str) -> str:
+    async def resolve_field(self, task_id: str, tool: str, label: str | None, text: str) -> str:
+        """Restores tokens typed into a UI field; the policy decides by the field's accessible name."""
+        return await self._string(task_id, tool, f"field:{label or ''}", text, label=label, by_label=True)
+
+    async def _string(
+        self,
+        task_id: str,
+        tool: str,
+        argument: str,
+        text: str,
+        label: str | None = None,
+        by_label: bool = False,
+    ) -> str:
         destination = f"tool:{tool}.{argument}"
         pieces, cursor = [], 0
         for match in TOKEN_RE.finditer(text):
@@ -130,11 +142,12 @@ class ToolArgumentResolver:
                 await self._audit.record(task_id, Action.UNRESOLVED, entity_type, token, destination)
                 raise RehydrationDenied(f"{token} is not a token of this task")
             rule = self._policy.entities.get(entity_type)
-            if (
-                rule is None
-                or not rule.rehydratable
-                or not self._policy.may_rehydrate(tool, argument, entity_type)
-            ):
+            allowed = (
+                self._policy.may_type_into(entity_type, label)
+                if by_label
+                else self._policy.may_rehydrate(tool, argument, entity_type)
+            )
+            if rule is None or not rule.rehydratable or not allowed:
                 await self._audit.record(task_id, Action.UNMASK_DENIED, entity_type, token, destination)
                 raise RehydrationDenied(f"policy does not allow {entity_type} in {tool}.{argument}")
             await self._audit.record(task_id, Action.UNMASK, entity_type, token, destination)

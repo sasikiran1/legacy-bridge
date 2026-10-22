@@ -2,6 +2,8 @@
 #   entities           which types are tokenized and the detector confidence each needs
 #   structured_fields  JSON keys whose values are a known type (schema-aware masking, no NER guesswork)
 #   rehydration        where the executor may restore each type (ADR 0003); anything not listed is denied
+#   browser_fields     for typing into the UI: which field labels (case-insensitive substrings of the target's
+#                      accessible name) may receive each type; unlabeled fields receive no real values
 
 version: 1
 
@@ -63,3 +65,16 @@ rehydration:
     memberNumber: [MEMBER_ID]
     body: [PERSON, MEMBER_ID, POLICY_NUMBER, CLAIM_NUMBER]
   deleteNote: {}
+  browser_navigate:
+    url: [MEMBER_ID, CLAIM_NUMBER, POLICY_NUMBER]
+
+browser_fields:
+  PERSON: [payee, pay to, name, member name or number, search members, note, log entry]
+  MEMBER_ID: [member, search, note, log entry]
+  POLICY_NUMBER: [policy, note, log entry]
+  CLAIM_NUMBER: [claim, note, log entry]
+  STREET_ADDRESS: [street, address line]
+  EMAIL_ADDRESS: [mail]
+  PHONE_NUMBER: [phone, telephone]
+  ROUTING_NUMBER: [routing]
+  BANK_ACCOUNT: [account]
