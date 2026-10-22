@@ -98,8 +98,12 @@ The attacker cannot read `.env`, run code on the host, or modify container image
 | T9 | Agent defeats a CAPTCHA or MFA wall | Detect the wall and raise a human-handoff interrupt; no solver code exists | CAPTCHA scenario must end in `human` tier, never success |
 | T10 | Vault compromise via Redis persistence or memory dump | Values encrypted with AES-GCM before they reach Redis; AAD binds ciphertext to task and token; TTL per task | Unit tests; ADR 0002 |
 | T11 | Screenshot leaks PII to a remote VLM | OCR + detector → black boxes before any non-local model; local VLM is the default | Redaction test with canaries rendered into the page (M4) |
+| T12 | An injected model types a real value into the wrong UI field, or drives the browser around the policy | The executor restores a token only into fields whose accessible name the policy allows for its type (`browser_fields`). Targets must be snapshot refs, not CSS selectors, so the label check and destructive-click approval cannot be bypassed. `browser_evaluate` and `browser_run_code_unsafe` are never offered to the model; the executor uses the latter only for sign-in and page settling. `--allowed-origins` confines the browser itself to the portal. | tests/agent, tests/proxy (resolve_field) |
+| T13 | Raw PII persists in the agent's checkpoints or traces | Executors mask every tool result via the proxy before it enters state; spans carry counts and ids only (ADR 0012) | Cassette leak scan; agent state is built only from masked results |
 
 ## Residual risk and limitations
+
+- **The injection classifier is not running yet.** Prompt Guard 2 is gated and access has not been granted (ADR 0009), so the agent currently runs with structural defenses only: spotlighting, action allowlists, approvals and post-conditions. Results record which scanner ran.
 
 - **Detection is probabilistic.** Recall below 100% means T1 relies on the second pass and canaries to catch misses. Canaries only catch values we planted. A real deployment would need ongoing recall measurement on its own data.
 - **Token-derivation key in CI.** Replay determinism needs CI to derive the same tokens as recording did, so cassette recording and CI use a fixed, non-secret derivation key. The data is synthetic, so linkage is harmless here. With real data, a secret key would be required, and cross-run cassette replay would break by design (ADR 0001).
