@@ -17,6 +17,7 @@ from collections import Counter
 from typing import Any
 
 from analysis.manifest import RESULTS_DIR, Run
+from proxy.cassettes import CASSETTE_DIR
 
 
 def latest_rows(label: str) -> tuple[dict[tuple[str, str], dict[str, Any]], dict[tuple[str, str], str]]:
@@ -35,6 +36,14 @@ def latest_rows(label: str) -> tuple[dict[tuple[str, str], dict[str, Any]], dict
     return rows, sources
 
 
+def cassette_models(row: dict[str, Any]) -> set[str]:
+    """Rows recorded before runs tracked their models; the cassettes name who served each call."""
+    directory = CASSETTE_DIR / f"{row['scenario']}_{row['task_id']}"
+    return {
+        json.loads(path.read_text(encoding="utf-8"))["served_by"] for path in sorted(directory.glob("*.json"))
+    }
+
+
 def summarise(rows: list[dict[str, Any]]) -> dict[str, Any]:
     return {
         "tasks": len(rows),
@@ -46,7 +55,7 @@ def summarise(rows: list[dict[str, Any]]) -> dict[str, Any]:
         "median_llm_calls": statistics.median(r["llm_calls"] for r in rows),
         "median_seconds": statistics.median(r["seconds"] for r in rows),
         "median_prompt_tokens": statistics.median(r["tokens_in"] for r in rows),
-        "models": sorted({m for r in rows for m in r.get("models", [])}),
+        "models": sorted({m for r in rows for m in r.get("models") or cassette_models(r)}),
         "failed_tasks": sorted(r["task_id"] for r in rows if not r["passed"]),
     }
 
