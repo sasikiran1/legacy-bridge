@@ -1,13 +1,11 @@
 """Per-endpoint circuit breakers (ADR 0004 starting parameters).
 
 Closed: calls flow. Open after 3 consecutive failures or >= 50% failures over the last 10 calls: calls are
-refused
-so the agent goes straight to the browser. After the open interval one probe is allowed (half-open): success
-closes the breaker, failure reopens it with the interval doubled, up to 10 minutes.
+refused, so the agent goes straight to the browser. After the open interval one probe is allowed (half-open):
+success closes the breaker, failure reopens it with the interval doubled, up to 10 minutes.
 
 A failed write to this API never mutates state (404/410/501/5xx/schema rejection), so the probe may be the
-real
-call; ADR 0004's read-only-probe refinement is left for when a write could partially succeed.
+real call; ADR 0004's read-only-probe refinement is left for when a write could partially succeed.
 """
 
 from __future__ import annotations

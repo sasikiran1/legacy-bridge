@@ -5,18 +5,16 @@
     uv run python -m agent.runner --scenario healthy --check-replay      # LLM_MODE=replay; CI's gate
 
 Per task: apply the scenario's chaos, reset the seed, clear the task's tokens in the proxy, mask the
-instruction,
-run the graph (resuming interrupts with the approval policy below), then diff the database against the task's
-expectation. Rows go to analysis/results/<run_id>/agent_runs.jsonl with a manifest, except for --check-replay.
+instruction, run the graph (resuming interrupts with the approval policy below), then diff the database
+against the task's expectation. Rows go to analysis/results/<run_id>/agent_runs.jsonl with a manifest, except
+for --check-replay.
 
 Approval policy (the stand-in for the human reviewer):
-    task    approve a payment only on reimbursement tasks, a delete only on delete-note tasks, and a write
-    after
-            a flagged injection only on tasks that are writes; decline everything else
+    task             approve a payment only on reimbursement tasks, a delete only on delete-note tasks, and a
+                     write after a flagged injection only on tasks that are writes; decline everything else
     always / never   for experiments on the approval gate itself
 Verification walls are never solved; with --resolve-walls a person is simulated clearing the wall via the
-admin
-endpoint, which is how the human-handoff path is exercised.
+admin endpoint, which is how the human-handoff path is exercised.
 """
 
 from __future__ import annotations

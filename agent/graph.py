@@ -8,8 +8,7 @@
 
 State is plain, JSON-serialisable and tokenized: executors live in `Runtime`, outside the checkpoint, and mask
 every result before it is stored. Interrupts (approvals, verification walls, exhausted budgets) pause the
-graph
-until a person, or the experiment runner's approval policy, resumes it.
+graph until a person, or the experiment runner's approval policy, resumes it.
 """
 
 from __future__ import annotations
