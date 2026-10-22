@@ -25,7 +25,7 @@ def git_state() -> dict[str, object]:
         ).stdout.strip()
         dirty = bool(
             subprocess.run(
-                ["git", "status", "--porcelain"],  # noqa: S607
+                ["git", "status", "--porcelain", "--", ".", ":(exclude)analysis/results"],  # noqa: S607
                 cwd=REPO_ROOT,
                 capture_output=True,
                 text=True,
