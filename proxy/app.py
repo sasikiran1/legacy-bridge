@@ -32,7 +32,7 @@ from fastapi.responses import JSONResponse, Response, StreamingResponse
 
 from proxy.audit import AuditLog
 from proxy.cassettes import CassetteMiss, CassetteStore, LlmMode, request_digest
-from proxy.detection import DetectionError, build_detector
+from proxy.detection import DetectionError, RegexDetector, build_detector
 from proxy.masking import Masker
 from proxy.policy import load_policy
 from proxy.providers import Provider, Registry, load_registry
@@ -76,19 +76,24 @@ def _error(status: int, message: str, kind: str) -> JSONResponse:
 async def mask_request(
     body: dict[str, Any], masker: Masker, task_id: str, destination: str
 ) -> dict[str, Any]:
-    masked = dict(body)
-    messages = []
-    for message in body.get("messages", []):
-        message = dict(message)
+    """Masks every message. User, system and tool messages go first so that values they introduce are known
+    before the model-authored (assistant) messages, which get pattern rules and known values but no NER."""
+    originals = list(body.get("messages", []))
+    masked_messages: list[dict[str, Any]] = [{} for _ in originals]
+    order = sorted(range(len(originals)), key=lambda i: originals[i].get("role") == "assistant")
+    for index in order:
+        message = dict(originals[index])
+        authored = message.get("role") == "assistant"
         content = message.get("content")
         if isinstance(content, str):
-            message["content"] = await masker.mask_content(content, task_id, destination)
+            message["content"] = await masker.mask_content(content, task_id, destination, authored)
         elif isinstance(content, list):
             parts = []
             for part in content:
                 if part.get("type") != "text":
                     raise UnsupportedContent("non-text content needs screenshot redaction (ADR 0008)")
-                parts.append({**part, "text": await masker.mask_content(part["text"], task_id, destination)})
+                text = await masker.mask_content(part["text"], task_id, destination, authored)
+                parts.append({**part, "text": text})
             message["content"] = parts
         if message.get("tool_calls"):
             calls = []
@@ -96,13 +101,12 @@ async def mask_request(
                 function = dict(call.get("function", {}))
                 if isinstance(function.get("arguments"), str):
                     function["arguments"] = await masker.mask_content(
-                        function["arguments"], task_id, destination
+                        function["arguments"], task_id, destination, authored
                     )
                 calls.append({**call, "function": function})
             message["tool_calls"] = calls
-        messages.append(message)
-    masked["messages"] = messages
-    return masked
+        masked_messages[index] = message
+    return {**body, "messages": masked_messages}
 
 
 def create_app(build: Callable[[], Awaitable[Services]]) -> FastAPI:
@@ -154,6 +158,17 @@ def create_app(build: Callable[[], Awaitable[Services]]) -> FastAPI:
         except (DetectionError, VaultUnavailable, TokenCollision) as e:
             return _error(503, f"PII protection unavailable: {e}", "fail_closed")
         return JSONResponse({"masked": masked})
+
+    @app.delete("/v1/tasks/{task_id:path}")
+    async def forget_task(task_id: str, request: Request) -> Response:
+        """Drops a task's vault entries and cached masks, so a rerun of the same task starts clean."""
+        services: Services = request.app.state.services
+        services.masker.forget(task_id)
+        try:
+            await services.vault.drop(task_id)
+        except VaultUnavailable as e:
+            return _error(503, f"vault unavailable: {e}", "fail_closed")
+        return Response(status_code=204)
 
     @app.post("/v1/chat/completions")
     async def chat_completions(request: Request) -> Response:
@@ -328,6 +343,7 @@ async def build_services() -> Services:
         vault,
         audit,
         policy,
+        light_detector=RegexDetector(),
     )
     local_text = os.environ.get("LOCAL_TEXT_MODEL") or None
     return Services(

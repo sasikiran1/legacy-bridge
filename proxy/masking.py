@@ -26,30 +26,47 @@ JsonValue = None | bool | int | float | str | list["JsonValue"] | dict[str, "Jso
 
 class Masker:
     def __init__(
-        self, detector: Detector, minter: TokenMinter, vault: Vault, audit: AuditLog, policy: PiiPolicy
+        self,
+        detector: Detector,
+        minter: TokenMinter,
+        vault: Vault,
+        audit: AuditLog,
+        policy: PiiPolicy,
+        light_detector: Detector | None = None,
     ) -> None:
+        """`light_detector` (pattern rules only) handles model-authored text: the model only ever saw tokens,
+        so raw PII in its output must be reconstructed, and precise detectors plus known values catch that
+        without NER false positives on its short tool arguments."""
         self._detector = detector
+        self._light = light_detector or detector
         self._minter = minter
         self._vault = vault
         self._audit = audit
         self._policy = policy
         self._cache: OrderedDict[tuple[str, str], str] = OrderedDict()
+        self._propagate: dict[str, set[str]] = {}
 
-    async def mask_text(self, text: str, task_id: str, destination: str) -> str:
+    async def mask_text(self, text: str, task_id: str, destination: str, model_authored: bool = False) -> str:
         if not text:
             return text
-        key = (task_id, hashlib.sha256(text.encode()).hexdigest())
+        key = (task_id, hashlib.sha256((("m:" if model_authored else "") + text).encode()).hexdigest())
         if key in self._cache:
             self._cache.move_to_end(key)
             return self._cache[key]
-        masked = await self._mask_uncached(text, task_id, destination)
+        masked = await self._mask_uncached(text, task_id, destination, model_authored)
         self._cache[key] = masked
         if len(self._cache) > CACHE_SIZE:
             self._cache.popitem(last=False)
         return masked
 
-    async def _mask_uncached(self, text: str, task_id: str, destination: str) -> str:
-        detected = await asyncio.to_thread(self._detector.detect, text)
+    def forget(self, task_id: str) -> None:
+        for key in [k for k in self._cache if k[0] == task_id]:
+            del self._cache[key]
+        self._propagate.pop(task_id, None)
+
+    async def _mask_uncached(self, text: str, task_id: str, destination: str, model_authored: bool) -> str:
+        detector = self._light if model_authored else self._detector
+        detected = await asyncio.to_thread(detector.detect, text)
         candidates = [
             s
             for s in detected
@@ -63,22 +80,34 @@ class Masker:
         return await self._replace(text, spans, task_id, destination)
 
     async def mask_value(
-        self, value: JsonValue, task_id: str, destination: str, key: str | None = None
+        self,
+        value: JsonValue,
+        task_id: str,
+        destination: str,
+        key: str | None = None,
+        model_authored: bool = False,
     ) -> JsonValue:
         """Masks a JSON value. Values under keys the policy recognises are tokenized whole, without NER."""
         match value:
             case str():
                 field_type = self._policy.field_type(key) if key else None
                 if field_type and value and not TOKEN_RE.fullmatch(value):
-                    return await self._token_for(value, field_type, task_id, destination)
-                return await self.mask_text(value, task_id, destination)
+                    return await self._token_for(value, field_type, task_id, destination, propagate=True)
+                return await self.mask_text(value, task_id, destination, model_authored)
             case list():
-                return [await self.mask_value(item, task_id, destination, key) for item in value]
+                return [
+                    await self.mask_value(item, task_id, destination, key, model_authored) for item in value
+                ]
             case dict():
-                return {k: await self.mask_value(v, task_id, destination, k) for k, v in value.items()}
+                return {
+                    k: await self.mask_value(v, task_id, destination, k, model_authored)
+                    for k, v in value.items()
+                }
         return value
 
-    async def mask_content(self, content: str, task_id: str, destination: str) -> str:
+    async def mask_content(
+        self, content: str, task_id: str, destination: str, model_authored: bool = False
+    ) -> str:
         """Message content: JSON documents (tool results, API responses) get field-aware masking."""
         stripped = content.lstrip()
         if stripped[:1] in "{[":
@@ -87,15 +116,21 @@ class Masker:
             except ValueError:
                 pass
             else:
-                masked = await self.mask_value(parsed, task_id, destination)
+                masked = await self.mask_value(parsed, task_id, destination, model_authored=model_authored)
                 return json.dumps(masked, ensure_ascii=False)
-        return await self.mask_text(content, task_id, destination)
+        return await self.mask_text(content, task_id, destination, model_authored)
 
     async def _known_values(self, text: str, task_id: str) -> list[Span]:
-        """Values already tokenized in this task get the same token wherever they reappear."""
+        """Values already tokenized in this task get the same token wherever they reappear.
+
+        Only trusted values are propagated: structured fields, pattern rules and multi-word NER spans.
+        A single-word NER guess ("Member" read as a person) is masked where it was found but not spread, or it
+        would re-tokenize that word on every later page.
+        """
         spans = []
-        for entry in (await self._vault.entries(task_id)).values():
-            if len(entry.value) < MIN_KNOWN_VALUE_LENGTH:
+        trusted = self._propagate.get(task_id, set())
+        for token, entry in (await self._vault.entries(task_id)).items():
+            if len(entry.value) < MIN_KNOWN_VALUE_LENGTH or token not in trusted:
                 continue
             start = text.find(entry.value)
             while start != -1:
@@ -111,9 +146,13 @@ class Masker:
                 start = text.find(entry.value, start + 1)
         return spans
 
-    async def _token_for(self, value: str, entity_type: str, task_id: str, destination: str) -> str:
+    async def _token_for(
+        self, value: str, entity_type: str, task_id: str, destination: str, propagate: bool
+    ) -> str:
         token = self._minter.mint(task_id, entity_type, value).render()
         await self._vault.put(task_id, token, VaultEntry(entity_type=entity_type, value=value))
+        if propagate:
+            self._propagate.setdefault(task_id, set()).add(token)
         await self._audit.record(task_id, Action.MASK, entity_type, token, destination)
         return token
 
@@ -121,9 +160,9 @@ class Masker:
         pieces, cursor = [], 0
         for span in sorted(spans, key=lambda s: s.start):
             pieces.append(text[cursor : span.start])
-            pieces.append(
-                await self._token_for(text[span.start : span.end], span.entity_type, task_id, destination)
-            )
+            value = text[span.start : span.end]
+            propagate = not span.source.startswith("presidio") or len(value.split()) > 1
+            pieces.append(await self._token_for(value, span.entity_type, task_id, destination, propagate))
             cursor = span.end
         pieces.append(text[cursor:])
         return "".join(pieces)

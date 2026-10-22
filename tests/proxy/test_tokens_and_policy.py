@@ -3,7 +3,7 @@ from __future__ import annotations
 import pytest
 from pydantic import ValidationError
 
-from proxy.detection import Span, resolve_overlaps
+from proxy.detection import Span, resolve_overlaps, trim_street_spans
 from proxy.policy import PiiPolicy, load_policy
 from proxy.tokens import TOKEN_RE, TokenMinter
 from tests.proxy.fakes import TOKEN_KEY
@@ -72,3 +72,27 @@ def test_same_type_overlaps_are_unioned_and_partial_overlaps_keep_the_higher_sco
     assert [(s.start, s.end, s.score) for s in merged] == [(0, 15, 0.8)]
     winner = resolve_overlaps([_span(0, 10, "PERSON", 0.6), _span(5, 15, "STREET_ADDRESS", 0.8)])
     assert [s.entity_type for s in winner] == ["STREET_ADDRESS"]
+
+
+def test_street_spans_stop_before_city_state_and_zip() -> None:
+    text = "Move to 420 Jerry Alley Apt. 033, Danielleville, WA 25854 please"
+    start = text.index("420")
+    wide = _span(start, text.index(" please"), "STREET_ADDRESS", 0.9)
+    (trimmed,) = trim_street_spans([wide], text)
+    assert text[trimmed.start : trimmed.end] == "420 Jerry Alley Apt. 033"
+    not_a_street = _span(0, len("Springfield, IL"), "STREET_ADDRESS", 0.9)
+    assert trim_street_spans([not_a_street], "Springfield, IL") == [not_a_street]
+
+
+def test_city_state_zip_alone_is_not_a_street() -> None:
+    text = "Danielleville, WA 25854"
+    assert trim_street_spans([_span(0, len(text), "STREET_ADDRESS", 0.9)], text) == []
+
+
+def test_numeric_entity_types_need_digits() -> None:
+    from proxy.detection import plausible
+
+    text = "Date of birth 03/02/1987"
+    assert not plausible(_span(0, 13, "DATE_OF_BIRTH", 0.9), text)
+    assert plausible(_span(14, 24, "DATE_OF_BIRTH", 0.9), text)
+    assert plausible(_span(0, 4, "PERSON", 0.9), text)

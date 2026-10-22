@@ -179,6 +179,55 @@ CUSTOM_RULES: tuple[PatternRule, ...] = (
 # --- overlap resolution
 
 
+_STREET_RULE = next(rule for rule in CUSTOM_RULES if rule.entity_type == "STREET_ADDRESS")
+_CITY_STATE_ZIP = re.compile(r"[A-Za-z .'-]+,\s*[A-Z]{2}\s+\d{5}(-\d{4})?")
+
+
+NUMERIC_TYPES = frozenset(
+    {
+        "DATE_OF_BIRTH",
+        "US_SSN",
+        "PHONE_NUMBER",
+        "BANK_ACCOUNT",
+        "ROUTING_NUMBER",
+        "CREDIT_CARD",
+        "IBAN_CODE",
+        "MEMBER_ID",
+        "POLICY_NUMBER",
+        "CLAIM_NUMBER",
+    }
+)
+
+
+def plausible(span: Span, text: str) -> bool:
+    """Numeric entity types need at least two digits: NER tags column headers such as "Date of birth" or
+    "SSN" as the entities they describe."""
+    if span.entity_type not in NUMERIC_TYPES:
+        return True
+    return sum(ch.isdigit() for ch in text[span.start : span.end]) >= 2
+
+
+def trim_street_spans(spans: Sequence[Span], text: str) -> list[Span]:
+    """Cuts a street-address span at its first comma when the part before is a complete street address, and
+    drops spans that are only "City, ST 12345".
+
+    NER often tags "12 Elm St, Springfield, IL 62701" as one address, or tags the city part on its own. City,
+    state and ZIP are not tokenized by policy, and folding them into street tokens leaves the agent unable to
+    fill separate form fields.
+    """
+    trimmed = []
+    for span in spans:
+        if span.entity_type == "STREET_ADDRESS":
+            value = text[span.start : span.end]
+            if _CITY_STATE_ZIP.fullmatch(value.strip()):
+                continue
+            comma = value.find(",")
+            if comma > 0 and _STREET_RULE.pattern.fullmatch(value[:comma].rstrip()):
+                span = span.model_copy(update={"end": span.start + len(value[:comma].rstrip())})
+        trimmed.append(span)
+    return trimmed
+
+
 def resolve_overlaps(spans: Sequence[Span]) -> list[Span]:
     """Union overlapping same-type spans; a span inside a longer span yields to it; then partial overlaps
     keep the highest-scoring span. Containment wins over score because masking part of a value (the name
@@ -251,7 +300,7 @@ class RegexDetector:
                             source=f"presidio:{type(recognizer).__name__}",
                         )
                     )
-        return resolve_overlaps(spans)
+        return trim_street_spans(resolve_overlaps(spans), text)
 
 
 class PresidioDetector:
@@ -259,6 +308,7 @@ class PresidioDetector:
         self,
         with_gliner: bool,
         rules: Sequence[PatternRule] = (),
+        drop_spacy_ner: bool = False,
         policy: PiiPolicy | None = None,
         name: str = DetectorConfig.PRESIDIO.value,
     ) -> None:
@@ -266,10 +316,10 @@ class PresidioDetector:
         self._rules = tuple(rules)
         self._policy = policy
         self._lock = threading.Lock()
-        self._engine = self._build(with_gliner)
+        self._engine = self._build(with_gliner, drop_spacy_ner)
 
     @staticmethod
-    def _build(with_gliner: bool) -> AnalyzerEngine:
+    def _build(with_gliner: bool, drop_spacy_ner: bool) -> AnalyzerEngine:
         from presidio_analyzer import AnalyzerEngine
         from presidio_analyzer.predefined_recognizers import GLiNERRecognizer
 
@@ -285,6 +335,10 @@ class PresidioDetector:
                     map_location="cpu",
                 )
             )
+        if drop_spacy_ner:
+            # spaCy's NER tags UI labels such as "Mailing Address" as people; with GLiNER present it adds
+            # false positives rather than recall (measured in analysis/results/*-pii-benchmark).
+            engine.registry.remove_recognizer("SpacyRecognizer")
         return engine
 
     def detect(self, text: str) -> list[Span]:
@@ -304,7 +358,8 @@ class PresidioDetector:
                         end=result.end,
                         entity_type=mapped,
                         score=result.score,
-                        source="presidio",
+                        source="presidio:"
+                        + str((result.recognition_metadata or {}).get("recognizer_name", "")),
                     )
                 )
         if self._policy is not None:
@@ -312,9 +367,11 @@ class PresidioDetector:
             spans = [
                 s
                 for s in spans
-                if policy.tokenizes(s.entity_type) and s.score >= policy.min_score(s.entity_type)
+                if policy.tokenizes(s.entity_type)
+                and s.score >= policy.min_score(s.entity_type)
+                and plausible(s, text)
             ]
-        return resolve_overlaps(spans)
+        return trim_street_spans(resolve_overlaps(spans), text)
 
 
 def build_detector(config: DetectorConfig, policy: PiiPolicy) -> Detector:
@@ -326,4 +383,6 @@ def build_detector(config: DetectorConfig, policy: PiiPolicy) -> Detector:
         case DetectorConfig.PRESIDIO_GLINER:
             return PresidioDetector(with_gliner=True, name=config.value)
         case DetectorConfig.FULL:
-            return PresidioDetector(with_gliner=True, rules=CUSTOM_RULES, policy=policy, name=config.value)
+            return PresidioDetector(
+                with_gliner=True, rules=CUSTOM_RULES, policy=policy, drop_spacy_ner=True, name=config.value
+            )

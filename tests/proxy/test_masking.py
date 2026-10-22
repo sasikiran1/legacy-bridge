@@ -6,6 +6,7 @@ from pathlib import Path
 from hypothesis import HealthCheck, given, settings
 from hypothesis import strategies as st
 
+from proxy.detection import Span
 from proxy.tokens import TOKEN_RE
 from tests.proxy.fakes import kit, tokens_in
 
@@ -89,3 +90,29 @@ async def test_round_trip_is_exact_for_arbitrary_compositions(tmp_path: Path, pa
     text = " ".join(parts)
     masked = await k.masker.mask_text(text, "prop", "groq")
     assert await k.rehydrator.text(masked, "prop", "client") == text
+
+
+class _GuessingDetector:
+    """Mistakes "Member" for a person, but only in a sentence containing "called"."""
+
+    name = "guess"
+
+    def detect(self, text: str) -> list[Span]:
+        if "called" not in text:
+            return []
+        start = text.find("Member")
+        return [
+            Span(
+                start=start,
+                end=start + 6,
+                entity_type="PERSON",
+                score=0.9,
+                source="presidio:GLiNERRecognizer",
+            )
+        ]
+
+
+async def test_single_word_ner_guesses_are_masked_but_not_spread(tmp_path: Path) -> None:
+    k = kit(tmp_path, detector=_GuessingDetector())
+    assert "Member" not in await k.masker.mask_text("Member called.", "t1", "groq")
+    assert await k.masker.mask_text("Member Services Portal", "t1", "groq") == "Member Services Portal"

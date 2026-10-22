@@ -8,7 +8,7 @@
 version: 1
 
 entities:
-  PERSON: {min_score: 0.5}
+  PERSON: {min_score: 0.75}
   EMAIL_ADDRESS: {min_score: 0.5}
   PHONE_NUMBER: {min_score: 0.4}
   US_SSN: {min_score: 0.5}
