@@ -8,9 +8,10 @@ from collections.abc import Mapping
 
 from proxy.audit import Action, AuditLog
 from proxy.policy import PiiPolicy
-from proxy.tokens import MAX_TOKEN_LENGTH, OPEN, TOKEN_RE
+from proxy.tokens import MAX_TOKEN_LENGTH, OPEN, SHORT_ID_LENGTH, TOKEN_RE
 from proxy.vault import Vault
 
+_BARE_ID = re.compile(rf"(?<![0-9a-z])[0-9a-f]{{{SHORT_ID_LENGTH}}}(?![0-9a-z])")
 _VIABLE_PREFIX = re.compile(r"\[\[(?:[A-Z][A-Z_]*(?::[0-9a-f]{0,10}(?:\])?)?)?")
 
 
@@ -136,11 +137,19 @@ class ToolArgumentResolver:
         by_label: bool = False,
     ) -> str:
         destination = f"tool:{tool}.{argument}"
-        if fragment := self._malformed.search(TOKEN_RE.sub("", text)):
+        rest = TOKEN_RE.sub("", text)
+        if fragment := self._malformed.search(rest):
             # A near-miss such as "[[MEMBER_ID:975008917f]" would otherwise reach the portal literally.
             raise RehydrationDenied(
                 f"malformed placeholder {fragment.group()!r}: copy placeholders exactly, including [[ and ]]"
             )
+        for bare in _BARE_ID.findall(rest):
+            # The id alone ("dee6ee156d") is a placeholder with its type and brackets dropped.
+            for entity_type in self._policy.entities:
+                if await self._vault.get(task_id, f"[[{entity_type}:{bare}]]") is not None:
+                    raise RehydrationDenied(
+                        f"{bare!r} is part of a placeholder: write it in full, as [[{entity_type}:{bare}]]"
+                    )
         pieces, cursor = [], 0
         for match in TOKEN_RE.finditer(text):
             token, entity_type = match.group(), match.group(1)

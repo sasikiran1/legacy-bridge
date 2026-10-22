@@ -115,3 +115,12 @@ async def test_near_miss_placeholders_are_refused_not_typed(tmp_path: Path) -> N
     assert await k.resolver.resolve("t1", "addNote", {"body": "Ref ID:1234 per call"}) == {
         "body": "Ref ID:1234 per call"
     }
+
+
+async def test_a_bare_placeholder_id_is_refused(tmp_path: Path) -> None:
+    k = kit(tmp_path)
+    member = await k.masker.mask_text("M1234567", "t1", "agent")
+    bare = member.split(":")[1].rstrip("]")
+    with pytest.raises(RehydrationDenied, match="part of a placeholder"):
+        await k.resolver.resolve("t1", "getMember", {"memberNumber": bare})
+    assert await k.resolver.resolve("t2", "getMember", {"memberNumber": bare}) == {"memberNumber": bare}
