@@ -15,7 +15,7 @@ NODE_IMAGE := node:26.9.0
 .DEFAULT_GOAL := help
 .PHONY: help up down reset-db logs seed lint typecheck test portal-test web-build check probe oracles demo \
 	proxy-up leak proxy-demo bench-pii bench-latency bench-tokens audit-verify agent-stack record replay-check \
-	demo-fallback
+	demo-fallback traces
 
 help: ## List targets
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*## "} {printf "  %-12s %s\n", $$1, $$2}'
@@ -110,3 +110,9 @@ replay-check: agent-stack ## Replay every recorded task and fail if any outcome 
 demo-fallback: LLM_MODE := replay
 demo-fallback: agent-stack ## M3 demo: removed and retired endpoints push the agent to the browser (replayed, no model)
 	$(TESTBED) uv run python -W ignore -m agent.runner --scenario api_degraded --check-replay --label demo
+
+traces: LLM_MODE := replay
+traces: agent-stack ## Replay recorded healthy tasks with tracing to Phoenix (http://localhost:6006), then check spans for canaries
+	$(COMPOSE) up -d phoenix
+	$(TESTBED) sh -c "OTEL_EXPORTER_OTLP_ENDPOINT=http://phoenix:6006 uv run python -W ignore -m agent.runner \
+		--scenario healthy --check-replay --label traces && uv run pytest -m phoenix tests/leak/test_traces.py"

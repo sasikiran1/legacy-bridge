@@ -78,5 +78,6 @@ markers = [
     "oracle: drives the running portal stack with Playwright (needs `docker compose up`)",
     "models: loads the spaCy and GLiNER detection models (slow first run; downloads ~1.2 GB)",
     "redis: needs the Redis service (REDIS_URL)",
+    "phoenix: reads spans from a running Phoenix (PHOENIX_URL, default http://phoenix:6006)",
 ]
-addopts = "-m 'not oracle and not models and not redis'"
+addopts = "-m 'not oracle and not models and not redis and not phoenix'"

@@ -108,6 +108,7 @@ Results on a 10-task development subset, local model qwen2.5-14b, graded against
 make demo-fallback   # replay: the API refuses, the agent completes the tasks in the browser, the database diff decides
 make replay-check    # every recorded task must reproduce its recorded outcome
 make record SCENARIO=healthy TASKS=claim_status-01   # record with the local model (Ollama)
+make traces          # replay with OpenTelemetry GenAI spans to Phoenix (localhost:6006); spans are checked for canaries
 ```
 
 ### Limitations
