@@ -14,3 +14,4 @@ Short records: context, decision, alternatives, consequences. A decision is chan
 | [0008](0008-vision-fallback-and-redaction.md) | Vision fallback model and screenshot redaction | Proposed (decide in M4) |
 | [0009](0009-injection-detection.md) | Injection detection on page content | Accepted |
 | [0010](0010-portal-frontend.md) | Portal frontend: React SPA over internal endpoints | Accepted |
+| [0011](0011-ascii-token-delimiters.md) | ASCII token delimiters (supersedes the rendering in 0001) | Accepted |

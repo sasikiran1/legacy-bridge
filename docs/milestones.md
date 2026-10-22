@@ -64,6 +64,20 @@ Each milestone ends with green tests, a demo command, and an interview brief (wh
 
 ## M2: PII proxy
 
+**Done 2026-10-22.** Deviations from the plan below:
+- **Token rendering is `[[TYPE:hex10]]`, not `⟦…⟧`** (ADR 0011). The Unicode brackets cost 6 extra LLM tokens per value.
+- **Beyond NER, masking has two more layers:**
+  - schema-aware masking of JSON keys
+  - a known-values pass, so a value tokenized once in a task is caught wherever it reappears
+
+  The leak check reports both an agent-session scope and a cold per-document scope, so the detector's own share is visible.
+- **Overlap resolution prefers the containing span** (a street over the person-like name inside it). Score-only resolution leaked one cold canary address.
+- **Not used:**
+  - Presidio's anonymizer: tokenization needs async vault writes
+  - sse-starlette: raw SSE pass-through needs only `StreamingResponse`
+- **Moved to M3:** OTel GenAI spans for the proxy (ADR 0006 placed `proxy/telemetry.py` in M2). They land together with the agent's spans and the Phoenix service.
+- **Detection runs on CPU** (torch CPU wheel), so the latency numbers are CPU numbers.
+
 - **Detection:** Presidio + GLiNER (`urchade/gliner_multi_pii-v1`) + custom recognizers (member ID, policy number, claim number). PII policy YAML.
 - **Tokenizer** per ADR 0001. **Vault** per ADR 0002. **Rehydration** in text, tool arguments, and SSE per ADR 0003, plus the policy engine.
 - **FastAPI** OpenAI-compatible `/v1/chat/completions`, streaming and non-streaming. Fails closed.

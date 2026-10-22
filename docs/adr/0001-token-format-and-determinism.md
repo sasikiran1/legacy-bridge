@@ -1,6 +1,6 @@
 # 0001. Token format and determinism scope
 
-- Status: Accepted. The short-ID length is provisional until the M2 token-overhead measurement.
+- Status: Accepted. The rendering (delimiters) is superseded by [ADR 0011](0011-ascii-token-delimiters.md); derivation, determinism scope and the 10-hex short ID stand.
 - Date: 2026-10-21
 
 ## Context

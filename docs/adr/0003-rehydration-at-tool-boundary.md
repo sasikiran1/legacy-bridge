@@ -18,7 +18,7 @@ Tokens are swapped for values in exactly three places.
 2. **Final operator-facing text, in the proxy.** Only when the caller sets `x-lb-rehydrate: final`.
    - By default the proxy returns tokens, because the agent loop is itself a client of the proxy and should stay in token space.
 3. **SSE streams, in the proxy.** Same opt-in as (2).
-   - A lookahead buffer holds output from a `⟦` until the matching `⟧`, or until 48 characters pass without one (then it flushes verbatim).
+   - A lookahead buffer holds output from a `[[` (or a trailing `[`) until the token closes, or until the held text can no longer become a token (then it is released one character at a time).
    - Tokens split across chunks are reassembled before resolution.
    - Tested with every split point of every token in a fixture stream.
 

@@ -35,9 +35,11 @@ Latest versions on PyPI as of the date above (`https://pypi.org/pypi/<name>/json
 | playwright | 1.64.0 | Apache-2.0 | |
 | presidio-analyzer / presidio-anonymizer | 2.2.364 | MIT | `[gliner]` extra; requires Python `<3.15` |
 | gliner | 0.2.29 | Apache-2.0 | Pins `transformers<5.17.0` (latest is 5.20.2) |
-| transformers | 5.20.2 (resolves below 5.17 via gliner) | Apache-2.0 | |
-| torch | 2.14.1 | BSD-3-Clause | Lists Python 3.14 |
-| spacy | 3.8.16 | MIT | Presidio's default NLP engine; model chosen in M2 |
+| transformers | 5.16.1 (resolved; capped by gliner) | Apache-2.0 | |
+| torch | 2.14.1+cpu from https://download.pytorch.org/whl/cpu | BSD-3-Clause | CPU-only wheel; the PyPI default bundles CUDA |
+| spacy | 3.8.16 | MIT | Presidio's default NLP engine |
+| en_core_web_lg | 3.8.0 (wheel from github.com/explosion/spacy-models releases) | MIT | Presidio's default spaCy model |
+| huggingface-hub | 1.33.0 | Apache-2.0 | Model and dataset downloads |
 | fastapi | 0.159.1 | MIT | |
 | uvicorn | 0.54.0 | BSD-3-Clause | |
 | sse-starlette | 3.5.0 | BSD-3-Clause | |
@@ -101,6 +103,8 @@ Latest versions on npm as of the date above (`https://registry.npmjs.org/<name>/
 | Artifact | License / access | Constraints that affect us | Source |
 |---|---|---|---|
 | `urchade/gliner_multi_pii-v1` | Apache-2.0 | Fine-tuned from `gliner_multi-v2.1` on synthetic PII | https://huggingface.co/urchade/gliner_multi_pii-v1 |
+| `microsoft/mdeberta-v3-base` (tokenizer pulled by GLiNER) | MIT | Downloaded on first GLiNER load | https://huggingface.co/microsoft/mdeberta-v3-base |
+| `openai/gpt-oss-20b` (tokenizer files only) | Apache-2.0 | Used to count LLM tokens in analysis/token_overhead.py | https://huggingface.co/openai/gpt-oss-20b |
 | `meta-llama/Llama-Prompt-Guard-2-86M` / `-22M` | Llama 4 Community License, **gated** | Access form asks for legal name, DOB, and organization; Sasi submits it. 512-token input, so chunk. Binary benign/malicious. "Built with Llama" attribution. Run locally; never send page text to Groq's hosted copy. | https://huggingface.co/meta-llama/Llama-Prompt-Guard-2-86M |
 | `qwen3-vl:8b` (Ollama) / `Qwen/Qwen3-VL-8B-Instruct` | Apache-2.0 | 6.2 GB, fits the 12 GB GPU; documents GUI understanding and OCR | https://ollama.com/library/qwen3-vl, https://huggingface.co/Qwen/Qwen3-VL-8B-Instruct |
 | `ai4privacy/open-pii-masking-500k-ai4privacy` | Metadata: CC BY 4.0. README: **also subject to the Llama Community License** | Eval only. Download at run time into `analysis/data/raw/` (gitignored). Never commit or publish rows; publish aggregate metrics only. Show "Built with Llama" and the citation on the report page. The README says redistribution "beyond the permitted scope may require explicit written permission". ~580k rows, 8 languages. | https://huggingface.co/datasets/ai4privacy/open-pii-masking-500k-ai4privacy |
