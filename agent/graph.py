@@ -51,6 +51,7 @@ class AgentState(TypedDict, total=False):
     tokens_in: int
     tokens_out: int
     cassette_mismatches: int
+    models: list[str]
     plan: dict[str, Any]
     tier: str
     tiers: list[str]
@@ -139,6 +140,7 @@ def _usage(state: AgentState, reply: LlmReply) -> dict[str, Any]:
         "tokens_in": state.get("tokens_in", 0) + reply.input_tokens,
         "tokens_out": state.get("tokens_out", 0) + reply.output_tokens,
         "cassette_mismatches": state.get("cassette_mismatches", 0) + (reply.cassette == "mismatch"),
+        "models": sorted({*state.get("models", []), reply.model}),
     }
 
 

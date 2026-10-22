@@ -85,6 +85,7 @@ class TaskRun(BaseModel):
     tokens_in: int
     tokens_out: int
     cassette_mismatches: int
+    models: list[str]
     seconds: float
     missing: list[str]
     unexpected: list[str]
@@ -236,6 +237,7 @@ async def run_task(
         tokens_in=int(state.get("tokens_in", 0)),
         tokens_out=int(state.get("tokens_out", 0)),
         cassette_mismatches=int(state.get("cassette_mismatches", 0)),
+        models=list(state.get("models", [])),
         seconds=round(seconds, 2),
         missing=list(result.missing),
         unexpected=list(result.unexpected),
@@ -319,7 +321,8 @@ async def main_async(args: argparse.Namespace) -> int:
     (run.directory / "agent_runs.jsonl").write_text(
         "".join(r.model_dump_json() + "\n" for r in rows), encoding="utf-8"
     )
-    run.finish(models={"profile": settings.profile.value})
+    served = sorted({m for r in rows for m in r.models})
+    run.finish(models={"profile": settings.profile.value, "served": ", ".join(served)})
     await masker.aclose()
     await proxy_http.aclose()
     await api.aclose()

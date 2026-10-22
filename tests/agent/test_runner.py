@@ -27,6 +27,7 @@ def row(task_id: str, outcome: str = "success", passed: bool = True, llm_calls: 
         tokens_in=100,
         tokens_out=10,
         cassette_mismatches=0,
+        models=["scripted"],
         seconds=1.0,
         missing=[],
         unexpected=[],
