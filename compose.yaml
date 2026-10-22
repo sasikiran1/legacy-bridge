@@ -70,13 +70,31 @@ services:
       GROQ_API_KEY: ${GROQ_API_KEY:-}
       GEMINI_API_KEY: ${GEMINI_API_KEY:-}
       OLLAMA_BASE_URL: ${OLLAMA_DOCKER_URL:-http://host.docker.internal:11434/v1}
+      LLM_MODE: ${LLM_MODE:-replay}
+      LOCAL_TEXT_MODEL: ${LOCAL_TEXT_MODEL:-}
     extra_hosts:
       - "host.docker.internal:host-gateway"
     ports:
       - "127.0.0.1:8090:8090"
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8090/healthz')"]
+      interval: 5s
+      timeout: 5s
+      retries: 60
+      start_period: 30s
     depends_on:
       redis:
         condition: service_healthy
+
+  # Trace UI for the agent's OpenTelemetry spans (ADR 0006): http://localhost:6006
+  phoenix:
+    image: arizephoenix/phoenix:version-20.24.0
+    environment:
+      PHOENIX_WORKING_DIR: /mnt/data
+    ports:
+      - "127.0.0.1:6006:6006"
+    volumes:
+      - phoenix-data:/mnt/data
 
   # Python checks, tests, oracles and analysis: `docker compose --profile test run --rm testbed uv run pytest`
   testbed:
@@ -88,6 +106,12 @@ services:
       PORTAL_DB_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/portal
       PORTAL_ADMIN_TOKEN: ${PORTAL_ADMIN_TOKEN}
       PORTAL_TEST_USER_PASSWORD: ${PORTAL_TEST_USER_PASSWORD}
+      PROXY_URL: http://proxy:8090
+      AGENT_DB_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/agent
+      AGENT_PROFILE: ${AGENT_PROFILE:-local}
+      INJECTION_SCANNER: ${INJECTION_SCANNER:-none}
+      HF_TOKEN: ${HF_TOKEN:-}
+      OTEL_EXPORTER_OTLP_ENDPOINT: ${AGENT_OTLP_ENDPOINT:-}
     shm_size: 1gb
     depends_on:
       portal:
@@ -99,3 +123,4 @@ volumes:
   postgres-data:
   redis-data:
   hf-cache:
+  phoenix-data:

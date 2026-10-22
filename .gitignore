@@ -39,3 +39,6 @@ test-results/
 .idea/
 .vscode/
 *.iml
+
+# Playwright MCP output (raw page snapshots)
+.playwright-mcp/

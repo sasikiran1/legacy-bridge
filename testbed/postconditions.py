@@ -57,6 +57,12 @@ def normalize_answer(text: str) -> str:
     return re.sub(r"\s+", " ", text).strip().strip(".").casefold()
 
 
+def answer_matches(answer: str, expected: str) -> bool:
+    """Exact after normalisation, or the expected value appears as a whole word in a free-text answer."""
+    got, want = normalize_answer(answer), normalize_answer(expected)
+    return got == want or re.search(rf"(?<![\w-]){re.escape(want)}(?![\w-])", got) is not None
+
+
 class RowChange(BaseModel):
     model_config = ConfigDict(frozen=True)
 
@@ -159,9 +165,7 @@ def check(
     unexpected += [f"{t}#{rid} inserted" for t, rid in changes.inserted if (t, rid) not in accounted_inserts]
     unexpected += [f"{t}#{rid} deleted" for t, rid in changes.deleted]
 
-    if expectation.answer is not None and (
-        answer is None or normalize_answer(answer) != normalize_answer(expectation.answer)
-    ):
+    if expectation.answer is not None and (answer is None or not answer_matches(answer, expectation.answer)):
         missing.append(f"answer {answer!r} != expected {expectation.answer!r}")
 
     return CheckResult(

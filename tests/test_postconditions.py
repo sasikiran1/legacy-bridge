@@ -112,3 +112,10 @@ def test_any_single_field_change_is_detected_exactly_once(city: str) -> None:
 @given(amount=st.decimals(min_value=Decimal("0.01"), max_value=Decimal("99999.99"), places=2))
 def test_decimal_normalization_round_trips_two_places(amount: Decimal) -> None:
     assert Decimal(normalize(amount)) == amount
+
+
+def test_free_text_answers_match_on_the_whole_expected_value() -> None:
+    assert check(Expectation(answer="IN_REVIEW"), base(), base(), answer="The claim is IN_REVIEW.").passed
+    assert not check(Expectation(answer="IN_REVIEW"), base(), base(), answer="NOT_IN_REVIEW").passed
+    assert check(Expectation(answer="POL-1234-5678"), base(), base(), answer="Policy POL-1234-5678").passed
+    assert not check(Expectation(answer="POL-1234-5678"), base(), base(), answer="POL-1234-56789").passed
