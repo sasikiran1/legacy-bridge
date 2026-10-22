@@ -1,12 +1,12 @@
 {
-  "run_id": "20261022T025101Z-pii-benchmark",
+  "run_id": "20261022T134635Z-pii-benchmark",
   "kind": "pii-benchmark",
   "git": {
-    "sha": "584a3e74174bb6cfb8f57cd6b7a500516867cd9c",
+    "sha": "2208dda693e14ba2c9a74bb584329eb8dc80869c",
     "dirty": false
   },
-  "started": "2026-10-22T02:51:01.163680+00:00",
-  "finished": "2026-10-22T03:04:48.313218+00:00",
+  "started": "2026-10-22T13:46:35.426784+00:00",
+  "finished": "2026-10-22T13:54:04.818065+00:00",
   "python": "3.14.7",
   "machine": "x86_64",
   "models": {

@@ -60,8 +60,8 @@ Results, each linked to the file it comes from:
 |---|---|
 | Canary values in recorded provider payloads, production detector ([leak check](analysis/results/20261022T120500Z-leak-check/leak.json)) | 0 of 125 per agent session; 0 of 125 with each document isolated |
 | Same check with Presidio's default analyzer | 23 / 76 of 125 leaked |
-| Detection micro-F1, synthetic portal text / ai4privacy English rows ([benchmark](analysis/results/20261022T025101Z-pii-benchmark/pii_benchmark.json)) | 0.907 / 0.854 (Presidio default: 0.547 / 0.682) |
-| Latency the proxy adds, p50 / p95, CPU detection, Redis vault ([latency](analysis/results/20261022T023532Z-proxy-latency/proxy_latency.json)) | 262 ms / 1,779 ms |
+| Detection micro-F1, synthetic portal text / ai4privacy English rows ([benchmark](analysis/results/20261022T134635Z-pii-benchmark/pii_benchmark.json)) | 0.936 / 0.881 (Presidio default: 0.547 / 0.682) |
+| Latency the proxy adds, p50 / p95, CPU detection, Redis vault ([latency](analysis/results/20261022T135447Z-proxy-latency/proxy_latency.json)) | 243 ms / 1,498 ms |
 | Prompt-token overhead of tokenization, gpt-oss tokenizer ([tokens](analysis/results/20261022T023527Z-token-overhead/token_overhead.json)) | +35% on PII-dense documents |
 
 ```bash
@@ -72,11 +72,11 @@ make bench-pii      # P/R/F1 per entity type for four detector configurations
 
 ### Limitations
 
-- **Detection is slow on CPU.** GLiNER costs about 2 s per 1,000 characters on CPU, which drives the p95 latency. No GPU path is wired up yet.
+- **Detection is slow on CPU.** The production configuration takes about 0.9–1.1 s per 1,000 characters on CPU, which drives the p95 latency. No GPU path is wired up yet.
 - **The canary result depends on the known-values pass** within a task. With documents isolated, the detector alone also reached zero on this corpus, but the corpus is synthetic and narrow.
-- **Per-type F1 understates coverage for street addresses (0.62) and SSNs (0.66)** on synthetic text, even though 99.9% of gold PII characters are covered. GLiNER's wider spans (street plus city plus ZIP) merge with the rules' spans and miss the gold boundaries at IoU ≥ 0.5.
+- **Per-type F1 understates coverage for SSNs (0.66) and street addresses (0.80)** on synthetic text, even though 98.9% of gold PII characters are covered. Predicted spans cover the value but miss the gold boundaries at IoU ≥ 0.5.
 - **Credit cards in ai4privacy score 0.** The policy threshold drops GLiNER's low-confidence hits, and Presidio's recognizer requires a valid Luhn checksum, which those numbers lack.
-- **On ai4privacy, the production configuration covers fewer gold characters than Presidio+GLiNER without the policy filter** (0.934 vs 0.991). Policy thresholds trade recall for precision.
+- **On ai4privacy, the production configuration covers fewer gold characters than Presidio+GLiNER without the policy filter** (0.926 vs 0.990). Policy thresholds trade recall for precision.
 - **Results vary slightly between runs.** GLiNER configurations moved by about 0.003 F1 on identical code, most likely from CPU threading.
 - **Synthetic addresses use the same USPS suffix list as the street rule,** so the rule's synthetic recall is optimistic. The ai4privacy numbers are the better guide.
 - **ai4privacy rows are used for evaluation only.** They are never committed or published, only these aggregates. The dataset is Built with Llama and also subject to the Llama Community License ([details](docs/environment.md)).
