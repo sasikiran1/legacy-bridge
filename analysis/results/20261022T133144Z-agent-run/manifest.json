@@ -1,0 +1,28 @@
+{
+  "run_id": "20261022T133144Z-agent-run",
+  "kind": "agent-run",
+  "git": {
+    "sha": "969d56f366a116f6fb8c22a7a61407e0129ec95e",
+    "dirty": true
+  },
+  "started": "2026-10-22T13:31:44.670981+00:00",
+  "finished": "2026-10-22T13:35:14.349687+00:00",
+  "python": "3.14.7",
+  "machine": "x86_64",
+  "models": {
+    "profile": "local",
+    "served": "qwen2.5-14b-16k:latest"
+  },
+  "config": {
+    "scenario": "api_degraded",
+    "tasks": [
+      "delete_note-01"
+    ],
+    "profile": "local",
+    "approvals": "task",
+    "resolve_walls": false,
+    "scanner": "none",
+    "record": true,
+    "label": "dev"
+  }
+}

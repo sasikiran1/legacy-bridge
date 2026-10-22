@@ -1,0 +1,197 @@
+{
+ "api_degraded/add_note-01": {
+  "llm_calls": 4,
+  "outcome": "unverified",
+  "passed": false,
+  "tiers": [
+   "api",
+   "explore"
+  ],
+  "wrong_action": false
+ },
+ "api_degraded/claim_status-01": {
+  "llm_calls": 4,
+  "outcome": "success",
+  "passed": true,
+  "tiers": [
+   "api",
+   "explore"
+  ],
+  "wrong_action": false
+ },
+ "api_degraded/delete_note-01": {
+  "llm_calls": 16,
+  "outcome": "unverified",
+  "passed": false,
+  "tiers": [
+   "api",
+   "explore"
+  ],
+  "wrong_action": false
+ },
+ "api_degraded/policy_lookup-01": {
+  "llm_calls": 5,
+  "outcome": "success",
+  "passed": true,
+  "tiers": [
+   "api",
+   "explore"
+  ],
+  "wrong_action": false
+ },
+ "api_degraded/policy_lookup-02": {
+  "llm_calls": 4,
+  "outcome": "success",
+  "passed": true,
+  "tiers": [
+   "api",
+   "explore"
+  ],
+  "wrong_action": false
+ },
+ "api_degraded/request_reconsideration-01": {
+  "llm_calls": 5,
+  "outcome": "success",
+  "passed": true,
+  "tiers": [
+   "api",
+   "explore"
+  ],
+  "wrong_action": false
+ },
+ "api_degraded/submit_reimbursement-01": {
+  "llm_calls": 6,
+  "outcome": "success",
+  "passed": true,
+  "tiers": [
+   "api",
+   "explore"
+  ],
+  "wrong_action": false
+ },
+ "api_degraded/update_address-01": {
+  "llm_calls": 7,
+  "outcome": "success",
+  "passed": true,
+  "tiers": [
+   "api",
+   "explore"
+  ],
+  "wrong_action": false
+ },
+ "api_degraded/update_contact-01": {
+  "llm_calls": 10,
+  "outcome": "success",
+  "passed": true,
+  "tiers": [
+   "api",
+   "explore"
+  ],
+  "wrong_action": false
+ },
+ "api_degraded/update_contact-02": {
+  "llm_calls": 8,
+  "outcome": "unverified",
+  "passed": false,
+  "tiers": [
+   "api",
+   "explore"
+  ],
+  "wrong_action": false
+ },
+ "healthy/add_note-01": {
+  "llm_calls": 3,
+  "outcome": "success",
+  "passed": true,
+  "tiers": [
+   "api"
+  ],
+  "wrong_action": false
+ },
+ "healthy/claim_status-01": {
+  "llm_calls": 3,
+  "outcome": "success",
+  "passed": true,
+  "tiers": [
+   "api"
+  ],
+  "wrong_action": false
+ },
+ "healthy/delete_note-01": {
+  "llm_calls": 8,
+  "outcome": "success",
+  "passed": true,
+  "tiers": [
+   "api",
+   "explore"
+  ],
+  "wrong_action": false
+ },
+ "healthy/policy_lookup-01": {
+  "llm_calls": 5,
+  "outcome": "success",
+  "passed": true,
+  "tiers": [
+   "api"
+  ],
+  "wrong_action": false
+ },
+ "healthy/policy_lookup-02": {
+  "llm_calls": 3,
+  "outcome": "success",
+  "passed": true,
+  "tiers": [
+   "api"
+  ],
+  "wrong_action": false
+ },
+ "healthy/request_reconsideration-01": {
+  "llm_calls": 5,
+  "outcome": "success",
+  "passed": true,
+  "tiers": [
+   "api",
+   "explore"
+  ],
+  "wrong_action": false
+ },
+ "healthy/submit_reimbursement-01": {
+  "llm_calls": 7,
+  "outcome": "success",
+  "passed": true,
+  "tiers": [
+   "api",
+   "explore"
+  ],
+  "wrong_action": false
+ },
+ "healthy/update_address-01": {
+  "llm_calls": 5,
+  "outcome": "success",
+  "passed": true,
+  "tiers": [
+   "api"
+  ],
+  "wrong_action": false
+ },
+ "healthy/update_contact-01": {
+  "llm_calls": 8,
+  "outcome": "success",
+  "passed": true,
+  "tiers": [
+   "api",
+   "explore"
+  ],
+  "wrong_action": false
+ },
+ "healthy/update_contact-02": {
+  "llm_calls": 12,
+  "outcome": "unverified",
+  "passed": false,
+  "tiers": [
+   "api",
+   "explore"
+  ],
+  "wrong_action": false
+ }
+}
