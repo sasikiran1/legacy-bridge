@@ -7,7 +7,7 @@ Business processes often live in legacy systems with half-finished APIs. Automat
 
 legacy-bridge is an agent that tries the API first, falls back to a browser when the API breaks, and compiles successful browser runs into replayable scripts. Every model call goes through a proxy that swaps PII for tokens. Real values are restored only at the moment the agent acts, so no model ever sees them.
 
-**Status:** the testbed and the PII proxy are built. The agent is not built yet ([milestones](docs/milestones.md)).
+**Status:** the testbed, the PII proxy and the API-first agent with browser fallback are built. Replay compilation is not built yet ([milestones](docs/milestones.md)).
 
 ## The testbed
 
@@ -80,6 +80,49 @@ make bench-pii      # P/R/F1 per entity type for four detector configurations
 - **Results vary slightly between runs.** GLiNER configurations moved by about 0.003 F1 on identical code, most likely from CPU threading.
 - **Synthetic addresses use the same USPS suffix list as the street rule,** so the rule's synthetic recall is optimistic. The ai4privacy numbers are the better guide.
 - **ai4privacy rows are used for evaluation only.** They are never committed or published, only these aggregates. The dataset is Built with Llama and also subject to the Llama Community License ([details](docs/environment.md)).
+
+## The agent
+
+A LangGraph state machine, checkpointed in Postgres:
+1. **Plan** the task from the (masked) instruction.
+2. **API tier.** Tools are generated from the portal's OpenAPI document. Each endpoint has a circuit breaker. A missing, retired, failing or drifted endpoint hands the task to the browser.
+3. **Browser tier.** Playwright MCP, driven by accessibility snapshots.
+4. **Verify.** A change task that executed no write, or a question finished without an answer, is never reported as a success.
+
+Guardrails:
+- Payments and deletes stop for approval. After suspected prompt injection, every write does.
+- A CAPTCHA or MFA wall hands the task to a person; it is never solved.
+- Agent state holds tokens only: API responses and page snapshots are masked before they enter it ([ADR 0012](docs/adr/0012-masking-boundaries-for-the-agent.md)).
+- Placeholders are restored only in the tool arguments and form fields the policy allows. Malformed placeholders are refused rather than typed into the portal.
+
+Every model exchange is recorded as a cassette. CI replays them with no model and fails if any task's outcome changes.
+
+Results on a 10-task development subset, local model qwen2.5-14b, graded against the database diff ([summary](analysis/results/20261022T134804Z-agent-summary/agent_summary.json)):
+
+| Scenario | Passed | Wrong actions | Completed through the browser | Median time |
+|---|---|---|---|---|
+| Healthy (the API is partly unfinished) | 9 / 10 | 0 | 5 / 10 | 34 s |
+| API degraded | 7 / 10 | 0 | 10 / 10 | 130 s |
+
+```bash
+make demo-fallback   # replay: the API refuses, the agent completes the tasks in the browser, the database diff decides
+make replay-check    # every recorded task must reproduce its recorded outcome
+make record SCENARIO=healthy TASKS=claim_status-01   # record with the local model (Ollama)
+```
+
+### Limitations
+
+- **Ten tasks and two scenarios so far.** The other five scenarios, the full task set and hosted models are not measured yet.
+- **No failure changed anything it should not have.**
+  - In two of the four failures, the database change was correct, but the agent could not confirm it in the page and did not claim success.
+  - In the other two, the expected change is missing from the database: the note was not added, or the phone number does not match.
+- **The local model is the weak link.** In the recordings, qwen2.5-14b sometimes:
+  - writes tool calls as text
+  - drops placeholder brackets
+  - drifts out of English
+
+  A local-model comparison is planned.
+- **Replays are not bit-identical.** GLiNER on CPU masks a few borderline spans differently between runs, so some replayed requests differ from their recordings. They are served and counted; outcomes have matched.
 
 ## Design documents
 

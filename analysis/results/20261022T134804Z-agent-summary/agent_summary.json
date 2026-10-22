@@ -1,0 +1,51 @@
+{
+  "api_degraded": {
+    "tasks": 10,
+    "passed": 7,
+    "wrong_actions": 0,
+    "fell_back_to_browser": 10,
+    "claimed_success_but_failed": 0,
+    "outcomes": {
+      "success": 7,
+      "unverified": 3
+    },
+    "median_llm_calls": 5.5,
+    "median_seconds": 129.8,
+    "median_prompt_tokens": 11132.0,
+    "models": [
+      "qwen2.5-14b-16k:latest"
+    ],
+    "failed_tasks": [
+      "add_note-01",
+      "delete_note-01",
+      "update_contact-02"
+    ],
+    "runs": [
+      "20261022T125521Z-agent-run",
+      "20261022T133144Z-agent-run"
+    ]
+  },
+  "healthy": {
+    "tasks": 10,
+    "passed": 9,
+    "wrong_actions": 0,
+    "fell_back_to_browser": 5,
+    "claimed_success_but_failed": 0,
+    "outcomes": {
+      "success": 9,
+      "unverified": 1
+    },
+    "median_llm_calls": 5.0,
+    "median_seconds": 34.18,
+    "median_prompt_tokens": 7659.5,
+    "models": [
+      "qwen2.5-14b-16k:latest"
+    ],
+    "failed_tasks": [
+      "update_contact-02"
+    ],
+    "runs": [
+      "20261022T123518Z-agent-run"
+    ]
+  }
+}
