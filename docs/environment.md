@@ -11,7 +11,8 @@ Every version, license, price, and free-tier limit below was read from its sourc
 | Spring Boot Java/Maven support | Java 17–26, Maven ≥ 3.6.3, Tomcat 11 | | https://docs.spring.io/spring-boot/system-requirements.html |
 | springdoc-openapi | 3.1.1 | Built against Boot 4.1.0 | https://repo1.maven.org/maven2/org/springdoc/springdoc-openapi-starter-webmvc-ui/maven-metadata.xml |
 | Testcontainers (Java) | 2.0.5 | 2.x prefixes modules: `testcontainers-postgresql` | https://repo1.maven.org/maven2/org/testcontainers/testcontainers/maven-metadata.xml |
-| Flyway | 13.11.1 | Use the Boot-managed version unless it lags | https://repo1.maven.org/maven2/org/flywaydb/flyway-core/maven-metadata.xml |
+| Flyway | 12.4.0 (Boot-managed; 13.11.1 is the latest release) | Boot 4.1.1 also manages Hibernate 7.4.5, Jackson 3.1.5, JUnit 6.0.3, Testcontainers 2.0.5, PostgreSQL JDBC 42.7.13 | https://repo1.maven.org/maven2/org/springframework/boot/spring-boot-dependencies/4.1.1/spring-boot-dependencies-4.1.1.pom |
+| Maven | 3.9.16 via the wrapper (`portal/mvnw`, script-only, no committed jar) | Maven 4.0 is still at release candidates | https://repo1.maven.org/maven2/org/apache/maven/apache-maven/maven-metadata.xml |
 | Docker base image | `eclipse-temurin:25-jdk` | | https://hub.docker.com/_/eclipse-temurin |
 | PostgreSQL | 18.6 (`postgres:18.6`) | Supported until 2030-11-14 | https://www.postgresql.org/support/versioning/ |
 | Redis | 8.10.2 (`redis:8.10.2`) | Tri-licensed RSALv2 / SSPLv1 / AGPLv3 since 8.0; we run it unmodified | https://github.com/redis/redis/releases, https://github.com/redis/redis/blob/unstable/LICENSE.txt |
@@ -43,6 +44,8 @@ Latest versions on PyPI as of the date above (`https://pypi.org/pypi/<name>/json
 | httpx | 0.28.1 | BSD-3-Clause | |
 | pydantic | 2.14.1 | MIT | |
 | redis (redis-py) | 8.1.0 | MIT | |
+| psycopg[binary] | 3.3.6 | LGPL-3.0-only | Post-condition snapshots; also what langgraph-checkpoint-postgres uses. Used unmodified as a library. |
+| types-pyyaml | 6.0.12.x | Apache-2.0 | Stubs for mypy strict |
 | cryptography | 50.0.2 | Apache-2.0 OR BSD-3-Clause | AES-GCM for the vault |
 | Faker | 40.43.0 | MIT | |
 | PyYAML | 6.0.3 | MIT | |
@@ -68,6 +71,7 @@ Latest versions on npm as of the date above (`https://registry.npmjs.org/<name>/
 | @vitejs/plugin-react | 6.1.2 | MIT | |
 | typescript | 7.0.2 | Apache-2.0 | Native (Go) compiler line |
 | react-router | 8.5.0 | MIT | Needs Node ≥ 22.22 |
+| @types/react / @types/react-dom | 19.3.0 | MIT | Type definitions for React 19 |
 
 ## Containers
 
@@ -77,6 +81,19 @@ Latest versions on npm as of the date above (`https://registry.npmjs.org/<name>/
 | `arizephoenix/phoenix` | `version-20.24.0` | https://hub.docker.com/r/arizephoenix/phoenix |
 | `postgres` | `18.6` | https://hub.docker.com/_/postgres |
 | `node` (frontend build stage only) | `26.9.0` | https://hub.docker.com/_/node |
+| `maven` (portal build stage, `make portal-test`) | `3.9.16-eclipse-temurin-25-noble` | https://hub.docker.com/_/maven |
+| `eclipse-temurin` (portal runtime) | `25-jre` | https://hub.docker.com/_/eclipse-temurin |
+| `mcr.microsoft.com/playwright/python` (testbed base) | `v1.64.0-noble` | https://mcr.microsoft.com/v2/playwright/python/tags/list |
+| `astral/uv` (copied into the testbed image) | `0.12.9` | https://hub.docker.com/r/astral/uv |
+
+## CI actions
+
+| Action | Version | Source |
+|---|---|---|
+| actions/checkout | v7 (7.0.1) | https://github.com/actions/checkout/releases |
+| actions/setup-java | v6 (6.1.0) | https://github.com/actions/setup-java/releases |
+| actions/setup-node | v7 (7.1.0) | https://github.com/actions/setup-node/releases |
+| astral-sh/setup-uv | v10 (10.3.1) | https://github.com/astral-sh/setup-uv/releases |
 | `redis` | `8.10.2` | https://hub.docker.com/_/redis |
 
 ## Models and datasets
@@ -131,3 +148,11 @@ The OTel GenAI semantic conventions moved to https://github.com/open-telemetry/s
 - about 75 GB free disk
 - Docker Desktop with the WSL2 backend; Ubuntu in WSL for `make`
 - not installed on the host: `make` (use WSL), `gh`, Tesseract (it lives in the proxy image)
+- **Windows Application Control (Smart App Control) blocks unsigned native binaries.** Verified blocked:
+  - Vite's `rolldown` binding
+  - the `mypy` and `pytest` launcher executables
+  - mypy's compiled modules
+  - psycopg's binary driver
+
+  Pure-Python code, `ruff`, `uv`, and `tsc` run. Everything else runs in containers (`make` targets, the `testbed` Compose service). Don't weaken the policy to work around it.
+- WSL Ubuntu 26.04 has Python 3.14.4, Docker (Desktop integration), and uv 0.12.9 (user install). `make` and Playwright's system libraries need `sudo apt`, which Sasi runs.

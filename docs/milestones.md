@@ -29,6 +29,11 @@ Each milestone ends with green tests, a demo command, and an interview brief (wh
 
 ## M1: Portal and testbed
 
+**Done 2026-10-21.** Deviations from the plan below:
+- **Auth uses JDK PBKDF2 and an interceptor,** not Spring Security, so no unapproved dependency.
+- **The Python toolchain runs in a `testbed` container** (Playwright base image plus uv), because the Windows host blocks unsigned native binaries.
+- **The seed is a repeatable migration** (`R__seed_data.sql`), not `V2`.
+
 - **Portal:**
   - Spring Boot 4.1, JPA, Flyway, Postgres 18
   - React SPA in `portal/web/`, styled as a dated intranet, built in a multi-stage Docker image and served by Spring Boot (ADR 0010)
