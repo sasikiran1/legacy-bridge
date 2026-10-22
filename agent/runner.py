@@ -37,7 +37,7 @@ from pydantic import BaseModel, ConfigDict
 
 from agent import openapi
 from agent.breaker import BreakerRegistry
-from agent.executors import ApiExecutor
+from agent.executors import ApiExecutor, BrowserSession
 from agent.graph import Runtime, build_graph
 from agent.guardrails import ApprovalKind, build_scanner
 from agent.llm import LlmClient, LlmError
@@ -131,14 +131,19 @@ async def run_task(
     before = await snapshot(services["db_url"])
 
     masker: MaskClient = services["masker"]
+
+    async def open_browser() -> BrowserSession:
+        session = BrowserSession(settings.portal_origin, settings.portal_host, services["resolver"], masker)
+        return await session.start()
+
     runtime = Runtime(
         settings=settings,
         llm=services["llm"],
         api=services["api"],
         masker=masker,
-        resolver=services["resolver"],
         scanner=services["scanner"],
         password=settings.test_user_password,
+        open_browser=open_browser,
     )
     graph = build_graph(runtime, services["checkpointer"])
     config = {"configurable": {"thread_id": f"{run_id}/{task_key}"}}

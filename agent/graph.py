@@ -16,15 +16,16 @@ from __future__ import annotations
 
 import json
 import re
+from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
-from typing import Any, TypedDict
+from typing import Any, Protocol, TypedDict
 
 from langgraph.checkpoint.base import BaseCheckpointSaver
 from langgraph.graph import END, START, StateGraph
 from langgraph.graph.state import CompiledStateGraph
 from langgraph.types import interrupt
 
-from agent.executors import FALLBACK, ApiExecutor, BrowserSession
+from agent.executors import FALLBACK, ApiResult, BrowserObservation
 from agent.guardrails import (
     InjectionScanner,
     approval_for_click,
@@ -32,12 +33,11 @@ from agent.guardrails import (
     is_verification_wall,
     spotlight,
 )
-from agent.llm import LlmClient, LlmReply, ToolCall
-from agent.masking import MaskClient
+from agent.llm import LlmReply, ToolCall
+from agent.openapi import Operation
 from agent.prompts import AGENT_TOOLS, API, BROWSER_TOOL_SPECS, EXPLORE, PLAN
 from agent.settings import AgentSettings
 from agent.telemetry import tracer
-from proxy.rehydrate import ToolArgumentResolver
 
 _SUCCESS = re.compile(r"\b(saved|submitted|added|deleted|requested)\b", re.I)
 _KEEP_OBSERVATIONS = 2
@@ -73,22 +73,58 @@ class AgentState(TypedDict, total=False):
     outcome: str | None
 
 
+class Browser(Protocol):
+    async def login(self, username: str, password: str) -> str: ...
+
+    def describe(self, ref: str) -> tuple[str, str] | None: ...
+
+    async def act(self, task_id: str, tool: str, arguments: dict[str, Any]) -> BrowserObservation: ...
+
+    async def close(self) -> None: ...
+
+
+class Api(Protocol):
+    operations: dict[str, Operation]
+
+    def available(self) -> list[Operation]: ...
+
+    async def call(
+        self, task_id: str, credentials: tuple[str, str], operation_id: str, arguments: dict[str, Any]
+    ) -> ApiResult: ...
+
+
+class Masking(Protocol):
+    async def text(self, task_id: str, content: str) -> str: ...
+
+
+class Chat(Protocol):
+    async def chat(
+        self,
+        task_id: str,
+        call: int,
+        role: str,
+        messages: list[dict[str, Any]],
+        tools: list[dict[str, Any]] | None = None,
+        max_tokens: int = 1024,
+    ) -> LlmReply: ...
+
+
 @dataclass
 class Runtime:
+    """Everything the graph acts through. Not part of the checkpointed state."""
+
     settings: AgentSettings
-    llm: LlmClient
-    api: ApiExecutor
-    masker: MaskClient
-    resolver: ToolArgumentResolver
+    llm: Chat
+    api: Api
+    masker: Masking
     scanner: InjectionScanner
     password: str
-    browser: BrowserSession | None = None
+    open_browser: Callable[[], Awaitable[Browser]]
+    browser: Browser | None = None
 
-    async def ensure_browser(self) -> BrowserSession:
+    async def ensure_browser(self) -> Browser:
         if self.browser is None:
-            self.browser = await BrowserSession(
-                self.settings.portal_origin, self.settings.portal_host, self.resolver, self.masker
-            ).start()
+            self.browser = await self.open_browser()
         return self.browser
 
     async def close(self) -> None:
