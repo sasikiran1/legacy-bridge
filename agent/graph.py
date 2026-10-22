@@ -148,6 +148,29 @@ def _pending(reply: LlmReply) -> list[dict[str, Any]]:
     return [c.model_dump() for c in reply.tool_calls]
 
 
+_TEXT_CALL = re.compile(
+    r"\s*(?:<tool_call>)?\s*([A-Za-z_]\w*)\s*[:(]?\s*(\{.*\})\s*\)?\s*(?:</tool_call>)?\s*", re.S
+)
+
+
+def _recover_text_call(reply: LlmReply, tools: list[dict[str, Any]]) -> LlmReply:
+    """Local models sometimes write a call as text (`finish: {...}`). The whole reply must be one offered tool
+    name and a JSON object; anything else stays free text and gets a nudge."""
+    if reply.tool_calls or not reply.content:
+        return reply
+    match = _TEXT_CALL.fullmatch(reply.content)
+    if not match or match.group(1) not in {t["function"]["name"] for t in tools}:
+        return reply
+    try:
+        arguments = json.loads(match.group(2))
+    except ValueError:
+        return reply
+    if not isinstance(arguments, dict):
+        return reply
+    call = ToolCall(id="text-call", name=match.group(1), arguments=arguments, raw_arguments=match.group(2))
+    return reply.model_copy(update={"content": "", "tool_calls": (call,)})
+
+
 NUDGE = "Respond by calling one of the available tools. Use finish when the task is done."
 
 
@@ -183,6 +206,23 @@ def _compact(messages: list[dict[str, Any]]) -> list[dict[str, Any]]:
 
 def _tool_message(call_id: str, content: str) -> dict[str, Any]:
     return {"role": "tool", "tool_call_id": call_id, "content": content}
+
+
+def _finish(state: AgentState, call: ToolCall, calls: list[ToolCall]) -> tuple[dict[str, Any] | None, str]:
+    """Accepts finish only on its own (the model has not yet seen the results of calls made alongside it) and,
+    for a question, only with an answer. Returns the state update, or None with the reason it was refused."""
+    if len(calls) > 1:
+        return (
+            None,
+            "Not recorded: call finish on its own, after you have seen the results of your other calls.",
+        )
+    answer = call.arguments.get("answer")
+    if state.get("plan", {}).get("kind") == "read" and not answer:
+        return (
+            None,
+            "Not recorded: this task asks a question. Call finish with the requested value in `answer`.",
+        )
+    return {"answer": answer, "summary": call.arguments.get("summary"), "finished": True}, "Recorded."
 
 
 def _parse_plan(text: str | None) -> dict[str, Any]:
@@ -236,7 +276,7 @@ def build_graph(rt: Runtime, checkpointer: BaseCheckpointSaver[Any] | None = Non
             },
         ]
         tools = [op.tool() for op in operations] + [AGENT_TOOLS["finish"], AGENT_TOOLS["cannot_use_api"]]
-        reply = await chat(state, "api", messages, tools)
+        reply = _recover_text_call(await chat(state, "api", messages, tools), tools)
         return {
             **_usage(state, reply),
             "messages": [*messages, reply.assistant_message()],
@@ -249,7 +289,7 @@ def build_graph(rt: Runtime, checkpointer: BaseCheckpointSaver[Any] | None = Non
         if not calls:
             return _nudge(state, {"fallback_reason": "the model stopped calling tools"})
         quarantined = state.get("quarantined", False)
-        needs = {c.id: kind for c in calls if (kind := approval_for_operation(c.name, quarantined))}
+        needs = {c.id: kind.value for c in calls if (kind := approval_for_operation(c.name, quarantined))}
         decision: dict[str, Any] = {}
         if needs:
             decision = interrupt(
@@ -273,13 +313,11 @@ def build_graph(rt: Runtime, checkpointer: BaseCheckpointSaver[Any] | None = Non
                 messages.append(_tool_message(call.id, "Not executed."))
                 continue
             if call.name == "finish":
-                update |= {
-                    "answer": call.arguments.get("answer") or call.arguments.get("summary"),
-                    "summary": call.arguments.get("summary"),
-                    "finished": True,
-                }
-                messages.append(_tool_message(call.id, "Recorded."))
-                stop = True
+                finished, reply = _finish(state, call, calls)
+                messages.append(_tool_message(call.id, reply))
+                if finished:
+                    update |= finished
+                    stop = True
                 continue
             if call.name == "cannot_use_api":
                 update["fallback_reason"] = f"model: {call.arguments.get('reason', '')}"
@@ -352,7 +390,7 @@ def build_graph(rt: Runtime, checkpointer: BaseCheckpointSaver[Any] | None = Non
             },
         ]
         tools = [*BROWSER_TOOL_SPECS, AGENT_TOOLS["finish"], AGENT_TOOLS["request_human"]]
-        reply = await chat(state, "explore", _compact(messages), tools)
+        reply = _recover_text_call(await chat(state, "explore", _compact(messages), tools), tools)
         return {
             **_usage(state, reply),
             "messages": [*messages, reply.assistant_message()],
@@ -371,7 +409,7 @@ def build_graph(rt: Runtime, checkpointer: BaseCheckpointSaver[Any] | None = Non
             if c.name == "browser_click":
                 element = browser.describe(str(c.arguments.get("target", "")))
                 if element and (kind := approval_for_click(*element, quarantined)):
-                    needs[c.id] = (kind, element[1])
+                    needs[c.id] = (kind.value, element[1])
         decision: dict[str, Any] = {}
         if needs:
             decision = interrupt(
@@ -404,13 +442,11 @@ def build_graph(rt: Runtime, checkpointer: BaseCheckpointSaver[Any] | None = Non
                 )
                 continue
             if call.name == "finish":
-                update |= {
-                    "answer": call.arguments.get("answer") or call.arguments.get("summary"),
-                    "summary": call.arguments.get("summary"),
-                    "finished": True,
-                }
-                messages.append(_tool_message(call.id, "Recorded."))
-                stop = True
+                finished, reply = _finish(state, call, calls)
+                messages.append(_tool_message(call.id, reply))
+                if finished:
+                    update |= finished
+                    stop = True
                 continue
             if call.name == "request_human":
                 update["handoff_reason"] = f"model: {call.arguments.get('reason', '')}"
@@ -471,7 +507,9 @@ def build_graph(rt: Runtime, checkpointer: BaseCheckpointSaver[Any] | None = Non
     async def verify(state: AgentState) -> dict[str, Any]:
         writes = state.get("writes", [])
         if not writes:
-            verified = bool(state.get("answer") or state.get("summary"))
+            # A change task that finished without executing any write did not do its job, whatever it says;
+            # a summary alone never verifies anything.
+            verified = state.get("plan", {}).get("kind") != "write" and bool(state.get("answer"))
         elif any(w["tier"] == "browser" for w in writes):
             verified = bool(_SUCCESS.search(state.get("last_observation", "")))
         else:

@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import asyncio
 import glob
+import json
 import re
 from enum import StrEnum
 from typing import Any
@@ -67,7 +68,8 @@ class ApiResult(BaseModel):
         if self.ok:
             prefix = "[deprecated endpoint] " if self.deprecated else ""
             note = f" ({self.detail})" if self.detail else ""
-            return f"{prefix}HTTP {self.status}: {self.body!s}{note}"
+            body = json.dumps(self.body, ensure_ascii=False) if not isinstance(self.body, str) else self.body
+            return f"{prefix}HTTP {self.status}: {body}{note}"
         return f"HTTP {self.status} ({self.failure}): {self.detail}"
 
 

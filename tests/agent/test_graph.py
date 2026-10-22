@@ -159,6 +159,7 @@ async def run(
 
 
 PLAN = reply(content='{"intent": "x", "kind": "read"}')
+WRITE_PLAN = reply(content='{"intent": "x", "kind": "write"}')
 
 
 async def test_api_tier_completes_a_read_without_the_browser() -> None:
@@ -180,7 +181,7 @@ async def test_api_tier_completes_a_read_without_the_browser() -> None:
 async def test_a_removed_endpoint_falls_back_to_the_browser() -> None:
     llm = ScriptedLlm(
         [
-            PLAN,
+            WRITE_PLAN,
             reply(("updateAddress", {"memberNumber": "m"})),
             reply(("browser_click", {"target": "e5"})),
             reply(("finish", {"summary": "saved"})),
@@ -199,7 +200,7 @@ async def test_a_removed_endpoint_falls_back_to_the_browser() -> None:
 async def test_a_declined_payment_is_never_executed() -> None:
     llm = ScriptedLlm(
         [
-            PLAN,
+            WRITE_PLAN,
             reply(("submitReimbursement", {"memberNumber": "m"})),
             reply(("finish", {"summary": "not paid"})),
         ]
@@ -240,7 +241,7 @@ async def test_free_text_without_a_tool_call_is_not_a_finish() -> None:
 async def test_refs_chosen_before_a_page_change_are_not_used() -> None:
     llm = ScriptedLlm(
         [
-            PLAN,
+            WRITE_PLAN,
             reply(("cannot_use_api", {"reason": "x"})),
             reply(("browser_navigate", {"url": "/members/m"}), ("browser_click", {"target": "e5"})),
             reply(("finish", {"summary": "done"})),
@@ -250,3 +251,53 @@ async def test_refs_chosen_before_a_page_change_are_not_used() -> None:
     state, _ = await run(llm, FakeApi({"getMember": ok("getMember")}), browser)
     assert browser.actions == ["browser_navigate"]
     assert any("page changed" in m.get("content", "") for m in state["messages"] if m["role"] == "tool")
+
+
+async def test_finish_alongside_other_calls_is_not_recorded() -> None:
+    llm = ScriptedLlm(
+        [
+            PLAN,
+            reply(("getClaim", {"memberNumber": "m"}), ("finish", {"answer": "guess"})),
+            reply(("finish", {"answer": "PAID"})),
+        ]
+    )
+    api = FakeApi({"getClaim": ok("getClaim", {"status": "PAID"})})
+    state, _ = await run(llm, api)
+    assert state["answer"] == "PAID"
+    assert any("call finish on its own" in m.get("content", "") for m in state["messages"])
+
+
+async def test_a_question_is_not_finished_without_an_answer() -> None:
+    llm = ScriptedLlm(
+        [
+            PLAN,
+            reply(("getClaim", {"memberNumber": "m"})),
+            reply(("finish", {"summary": "Found it."})),
+            reply(("finish", {"answer": "PAID", "summary": "Found it."})),
+        ]
+    )
+    state, _ = await run(llm, FakeApi({"getClaim": ok("getClaim", {"status": "PAID"})}))
+    assert state["answer"] == "PAID"
+    assert state["verified"] is True
+
+
+async def test_a_call_written_as_text_is_recovered_when_it_is_exactly_one_tool_call() -> None:
+    llm = ScriptedLlm(
+        [
+            PLAN,
+            reply(content='getClaim: {"memberNumber": "m"}'),
+            reply(content='finish: {"answer": "PAID"}'),
+        ]
+    )
+    api = FakeApi({"getClaim": ok("getClaim", {"status": "PAID"})})
+    state, _ = await run(llm, api)
+    assert api.executed == ["getClaim"]
+    assert state["answer"] == "PAID"
+    assert state.get("nudges", 0) == 0
+
+
+async def test_a_change_task_that_wrote_nothing_is_unverified() -> None:
+    llm = ScriptedLlm([WRITE_PLAN, reply(("finish", {"summary": "Updated the email."}))])
+    state, _ = await run(llm, FakeApi({"getMember": ok("getMember")}))
+    assert state["outcome"] == "unverified"
+    assert state["verified"] is False
