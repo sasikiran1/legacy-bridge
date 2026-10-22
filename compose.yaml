@@ -1,5 +1,20 @@
 name: legacy-bridge
 
+x-python: &python
+  build:
+    context: .
+    dockerfile: deploy/python.Dockerfile
+  volumes:
+    - .:/repo
+    - hf-cache:/cache/hf
+
+x-proxy-env: &proxy-env
+  REDIS_URL: redis://redis:6379/0
+  VAULT_MASTER_KEY: ${VAULT_MASTER_KEY:?set in .env}
+  VAULT_TASK_TTL_SECONDS: ${VAULT_TASK_TTL_SECONDS:-3600}
+  TOKEN_KEY: ${TOKEN_KEY:?set in .env}
+  RUN_SEED: ${RUN_SEED:-7}
+
 services:
   postgres:
     image: postgres:18.6
@@ -31,23 +46,55 @@ services:
       postgres:
         condition: service_healthy
 
-  # Python checks and the oracle suite: `docker compose --profile test run --rm testbed uv run pytest`
-  testbed:
-    profiles: ["test"]
-    build:
-      context: .
-      dockerfile: deploy/testbed.Dockerfile
+  # Token→value vault (ADR 0002). Values arrive already AES-GCM encrypted, so the AOF holds only ciphertext.
+  redis:
+    image: redis:8.10.2
+    command: ["redis-server", "--appendonly", "yes", "--appendfsync", "everysec"]
+    ports:
+      - "127.0.0.1:6379:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+  proxy:
+    <<: *python
+    command: ["uv", "run", "uvicorn", "proxy.app:app", "--host", "0.0.0.0", "--port", "8090"]
     environment:
+      <<: *proxy-env
+      AUDIT_LOG_PATH: /repo/.cache/audit/proxy.jsonl
+      GROQ_API_KEY: ${GROQ_API_KEY:-}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      OLLAMA_BASE_URL: ${OLLAMA_DOCKER_URL:-http://host.docker.internal:11434/v1}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    ports:
+      - "127.0.0.1:8090:8090"
+    depends_on:
+      redis:
+        condition: service_healthy
+
+  # Python checks, tests, oracles and analysis: `docker compose --profile test run --rm testbed uv run pytest`
+  testbed:
+    <<: *python
+    profiles: ["test"]
+    environment:
+      <<: *proxy-env
       PORTAL_BASE_URL: http://portal:8080
       PORTAL_DB_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/portal
       PORTAL_ADMIN_TOKEN: ${PORTAL_ADMIN_TOKEN}
       PORTAL_TEST_USER_PASSWORD: ${PORTAL_TEST_USER_PASSWORD}
-    volumes:
-      - .:/repo
     shm_size: 1gb
     depends_on:
       portal:
         condition: service_started
+      redis:
+        condition: service_healthy
 
 volumes:
   postgres-data:
+  redis-data:
+  hf-cache:

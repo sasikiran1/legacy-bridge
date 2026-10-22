@@ -10,7 +10,8 @@ MAVEN_IMAGE := maven:3.9.16-eclipse-temurin-25-noble
 NODE_IMAGE := node:26.9.0
 
 .DEFAULT_GOAL := help
-.PHONY: help up down reset-db logs seed lint typecheck test portal-test web-build check probe oracles demo
+.PHONY: help up down reset-db logs seed lint typecheck test portal-test web-build check probe oracles demo \
+	proxy-up leak proxy-demo bench-pii bench-latency bench-tokens audit-verify
 
 help: ## List targets
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*## "} {printf "  %-12s %s\n", $$1, $$2}'
@@ -39,8 +40,11 @@ lint: .env ## ruff lint and format check
 typecheck: .env ## mypy (strict)
 	$(TESTBED) uv run mypy
 
-test: .env ## Python unit and property tests (includes the seed-drift check)
+test: .env ## Python unit and property tests (includes the seed-drift check; no models)
 	$(TESTBED) uv run pytest
+
+leak: .env ## Canary leak gate through the proxy with the production detector (loads models)
+	$(TESTBED) uv run pytest -m models tests/leak
 
 portal-test: ## Portal build and JUnit/Testcontainers tests
 	docker run --rm -v "$(CURDIR)/portal:/src" -v legacy-bridge-m2:/root/.m2 \
@@ -51,7 +55,7 @@ web-build: ## Type-check and build the SPA
 	docker run --rm -v "$(CURDIR)/portal/web:/src" -v /src/node_modules -w /src $(NODE_IMAGE) \
 		sh -c "npm ci --no-audit --no-fund && npm run build"
 
-check: lint typecheck test portal-test web-build ## Everything CI runs except the oracle suite
+check: lint typecheck test leak portal-test web-build ## Everything CI runs except the oracle suite
 
 probe: up ## Print the public-API outcome matrix across chaos scenarios
 	$(TESTBED) uv run python -m testbed.probe
@@ -62,3 +66,22 @@ oracles: up ## Scripted Playwright oracles (SCENARIOS=healthy,dom_drift to narro
 demo: up ## M1 demo: API matrix, then UI oracles under healthy, DOM drift, poor a11y and CAPTCHA
 	$(TESTBED) uv run python -m testbed.probe
 	$(TESTBED) uv run pytest -m oracle --scenarios healthy,dom_drift,poor_a11y,captcha -q
+
+proxy-up: .env ## Start Redis and the PII proxy on http://localhost:8090 (first start downloads ~1.2 GB of models)
+	$(COMPOSE) up -d --build redis proxy
+
+proxy-demo: .env ## M2 demo: mask, stream-rehydrate, tool-boundary policy, audit chain and tamper check
+	$(COMPOSE) up -d redis
+	$(TESTBED) uv run python -W ignore -m proxy.demo
+
+bench-pii: .env ## PII detection P/R/F1 per entity type and detector config -> analysis/results/
+	$(TESTBED) uv run python -W ignore -m analysis.pii_benchmark
+
+bench-latency: .env ## Latency the proxy adds (CPU detection, Redis vault) -> analysis/results/
+	$(TESTBED) uv run python -W ignore -m analysis.proxy_latency
+
+bench-tokens: .env ## LLM-token overhead of token renderings -> analysis/results/
+	$(TESTBED) uv run python -W ignore -m analysis.token_overhead
+
+audit-verify: ## Verify the proxy's audit chain
+	$(TESTBED) uv run python -m proxy.audit verify .cache/audit/proxy.jsonl
