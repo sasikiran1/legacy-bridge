@@ -40,3 +40,9 @@ def test_scoring_counts_iou_matches_one_to_one() -> None:
         Span(start=40, end=45, entity_type="PERSON", score=1, source="t"),
     ]
     assert score_document(gold, predicted, {"PERSON"})["PERSON"] == Counts(tp=1, fp=2, fn=1)
+
+
+def test_f1_is_zero_for_a_miss_without_predictions_and_undefined_without_data() -> None:
+    assert Counts(tp=0, fp=0, fn=5).f1 == 0.0
+    assert Counts(tp=0, fp=0, fn=0).f1 is None
+    assert Counts(tp=3, fp=1, fn=1).f1 == 0.75

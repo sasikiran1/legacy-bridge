@@ -66,8 +66,10 @@ class Counts(BaseModel):
 
     @property
     def f1(self) -> float | None:
-        p, r = self.precision, self.recall
-        return 2 * p * r / (p + r) if p and r else (0.0 if p is not None and r is not None else None)
+        """Undefined only when there is neither gold nor prediction; a miss with no predictions scores 0."""
+        if self.tp + self.fp + self.fn == 0:
+            return None
+        return 2 * self.tp / (2 * self.tp + self.fp + self.fn)
 
     def as_dict(self) -> dict[str, object]:
         return {
