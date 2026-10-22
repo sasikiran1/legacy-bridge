@@ -4,7 +4,8 @@
 
 The provider is a recorder, so the check sees exactly what a real provider would receive. Documents go in as
 the agent would send them: instructions and exports as user messages, API JSON as tool results. Any canary
-value found in a recorded payload is a leak.
+value found in a recorded payload is a leak. Leaks are reported by the canary's index in canaries.json, never
+by a value or member number, because the report is committed.
 
 Scopes: `member` sends all of a member's documents within one task, as an agent session would, so values
 masked from structured API JSON are re-caught later by the known-values pass. `document` gives every document
@@ -40,7 +41,7 @@ class Leak(BaseModel):
     model_config = ConfigDict(frozen=True)
 
     entity_type: str
-    member_number: str
+    canary: int
     surfaces: tuple[str, ...]
 
 
@@ -99,12 +100,10 @@ async def check(detector: Detector, audit_dir: Path, scope: Scope = "member") ->
 
     payloads = [json.dumps(json.loads(b), ensure_ascii=False) for b in provider.bodies]
     leaked = []
-    for canary in canaries:
+    for index, canary in enumerate(canaries):
         hits = tuple(sorted({surfaces_by_request[i] for i, p in enumerate(payloads) if canary.value in p}))
         if hits:
-            leaked.append(
-                Leak(entity_type=canary.entity_type, member_number=canary.member_number, surfaces=hits)
-            )
+            leaked.append(Leak(entity_type=canary.entity_type, canary=index, surfaces=hits))
     return LeakReport(
         detector=detector.name,
         scope=scope,

@@ -1,12 +1,12 @@
 {
-  "run_id": "20261022T023113Z-leak-check",
+  "run_id": "20261022T120500Z-leak-check",
   "kind": "leak-check",
   "git": {
-    "sha": "038444212c5db2e52fb7d533e02df45a7ad3b7eb",
-    "dirty": false
+    "sha": "d8745b9032070b2d4efa071de5aba22be1450b76",
+    "dirty": true
   },
-  "started": "2026-10-22T02:31:13.150710+00:00",
-  "finished": "2026-10-22T02:35:22.654637+00:00",
+  "started": "2026-10-22T12:05:00.449968+00:00",
+  "finished": "2026-10-22T12:14:04.439094+00:00",
   "python": "3.14.7",
   "machine": "x86_64",
   "models": {

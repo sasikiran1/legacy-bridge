@@ -2,6 +2,8 @@
 
 A task passes when every expected change is present, nothing else changed, and (for reads) the answer matches.
 Any change outside the expectation is reported as unexpected: that is the wrong-action signal.
+Messages name tables, row ids and columns, never values, because run results are committed and the values are
+(synthetic) PII.
 """
 
 from __future__ import annotations
@@ -139,12 +141,12 @@ def check(
             case RowUpdate(table=table, match=key, set=values):
                 rows = [(rid, row) for rid, row in after.get(table, {}).items() if _matches(row, key)]
                 if len(rows) != 1:
-                    missing.append(f"{table} row matching {key} not found exactly once")
+                    missing.append(f"{table} row matching {sorted(key)} not found exactly once")
                     continue
                 row_id, row = rows[0]
                 if not _matches(row, values):
-                    shown = {c: normalize(row.get(c)) for c in values}
-                    missing.append(f"{table}#{row_id}: expected {values}, found {shown}")
+                    wrong = sorted(c for c in values if not _matches(row, {c: values[c]}))
+                    missing.append(f"{table}#{row_id}: {wrong} not as expected")
                 accounted_updates.setdefault((table, row_id), set()).update(values)
             case RowInsert(table=table, values=values):
                 candidates = [
@@ -153,7 +155,7 @@ def check(
                     if t == table and (t, rid) not in accounted_inserts and _matches(after[t][rid], values)
                 ]
                 if not candidates:
-                    missing.append(f"no new {table} row with {values}")
+                    missing.append(f"no new {table} row matching {sorted(values)}")
                     continue
                 accounted_inserts.add((table, candidates[0]))
 
@@ -166,7 +168,7 @@ def check(
     unexpected += [f"{t}#{rid} deleted" for t, rid in changes.deleted]
 
     if expectation.answer is not None and (answer is None or not answer_matches(answer, expectation.answer)):
-        missing.append(f"answer {answer!r} != expected {expectation.answer!r}")
+        missing.append("answer missing" if answer is None else "answer differs from expected")
 
     return CheckResult(
         passed=not missing and not unexpected, missing=tuple(missing), unexpected=tuple(unexpected)

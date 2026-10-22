@@ -8,7 +8,7 @@
     "leaked": [
       {
         "entity_type": "PERSON",
-        "member_number": "[redacted]",
+        "canary": 0,
         "surfaces": [
           "instruction",
           "task"
@@ -16,7 +16,7 @@
       },
       {
         "entity_type": "PERSON",
-        "member_number": "[redacted]",
+        "canary": 14,
         "surfaces": [
           "instruction",
           "task"
@@ -24,7 +24,7 @@
       },
       {
         "entity_type": "PERSON",
-        "member_number": "[redacted]",
+        "canary": 28,
         "surfaces": [
           "instruction",
           "task"
@@ -32,7 +32,7 @@
       },
       {
         "entity_type": "PERSON",
-        "member_number": "[redacted]",
+        "canary": 37,
         "surfaces": [
           "instruction",
           "task"
@@ -40,7 +40,7 @@
       },
       {
         "entity_type": "PERSON",
-        "member_number": "[redacted]",
+        "canary": 47,
         "surfaces": [
           "instruction",
           "task"
@@ -48,7 +48,7 @@
       },
       {
         "entity_type": "PERSON",
-        "member_number": "[redacted]",
+        "canary": 56,
         "surfaces": [
           "instruction",
           "task"
@@ -56,7 +56,7 @@
       },
       {
         "entity_type": "PERSON",
-        "member_number": "[redacted]",
+        "canary": 73,
         "surfaces": [
           "instruction",
           "task"
@@ -64,7 +64,7 @@
       },
       {
         "entity_type": "PERSON",
-        "member_number": "[redacted]",
+        "canary": 86,
         "surfaces": [
           "instruction",
           "task"
@@ -72,7 +72,7 @@
       },
       {
         "entity_type": "PERSON",
-        "member_number": "[redacted]",
+        "canary": 103,
         "surfaces": [
           "instruction",
           "task"
@@ -80,7 +80,7 @@
       },
       {
         "entity_type": "PERSON",
-        "member_number": "[redacted]",
+        "canary": 114,
         "surfaces": [
           "instruction",
           "task"
@@ -97,7 +97,7 @@
     "leaked": [
       {
         "entity_type": "PERSON",
-        "member_number": "[redacted]",
+        "canary": 0,
         "surfaces": [
           "export",
           "instruction",
@@ -108,7 +108,7 @@
       },
       {
         "entity_type": "PERSON",
-        "member_number": "[redacted]",
+        "canary": 14,
         "surfaces": [
           "export",
           "instruction",
@@ -119,7 +119,7 @@
       },
       {
         "entity_type": "PERSON",
-        "member_number": "[redacted]",
+        "canary": 28,
         "surfaces": [
           "export",
           "instruction",
@@ -130,7 +130,7 @@
       },
       {
         "entity_type": "PERSON",
-        "member_number": "[redacted]",
+        "canary": 37,
         "surfaces": [
           "export",
           "instruction",
@@ -141,7 +141,7 @@
       },
       {
         "entity_type": "PERSON",
-        "member_number": "[redacted]",
+        "canary": 47,
         "surfaces": [
           "export",
           "instruction",
@@ -152,7 +152,7 @@
       },
       {
         "entity_type": "PHONE_NUMBER",
-        "member_number": "[redacted]",
+        "canary": 52,
         "surfaces": [
           "export",
           "snapshot"
@@ -160,7 +160,7 @@
       },
       {
         "entity_type": "PERSON",
-        "member_number": "[redacted]",
+        "canary": 56,
         "surfaces": [
           "export",
           "instruction",
@@ -171,7 +171,7 @@
       },
       {
         "entity_type": "PERSON",
-        "member_number": "[redacted]",
+        "canary": 73,
         "surfaces": [
           "export",
           "instruction",
@@ -182,7 +182,7 @@
       },
       {
         "entity_type": "PERSON",
-        "member_number": "[redacted]",
+        "canary": 86,
         "surfaces": [
           "export",
           "instruction",
@@ -193,7 +193,7 @@
       },
       {
         "entity_type": "PERSON",
-        "member_number": "[redacted]",
+        "canary": 103,
         "surfaces": [
           "export",
           "instruction",
@@ -204,7 +204,7 @@
       },
       {
         "entity_type": "PERSON",
-        "member_number": "[redacted]",
+        "canary": 114,
         "surfaces": [
           "export",
           "instruction",
@@ -224,28 +224,28 @@
     "leaked": [
       {
         "entity_type": "MEMBER_ID",
-        "member_number": "[redacted]",
+        "canary": 7,
         "surfaces": [
           "instruction"
         ]
       },
       {
         "entity_type": "US_SSN",
-        "member_number": "[redacted]",
+        "canary": 17,
         "surfaces": [
           "export"
         ]
       },
       {
         "entity_type": "STREET_ADDRESS",
-        "member_number": "[redacted]",
+        "canary": 20,
         "surfaces": [
           "instruction"
         ]
       },
       {
         "entity_type": "MEMBER_ID",
-        "member_number": "[redacted]",
+        "canary": 21,
         "surfaces": [
           "instruction",
           "task"
@@ -253,14 +253,14 @@
       },
       {
         "entity_type": "STREET_ADDRESS",
-        "member_number": "[redacted]",
+        "canary": 34,
         "surfaces": [
           "instruction"
         ]
       },
       {
         "entity_type": "MEMBER_ID",
-        "member_number": "[redacted]",
+        "canary": 35,
         "surfaces": [
           "instruction",
           "task"
@@ -268,14 +268,14 @@
       },
       {
         "entity_type": "STREET_ADDRESS",
-        "member_number": "[redacted]",
+        "canary": 43,
         "surfaces": [
           "instruction"
         ]
       },
       {
         "entity_type": "MEMBER_ID",
-        "member_number": "[redacted]",
+        "canary": 44,
         "surfaces": [
           "instruction",
           "task"
@@ -283,14 +283,14 @@
       },
       {
         "entity_type": "STREET_ADDRESS",
-        "member_number": "[redacted]",
+        "canary": 53,
         "surfaces": [
           "instruction"
         ]
       },
       {
         "entity_type": "MEMBER_ID",
-        "member_number": "[redacted]",
+        "canary": 54,
         "surfaces": [
           "instruction",
           "task"
@@ -298,57 +298,14 @@
       },
       {
         "entity_type": "STREET_ADDRESS",
-        "member_number": "[redacted]",
+        "canary": 62,
         "surfaces": [
           "instruction"
         ]
       },
       {
         "entity_type": "MEMBER_ID",
-        "member_number": "[redacted]",
-        "surfaces": [
-          "instruction",
-          "task"
-        ]
-      },
-      {
-        "entity_type": "ROUTING_NUMBER",
-        "member_number": "[redacted]",
-        "surfaces": [
-          "task"
-        ]
-      },
-      {
-        "entity_type": "BANK_ACCOUNT",
-        "member_number": "[redacted]",
-        "surfaces": [
-          "task"
-        ]
-      },
-      {
-        "entity_type": "STREET_ADDRESS",
-        "member_number": "[redacted]",
-        "surfaces": [
-          "instruction"
-        ]
-      },
-      {
-        "entity_type": "MEMBER_ID",
-        "member_number": "[redacted]",
-        "surfaces": [
-          "instruction"
-        ]
-      },
-      {
-        "entity_type": "STREET_ADDRESS",
-        "member_number": "[redacted]",
-        "surfaces": [
-          "instruction"
-        ]
-      },
-      {
-        "entity_type": "MEMBER_ID",
-        "member_number": "[redacted]",
+        "canary": 63,
         "surfaces": [
           "instruction",
           "task"
@@ -356,21 +313,64 @@
       },
       {
         "entity_type": "ROUTING_NUMBER",
-        "member_number": "[redacted]",
+        "canary": 71,
         "surfaces": [
           "task"
         ]
       },
       {
         "entity_type": "BANK_ACCOUNT",
-        "member_number": "[redacted]",
+        "canary": 72,
+        "surfaces": [
+          "task"
+        ]
+      },
+      {
+        "entity_type": "STREET_ADDRESS",
+        "canary": 79,
+        "surfaces": [
+          "instruction"
+        ]
+      },
+      {
+        "entity_type": "MEMBER_ID",
+        "canary": 80,
+        "surfaces": [
+          "instruction"
+        ]
+      },
+      {
+        "entity_type": "STREET_ADDRESS",
+        "canary": 92,
+        "surfaces": [
+          "instruction"
+        ]
+      },
+      {
+        "entity_type": "MEMBER_ID",
+        "canary": 93,
+        "surfaces": [
+          "instruction",
+          "task"
+        ]
+      },
+      {
+        "entity_type": "ROUTING_NUMBER",
+        "canary": 101,
+        "surfaces": [
+          "task"
+        ]
+      },
+      {
+        "entity_type": "BANK_ACCOUNT",
+        "canary": 102,
         "surfaces": [
           "task"
         ]
       },
       {
         "entity_type": "MEMBER_ID",
-        "member_number": "[redacted]",
+        "canary": 110,
         "surfaces": [
           "instruction",
           "task"
@@ -378,14 +378,14 @@
       },
       {
         "entity_type": "STREET_ADDRESS",
-        "member_number": "[redacted]",
+        "canary": 120,
         "surfaces": [
           "instruction"
         ]
       },
       {
         "entity_type": "MEMBER_ID",
-        "member_number": "[redacted]",
+        "canary": 121,
         "surfaces": [
           "instruction",
           "task"
@@ -402,7 +402,7 @@
     "leaked": [
       {
         "entity_type": "DATE_OF_BIRTH",
-        "member_number": "[redacted]",
+        "canary": 2,
         "surfaces": [
           "export",
           "snapshot"
@@ -410,7 +410,7 @@
       },
       {
         "entity_type": "MEMBER_ID",
-        "member_number": "[redacted]",
+        "canary": 7,
         "surfaces": [
           "instruction",
           "snapshot"
@@ -418,42 +418,42 @@
       },
       {
         "entity_type": "POLICY_NUMBER",
-        "member_number": "[redacted]",
+        "canary": 8,
         "surfaces": [
           "export"
         ]
       },
       {
         "entity_type": "CLAIM_NUMBER",
-        "member_number": "[redacted]",
+        "canary": 10,
         "surfaces": [
           "snapshot"
         ]
       },
       {
         "entity_type": "CLAIM_NUMBER",
-        "member_number": "[redacted]",
+        "canary": 11,
         "surfaces": [
           "snapshot"
         ]
       },
       {
         "entity_type": "CLAIM_NUMBER",
-        "member_number": "[redacted]",
+        "canary": 12,
         "surfaces": [
           "snapshot"
         ]
       },
       {
         "entity_type": "CLAIM_NUMBER",
-        "member_number": "[redacted]",
+        "canary": 13,
         "surfaces": [
           "snapshot"
         ]
       },
       {
         "entity_type": "DATE_OF_BIRTH",
-        "member_number": "[redacted]",
+        "canary": 16,
         "surfaces": [
           "export",
           "snapshot"
@@ -461,14 +461,14 @@
       },
       {
         "entity_type": "US_SSN",
-        "member_number": "[redacted]",
+        "canary": 17,
         "surfaces": [
           "export"
         ]
       },
       {
         "entity_type": "STREET_ADDRESS",
-        "member_number": "[redacted]",
+        "canary": 20,
         "surfaces": [
           "instruction",
           "snapshot"
@@ -476,7 +476,7 @@
       },
       {
         "entity_type": "MEMBER_ID",
-        "member_number": "[redacted]",
+        "canary": 21,
         "surfaces": [
           "instruction",
           "snapshot",
@@ -485,49 +485,49 @@
       },
       {
         "entity_type": "POLICY_NUMBER",
-        "member_number": "[redacted]",
+        "canary": 22,
         "surfaces": [
           "export"
         ]
       },
       {
         "entity_type": "POLICY_NUMBER",
-        "member_number": "[redacted]",
+        "canary": 23,
         "surfaces": [
           "export"
         ]
       },
       {
         "entity_type": "CLAIM_NUMBER",
-        "member_number": "[redacted]",
+        "canary": 24,
         "surfaces": [
           "snapshot"
         ]
       },
       {
         "entity_type": "CLAIM_NUMBER",
-        "member_number": "[redacted]",
+        "canary": 25,
         "surfaces": [
           "snapshot"
         ]
       },
       {
         "entity_type": "CLAIM_NUMBER",
-        "member_number": "[redacted]",
+        "canary": 26,
         "surfaces": [
           "snapshot"
         ]
       },
       {
         "entity_type": "CLAIM_NUMBER",
-        "member_number": "[redacted]",
+        "canary": 27,
         "surfaces": [
           "snapshot"
         ]
       },
       {
         "entity_type": "DATE_OF_BIRTH",
-        "member_number": "[redacted]",
+        "canary": 30,
         "surfaces": [
           "export",
           "snapshot"
@@ -535,7 +535,7 @@
       },
       {
         "entity_type": "STREET_ADDRESS",
-        "member_number": "[redacted]",
+        "canary": 34,
         "surfaces": [
           "export",
           "instruction",
@@ -544,7 +544,7 @@
       },
       {
         "entity_type": "MEMBER_ID",
-        "member_number": "[redacted]",
+        "canary": 35,
         "surfaces": [
           "instruction",
           "snapshot",
@@ -553,14 +553,14 @@
       },
       {
         "entity_type": "POLICY_NUMBER",
-        "member_number": "[redacted]",
+        "canary": 36,
         "surfaces": [
           "export"
         ]
       },
       {
         "entity_type": "DATE_OF_BIRTH",
-        "member_number": "[redacted]",
+        "canary": 39,
         "surfaces": [
           "export",
           "snapshot"
@@ -568,7 +568,7 @@
       },
       {
         "entity_type": "STREET_ADDRESS",
-        "member_number": "[redacted]",
+        "canary": 43,
         "surfaces": [
           "export",
           "instruction",
@@ -577,7 +577,7 @@
       },
       {
         "entity_type": "MEMBER_ID",
-        "member_number": "[redacted]",
+        "canary": 44,
         "surfaces": [
           "instruction",
           "snapshot",
@@ -586,21 +586,21 @@
       },
       {
         "entity_type": "POLICY_NUMBER",
-        "member_number": "[redacted]",
+        "canary": 45,
         "surfaces": [
           "export"
         ]
       },
       {
         "entity_type": "CLAIM_NUMBER",
-        "member_number": "[redacted]",
+        "canary": 46,
         "surfaces": [
           "snapshot"
         ]
       },
       {
         "entity_type": "DATE_OF_BIRTH",
-        "member_number": "[redacted]",
+        "canary": 49,
         "surfaces": [
           "export",
           "snapshot"
@@ -608,7 +608,7 @@
       },
       {
         "entity_type": "PHONE_NUMBER",
-        "member_number": "[redacted]",
+        "canary": 52,
         "surfaces": [
           "export",
           "snapshot"
@@ -616,7 +616,7 @@
       },
       {
         "entity_type": "STREET_ADDRESS",
-        "member_number": "[redacted]",
+        "canary": 53,
         "surfaces": [
           "export",
           "instruction",
@@ -625,7 +625,7 @@
       },
       {
         "entity_type": "MEMBER_ID",
-        "member_number": "[redacted]",
+        "canary": 54,
         "surfaces": [
           "instruction",
           "snapshot",
@@ -634,14 +634,14 @@
       },
       {
         "entity_type": "POLICY_NUMBER",
-        "member_number": "[redacted]",
+        "canary": 55,
         "surfaces": [
           "export"
         ]
       },
       {
         "entity_type": "PERSON",
-        "member_number": "[redacted]",
+        "canary": 56,
         "surfaces": [
           "payment",
           "snapshot",
@@ -650,7 +650,7 @@
       },
       {
         "entity_type": "DATE_OF_BIRTH",
-        "member_number": "[redacted]",
+        "canary": 58,
         "surfaces": [
           "export",
           "snapshot"
@@ -658,7 +658,7 @@
       },
       {
         "entity_type": "STREET_ADDRESS",
-        "member_number": "[redacted]",
+        "canary": 62,
         "surfaces": [
           "export",
           "instruction",
@@ -667,7 +667,7 @@
       },
       {
         "entity_type": "MEMBER_ID",
-        "member_number": "[redacted]",
+        "canary": 63,
         "surfaces": [
           "instruction",
           "snapshot",
@@ -676,70 +676,70 @@
       },
       {
         "entity_type": "POLICY_NUMBER",
-        "member_number": "[redacted]",
+        "canary": 64,
         "surfaces": [
           "export"
         ]
       },
       {
         "entity_type": "POLICY_NUMBER",
-        "member_number": "[redacted]",
+        "canary": 65,
         "surfaces": [
           "export"
         ]
       },
       {
         "entity_type": "CLAIM_NUMBER",
-        "member_number": "[redacted]",
+        "canary": 66,
         "surfaces": [
           "snapshot"
         ]
       },
       {
         "entity_type": "CLAIM_NUMBER",
-        "member_number": "[redacted]",
+        "canary": 67,
         "surfaces": [
           "snapshot"
         ]
       },
       {
         "entity_type": "CLAIM_NUMBER",
-        "member_number": "[redacted]",
+        "canary": 68,
         "surfaces": [
           "snapshot"
         ]
       },
       {
         "entity_type": "CLAIM_NUMBER",
-        "member_number": "[redacted]",
+        "canary": 69,
         "surfaces": [
           "snapshot"
         ]
       },
       {
         "entity_type": "CLAIM_NUMBER",
-        "member_number": "[redacted]",
+        "canary": 70,
         "surfaces": [
           "snapshot"
         ]
       },
       {
         "entity_type": "ROUTING_NUMBER",
-        "member_number": "[redacted]",
+        "canary": 71,
         "surfaces": [
           "task"
         ]
       },
       {
         "entity_type": "BANK_ACCOUNT",
-        "member_number": "[redacted]",
+        "canary": 72,
         "surfaces": [
           "task"
         ]
       },
       {
         "entity_type": "DATE_OF_BIRTH",
-        "member_number": "[redacted]",
+        "canary": 75,
         "surfaces": [
           "export",
           "snapshot"
@@ -747,7 +747,7 @@
       },
       {
         "entity_type": "STREET_ADDRESS",
-        "member_number": "[redacted]",
+        "canary": 79,
         "surfaces": [
           "export",
           "instruction",
@@ -756,7 +756,7 @@
       },
       {
         "entity_type": "MEMBER_ID",
-        "member_number": "[redacted]",
+        "canary": 80,
         "surfaces": [
           "instruction",
           "snapshot"
@@ -764,42 +764,42 @@
       },
       {
         "entity_type": "POLICY_NUMBER",
-        "member_number": "[redacted]",
+        "canary": 81,
         "surfaces": [
           "export"
         ]
       },
       {
         "entity_type": "POLICY_NUMBER",
-        "member_number": "[redacted]",
+        "canary": 82,
         "surfaces": [
           "export"
         ]
       },
       {
         "entity_type": "CLAIM_NUMBER",
-        "member_number": "[redacted]",
+        "canary": 83,
         "surfaces": [
           "snapshot"
         ]
       },
       {
         "entity_type": "CLAIM_NUMBER",
-        "member_number": "[redacted]",
+        "canary": 84,
         "surfaces": [
           "snapshot"
         ]
       },
       {
         "entity_type": "CLAIM_NUMBER",
-        "member_number": "[redacted]",
+        "canary": 85,
         "surfaces": [
           "snapshot"
         ]
       },
       {
         "entity_type": "DATE_OF_BIRTH",
-        "member_number": "[redacted]",
+        "canary": 88,
         "surfaces": [
           "export",
           "snapshot"
@@ -807,7 +807,7 @@
       },
       {
         "entity_type": "STREET_ADDRESS",
-        "member_number": "[redacted]",
+        "canary": 92,
         "surfaces": [
           "export",
           "instruction",
@@ -816,7 +816,7 @@
       },
       {
         "entity_type": "MEMBER_ID",
-        "member_number": "[redacted]",
+        "canary": 93,
         "surfaces": [
           "instruction",
           "snapshot",
@@ -825,70 +825,70 @@
       },
       {
         "entity_type": "POLICY_NUMBER",
-        "member_number": "[redacted]",
+        "canary": 94,
         "surfaces": [
           "export"
         ]
       },
       {
         "entity_type": "POLICY_NUMBER",
-        "member_number": "[redacted]",
+        "canary": 95,
         "surfaces": [
           "export"
         ]
       },
       {
         "entity_type": "CLAIM_NUMBER",
-        "member_number": "[redacted]",
+        "canary": 96,
         "surfaces": [
           "snapshot"
         ]
       },
       {
         "entity_type": "CLAIM_NUMBER",
-        "member_number": "[redacted]",
+        "canary": 97,
         "surfaces": [
           "snapshot"
         ]
       },
       {
         "entity_type": "CLAIM_NUMBER",
-        "member_number": "[redacted]",
+        "canary": 98,
         "surfaces": [
           "snapshot"
         ]
       },
       {
         "entity_type": "CLAIM_NUMBER",
-        "member_number": "[redacted]",
+        "canary": 99,
         "surfaces": [
           "snapshot"
         ]
       },
       {
         "entity_type": "CLAIM_NUMBER",
-        "member_number": "[redacted]",
+        "canary": 100,
         "surfaces": [
           "snapshot"
         ]
       },
       {
         "entity_type": "ROUTING_NUMBER",
-        "member_number": "[redacted]",
+        "canary": 101,
         "surfaces": [
           "task"
         ]
       },
       {
         "entity_type": "BANK_ACCOUNT",
-        "member_number": "[redacted]",
+        "canary": 102,
         "surfaces": [
           "task"
         ]
       },
       {
         "entity_type": "DATE_OF_BIRTH",
-        "member_number": "[redacted]",
+        "canary": 105,
         "surfaces": [
           "export",
           "snapshot"
@@ -896,7 +896,7 @@
       },
       {
         "entity_type": "MEMBER_ID",
-        "member_number": "[redacted]",
+        "canary": 110,
         "surfaces": [
           "instruction",
           "snapshot",
@@ -905,35 +905,35 @@
       },
       {
         "entity_type": "POLICY_NUMBER",
-        "member_number": "[redacted]",
+        "canary": 111,
         "surfaces": [
           "export"
         ]
       },
       {
         "entity_type": "CLAIM_NUMBER",
-        "member_number": "[redacted]",
+        "canary": 112,
         "surfaces": [
           "snapshot"
         ]
       },
       {
         "entity_type": "CLAIM_NUMBER",
-        "member_number": "[redacted]",
+        "canary": 113,
         "surfaces": [
           "snapshot"
         ]
       },
       {
         "entity_type": "PERSON",
-        "member_number": "[redacted]",
+        "canary": 114,
         "surfaces": [
           "task"
         ]
       },
       {
         "entity_type": "DATE_OF_BIRTH",
-        "member_number": "[redacted]",
+        "canary": 116,
         "surfaces": [
           "export",
           "snapshot"
@@ -941,7 +941,7 @@
       },
       {
         "entity_type": "STREET_ADDRESS",
-        "member_number": "[redacted]",
+        "canary": 120,
         "surfaces": [
           "export",
           "instruction"
@@ -949,7 +949,7 @@
       },
       {
         "entity_type": "MEMBER_ID",
-        "member_number": "[redacted]",
+        "canary": 121,
         "surfaces": [
           "instruction",
           "snapshot",
@@ -958,21 +958,21 @@
       },
       {
         "entity_type": "POLICY_NUMBER",
-        "member_number": "[redacted]",
+        "canary": 122,
         "surfaces": [
           "export"
         ]
       },
       {
         "entity_type": "CLAIM_NUMBER",
-        "member_number": "[redacted]",
+        "canary": 123,
         "surfaces": [
           "snapshot"
         ]
       },
       {
         "entity_type": "CLAIM_NUMBER",
-        "member_number": "[redacted]",
+        "canary": 124,
         "surfaces": [
           "snapshot"
         ]
@@ -988,14 +988,14 @@
     "leaked": [
       {
         "entity_type": "MEMBER_ID",
-        "member_number": "[redacted]",
+        "canary": 7,
         "surfaces": [
           "instruction"
         ]
       },
       {
         "entity_type": "MEMBER_ID",
-        "member_number": "[redacted]",
+        "canary": 21,
         "surfaces": [
           "instruction",
           "task"
@@ -1003,7 +1003,7 @@
       },
       {
         "entity_type": "MEMBER_ID",
-        "member_number": "[redacted]",
+        "canary": 35,
         "surfaces": [
           "instruction",
           "task"
@@ -1011,7 +1011,7 @@
       },
       {
         "entity_type": "MEMBER_ID",
-        "member_number": "[redacted]",
+        "canary": 44,
         "surfaces": [
           "instruction",
           "task"
@@ -1019,7 +1019,7 @@
       },
       {
         "entity_type": "MEMBER_ID",
-        "member_number": "[redacted]",
+        "canary": 54,
         "surfaces": [
           "instruction",
           "task"
@@ -1027,7 +1027,7 @@
       },
       {
         "entity_type": "MEMBER_ID",
-        "member_number": "[redacted]",
+        "canary": 63,
         "surfaces": [
           "instruction",
           "task"
@@ -1035,21 +1035,21 @@
       },
       {
         "entity_type": "ROUTING_NUMBER",
-        "member_number": "[redacted]",
+        "canary": 71,
         "surfaces": [
           "task"
         ]
       },
       {
         "entity_type": "MEMBER_ID",
-        "member_number": "[redacted]",
+        "canary": 80,
         "surfaces": [
           "instruction"
         ]
       },
       {
         "entity_type": "MEMBER_ID",
-        "member_number": "[redacted]",
+        "canary": 93,
         "surfaces": [
           "instruction",
           "task"
@@ -1057,14 +1057,14 @@
       },
       {
         "entity_type": "ROUTING_NUMBER",
-        "member_number": "[redacted]",
+        "canary": 101,
         "surfaces": [
           "task"
         ]
       },
       {
         "entity_type": "MEMBER_ID",
-        "member_number": "[redacted]",
+        "canary": 110,
         "surfaces": [
           "instruction",
           "task"
@@ -1072,7 +1072,7 @@
       },
       {
         "entity_type": "MEMBER_ID",
-        "member_number": "[redacted]",
+        "canary": 121,
         "surfaces": [
           "instruction",
           "task"
@@ -1089,7 +1089,7 @@
     "leaked": [
       {
         "entity_type": "MEMBER_ID",
-        "member_number": "[redacted]",
+        "canary": 7,
         "surfaces": [
           "instruction",
           "snapshot"
@@ -1097,49 +1097,49 @@
       },
       {
         "entity_type": "POLICY_NUMBER",
-        "member_number": "[redacted]",
+        "canary": 8,
         "surfaces": [
           "export"
         ]
       },
       {
         "entity_type": "CLAIM_NUMBER",
-        "member_number": "[redacted]",
+        "canary": 10,
         "surfaces": [
           "snapshot"
         ]
       },
       {
         "entity_type": "CLAIM_NUMBER",
-        "member_number": "[redacted]",
+        "canary": 11,
         "surfaces": [
           "snapshot"
         ]
       },
       {
         "entity_type": "CLAIM_NUMBER",
-        "member_number": "[redacted]",
+        "canary": 12,
         "surfaces": [
           "snapshot"
         ]
       },
       {
         "entity_type": "CLAIM_NUMBER",
-        "member_number": "[redacted]",
+        "canary": 13,
         "surfaces": [
           "snapshot"
         ]
       },
       {
         "entity_type": "STREET_ADDRESS",
-        "member_number": "[redacted]",
+        "canary": 20,
         "surfaces": [
           "export"
         ]
       },
       {
         "entity_type": "MEMBER_ID",
-        "member_number": "[redacted]",
+        "canary": 21,
         "surfaces": [
           "instruction",
           "snapshot",
@@ -1148,56 +1148,56 @@
       },
       {
         "entity_type": "POLICY_NUMBER",
-        "member_number": "[redacted]",
+        "canary": 22,
         "surfaces": [
           "export"
         ]
       },
       {
         "entity_type": "POLICY_NUMBER",
-        "member_number": "[redacted]",
+        "canary": 23,
         "surfaces": [
           "export"
         ]
       },
       {
         "entity_type": "CLAIM_NUMBER",
-        "member_number": "[redacted]",
+        "canary": 24,
         "surfaces": [
           "snapshot"
         ]
       },
       {
         "entity_type": "CLAIM_NUMBER",
-        "member_number": "[redacted]",
+        "canary": 25,
         "surfaces": [
           "snapshot"
         ]
       },
       {
         "entity_type": "CLAIM_NUMBER",
-        "member_number": "[redacted]",
+        "canary": 26,
         "surfaces": [
           "snapshot"
         ]
       },
       {
         "entity_type": "CLAIM_NUMBER",
-        "member_number": "[redacted]",
+        "canary": 27,
         "surfaces": [
           "snapshot"
         ]
       },
       {
         "entity_type": "STREET_ADDRESS",
-        "member_number": "[redacted]",
+        "canary": 34,
         "surfaces": [
           "export"
         ]
       },
       {
         "entity_type": "MEMBER_ID",
-        "member_number": "[redacted]",
+        "canary": 35,
         "surfaces": [
           "instruction",
           "snapshot",
@@ -1206,14 +1206,14 @@
       },
       {
         "entity_type": "POLICY_NUMBER",
-        "member_number": "[redacted]",
+        "canary": 36,
         "surfaces": [
           "export"
         ]
       },
       {
         "entity_type": "MEMBER_ID",
-        "member_number": "[redacted]",
+        "canary": 44,
         "surfaces": [
           "instruction",
           "snapshot",
@@ -1222,28 +1222,28 @@
       },
       {
         "entity_type": "POLICY_NUMBER",
-        "member_number": "[redacted]",
+        "canary": 45,
         "surfaces": [
           "export"
         ]
       },
       {
         "entity_type": "CLAIM_NUMBER",
-        "member_number": "[redacted]",
+        "canary": 46,
         "surfaces": [
           "snapshot"
         ]
       },
       {
         "entity_type": "STREET_ADDRESS",
-        "member_number": "[redacted]",
+        "canary": 53,
         "surfaces": [
           "export"
         ]
       },
       {
         "entity_type": "MEMBER_ID",
-        "member_number": "[redacted]",
+        "canary": 54,
         "surfaces": [
           "instruction",
           "snapshot",
@@ -1252,21 +1252,21 @@
       },
       {
         "entity_type": "POLICY_NUMBER",
-        "member_number": "[redacted]",
+        "canary": 55,
         "surfaces": [
           "export"
         ]
       },
       {
         "entity_type": "STREET_ADDRESS",
-        "member_number": "[redacted]",
+        "canary": 62,
         "surfaces": [
           "export"
         ]
       },
       {
         "entity_type": "MEMBER_ID",
-        "member_number": "[redacted]",
+        "canary": 63,
         "surfaces": [
           "instruction",
           "snapshot",
@@ -1275,70 +1275,70 @@
       },
       {
         "entity_type": "POLICY_NUMBER",
-        "member_number": "[redacted]",
+        "canary": 64,
         "surfaces": [
           "export"
         ]
       },
       {
         "entity_type": "POLICY_NUMBER",
-        "member_number": "[redacted]",
+        "canary": 65,
         "surfaces": [
           "export"
         ]
       },
       {
         "entity_type": "CLAIM_NUMBER",
-        "member_number": "[redacted]",
+        "canary": 66,
         "surfaces": [
           "snapshot"
         ]
       },
       {
         "entity_type": "CLAIM_NUMBER",
-        "member_number": "[redacted]",
+        "canary": 67,
         "surfaces": [
           "snapshot"
         ]
       },
       {
         "entity_type": "CLAIM_NUMBER",
-        "member_number": "[redacted]",
+        "canary": 68,
         "surfaces": [
           "snapshot"
         ]
       },
       {
         "entity_type": "CLAIM_NUMBER",
-        "member_number": "[redacted]",
+        "canary": 69,
         "surfaces": [
           "snapshot"
         ]
       },
       {
         "entity_type": "CLAIM_NUMBER",
-        "member_number": "[redacted]",
+        "canary": 70,
         "surfaces": [
           "snapshot"
         ]
       },
       {
         "entity_type": "ROUTING_NUMBER",
-        "member_number": "[redacted]",
+        "canary": 71,
         "surfaces": [
           "task"
         ]
       },
       {
         "entity_type": "STREET_ADDRESS",
-        "member_number": "[redacted]",
+        "canary": 79,
         "surfaces": [
           "export"
         ]
       },
       {
         "entity_type": "MEMBER_ID",
-        "member_number": "[redacted]",
+        "canary": 80,
         "surfaces": [
           "instruction",
           "snapshot"
@@ -1346,42 +1346,42 @@
       },
       {
         "entity_type": "POLICY_NUMBER",
-        "member_number": "[redacted]",
+        "canary": 81,
         "surfaces": [
           "export"
         ]
       },
       {
         "entity_type": "POLICY_NUMBER",
-        "member_number": "[redacted]",
+        "canary": 82,
         "surfaces": [
           "export"
         ]
       },
       {
         "entity_type": "CLAIM_NUMBER",
-        "member_number": "[redacted]",
+        "canary": 83,
         "surfaces": [
           "snapshot"
         ]
       },
       {
         "entity_type": "CLAIM_NUMBER",
-        "member_number": "[redacted]",
+        "canary": 84,
         "surfaces": [
           "snapshot"
         ]
       },
       {
         "entity_type": "CLAIM_NUMBER",
-        "member_number": "[redacted]",
+        "canary": 85,
         "surfaces": [
           "snapshot"
         ]
       },
       {
         "entity_type": "MEMBER_ID",
-        "member_number": "[redacted]",
+        "canary": 93,
         "surfaces": [
           "instruction",
           "snapshot",
@@ -1390,63 +1390,70 @@
       },
       {
         "entity_type": "POLICY_NUMBER",
-        "member_number": "[redacted]",
+        "canary": 94,
         "surfaces": [
           "export"
         ]
       },
       {
         "entity_type": "POLICY_NUMBER",
-        "member_number": "[redacted]",
+        "canary": 95,
         "surfaces": [
           "export"
         ]
       },
       {
         "entity_type": "CLAIM_NUMBER",
-        "member_number": "[redacted]",
+        "canary": 96,
         "surfaces": [
           "snapshot"
         ]
       },
       {
         "entity_type": "CLAIM_NUMBER",
-        "member_number": "[redacted]",
+        "canary": 97,
         "surfaces": [
           "snapshot"
         ]
       },
       {
         "entity_type": "CLAIM_NUMBER",
-        "member_number": "[redacted]",
+        "canary": 98,
         "surfaces": [
           "snapshot"
         ]
       },
       {
         "entity_type": "CLAIM_NUMBER",
-        "member_number": "[redacted]",
+        "canary": 99,
         "surfaces": [
           "snapshot"
         ]
       },
       {
         "entity_type": "CLAIM_NUMBER",
-        "member_number": "[redacted]",
+        "canary": 100,
         "surfaces": [
           "snapshot"
         ]
       },
       {
         "entity_type": "ROUTING_NUMBER",
-        "member_number": "[redacted]",
+        "canary": 101,
         "surfaces": [
           "task"
         ]
       },
       {
+        "entity_type": "STREET_ADDRESS",
+        "canary": 109,
+        "surfaces": [
+          "export"
+        ]
+      },
+      {
         "entity_type": "MEMBER_ID",
-        "member_number": "[redacted]",
+        "canary": 110,
         "surfaces": [
           "instruction",
           "snapshot",
@@ -1455,28 +1462,28 @@
       },
       {
         "entity_type": "POLICY_NUMBER",
-        "member_number": "[redacted]",
+        "canary": 111,
         "surfaces": [
           "export"
         ]
       },
       {
         "entity_type": "CLAIM_NUMBER",
-        "member_number": "[redacted]",
+        "canary": 112,
         "surfaces": [
           "snapshot"
         ]
       },
       {
         "entity_type": "CLAIM_NUMBER",
-        "member_number": "[redacted]",
+        "canary": 113,
         "surfaces": [
           "snapshot"
         ]
       },
       {
         "entity_type": "MEMBER_ID",
-        "member_number": "[redacted]",
+        "canary": 121,
         "surfaces": [
           "instruction",
           "snapshot",
@@ -1485,21 +1492,21 @@
       },
       {
         "entity_type": "POLICY_NUMBER",
-        "member_number": "[redacted]",
+        "canary": 122,
         "surfaces": [
           "export"
         ]
       },
       {
         "entity_type": "CLAIM_NUMBER",
-        "member_number": "[redacted]",
+        "canary": 123,
         "surfaces": [
           "snapshot"
         ]
       },
       {
         "entity_type": "CLAIM_NUMBER",
-        "member_number": "[redacted]",
+        "canary": 124,
         "surfaces": [
           "snapshot"
         ]
