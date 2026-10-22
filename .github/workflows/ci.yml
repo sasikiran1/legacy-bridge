@@ -106,3 +106,26 @@ jobs:
       - name: Portal logs
         if: failure()
         run: docker compose logs portal
+
+  agent-replay:
+    name: agent replay (recorded cassettes, no model)
+    needs: [portal, web, python, leak]
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v7
+      - name: Create .env with throwaway secrets (TOKEN_KEY stays the published replay key)
+        run: |
+          cp .env.example .env
+          pg="$(openssl rand -hex 16)"
+          sed -i "s/^POSTGRES_PASSWORD=.*/POSTGRES_PASSWORD=${pg}/" .env
+          sed -i "s/change-me@/${pg}@/g" .env
+          sed -i "s/^PORTAL_ADMIN_TOKEN=.*/PORTAL_ADMIN_TOKEN=$(openssl rand -hex 24)/" .env
+          sed -i "s/^PORTAL_TEST_USER_PASSWORD=.*/PORTAL_TEST_USER_PASSWORD=$(openssl rand -hex 12)/" .env
+          sed -i "s|^VAULT_MASTER_KEY=.*|VAULT_MASTER_KEY=$(openssl rand -base64 32)|" .env
+      - run: docker compose --profile test build testbed
+      - name: Every recorded task reproduces its recorded outcome
+        run: make replay-check
+      - name: Proxy and portal logs
+        if: failure()
+        run: docker compose logs proxy portal

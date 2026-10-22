@@ -5,13 +5,17 @@ SHELL := /bin/bash
 COMPOSE := docker compose
 TESTBED := $(COMPOSE) --profile test run --rm testbed
 SCENARIOS ?= all
+SCENARIO ?= healthy
+TASKS ?=
+RECORDED_SCENARIOS = $(sort $(shell sed -n 's/^ *"\([a-z_]*\)\/.*/\1/p' cassettes/index.json 2>/dev/null))
 
 MAVEN_IMAGE := maven:3.9.16-eclipse-temurin-25-noble
 NODE_IMAGE := node:26.9.0
 
 .DEFAULT_GOAL := help
 .PHONY: help up down reset-db logs seed lint typecheck test portal-test web-build check probe oracles demo \
-	proxy-up leak proxy-demo bench-pii bench-latency bench-tokens audit-verify
+	proxy-up leak proxy-demo bench-pii bench-latency bench-tokens audit-verify agent-stack record replay-check \
+	demo-fallback
 
 help: ## List targets
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*## "} {printf "  %-12s %s\n", $$1, $$2}'
@@ -85,3 +89,24 @@ bench-tokens: .env ## LLM-token overhead of token renderings -> analysis/results
 
 audit-verify: ## Verify the proxy's audit chain
 	$(TESTBED) uv run python -m proxy.audit verify .cache/audit/proxy.jsonl
+
+# The proxy reads LLM_MODE at start, so each agent target recreates it in the mode it needs.
+agent-stack:
+	LLM_MODE=$(LLM_MODE) $(COMPOSE) up -d --build --wait postgres portal redis
+	LLM_MODE=$(LLM_MODE) $(COMPOSE) up -d --force-recreate --wait proxy
+
+record: LLM_MODE := record
+record: agent-stack ## Record cassettes with the local model (SCENARIO=healthy TASKS=claim_status-01,... or TASKS=all)
+	$(TESTBED) uv run python -W ignore -m agent.runner --scenario $(SCENARIO) \
+		$(if $(filter all,$(TASKS)),--all,--tasks $(TASKS)) --record --label record; \
+	status=$$?; LLM_MODE=replay $(COMPOSE) up -d --force-recreate --wait proxy; exit $$status
+
+replay-check: LLM_MODE := replay
+replay-check: agent-stack ## Replay every recorded task and fail if any outcome differs from its recording (no model)
+	for s in $(RECORDED_SCENARIOS); do \
+		$(TESTBED) uv run python -W ignore -m agent.runner --scenario $$s --check-replay --label replay || exit 1; \
+	done
+
+demo-fallback: LLM_MODE := replay
+demo-fallback: agent-stack ## M3 demo: removed and retired endpoints push the agent to the browser (replayed, no model)
+	$(TESTBED) uv run python -W ignore -m agent.runner --scenario api_degraded --check-replay --label demo
