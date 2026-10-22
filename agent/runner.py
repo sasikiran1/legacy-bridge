@@ -7,7 +7,7 @@
 Per task: apply the scenario's chaos, reset the seed, clear the task's tokens in the proxy, mask the
 instruction,
 run the graph (resuming interrupts with the approval policy below), then diff the database against the task's
-expectation. Rows go to analysis/results/<run_id>/agent_runs.jsonl with a manifest.
+expectation. Rows go to analysis/results/<run_id>/agent_runs.jsonl with a manifest, except for --check-replay.
 
 Approval policy (the stand-in for the human reviewer):
     task    approve a payment only on reimbursement tasks, a delete only on delete-note tasks, and a write
@@ -317,12 +317,16 @@ async def main_async(args: argparse.Namespace) -> int:
         await services["llm"].aclose()
         await admin.apply(load_scenarios()["healthy"].chaos)
 
-    run.write("breakers.json", api.breakers.snapshot())
-    (run.directory / "agent_runs.jsonl").write_text(
-        "".join(r.model_dump_json() + "\n" for r in rows), encoding="utf-8"
-    )
-    served = sorted({m for r in rows for m in r.models})
-    run.finish(models={"profile": settings.profile.value, "served": ", ".join(served)})
+    destination = "not saved (replay check)"
+    if not args.check_replay:
+        # A replay check is a gate, not an experiment: its rows repeat the recording's and are not kept.
+        run.write("breakers.json", api.breakers.snapshot())
+        (run.directory / "agent_runs.jsonl").write_text(
+            "".join(r.model_dump_json() + "\n" for r in rows), encoding="utf-8"
+        )
+        served = sorted({m for r in rows for m in r.models})
+        run.finish(models={"profile": settings.profile.value, "served": ", ".join(served)})
+        destination = str(run.directory)
     await masker.aclose()
     await proxy_http.aclose()
     await api.aclose()
@@ -331,7 +335,7 @@ async def main_async(args: argparse.Namespace) -> int:
     passed = sum(r.passed for r in rows)
     print(
         f"{passed}/{len(rows)} passed, {sum(r.wrong_action for r in rows)} wrong actions, "
-        f"{sum(r.cassette_mismatches for r in rows)} cassette mismatches -> {run.directory}"
+        f"{sum(r.cassette_mismatches for r in rows)} cassette mismatches -> {destination}"
     )
     if args.record:
         record_index(rows)
