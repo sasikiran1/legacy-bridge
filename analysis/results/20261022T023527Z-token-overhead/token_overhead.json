@@ -1,0 +1,29 @@
+{
+  "openai/gpt-oss-20b": {
+    "documents": 249,
+    "pii_spans": 1641,
+    "raw_prompt_tokens": 26108,
+    "variants": {
+      "unicode_uuid": {
+        "prompt_tokens": 69679,
+        "prompt_change_vs_raw": 1.6688754404780144,
+        "llm_tokens_per_pii_token": 32.03107861060329
+      },
+      "unicode_hex10": {
+        "prompt_tokens": 42204,
+        "prompt_change_vs_raw": 0.6165160104182625,
+        "llm_tokens_per_pii_token": 15.28823887873248
+      },
+      "ascii_hex10": {
+        "prompt_tokens": 35172,
+        "prompt_change_vs_raw": 0.347173280220622,
+        "llm_tokens_per_pii_token": 11.28823887873248
+      },
+      "ascii_hex8": {
+        "prompt_tokens": 33258,
+        "prompt_change_vs_raw": 0.2738624176497626,
+        "llm_tokens_per_pii_token": 10.12187690432663
+      }
+    }
+  }
+}

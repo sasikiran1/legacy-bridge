@@ -1,0 +1,1525 @@
+[
+  {
+    "detector": "regex",
+    "scope": "member",
+    "canaries": 125,
+    "documents": 70,
+    "requests": 70,
+    "leaked": [
+      {
+        "entity_type": "PERSON",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "instruction",
+          "task"
+        ]
+      },
+      {
+        "entity_type": "PERSON",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "instruction",
+          "task"
+        ]
+      },
+      {
+        "entity_type": "PERSON",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "instruction",
+          "task"
+        ]
+      },
+      {
+        "entity_type": "PERSON",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "instruction",
+          "task"
+        ]
+      },
+      {
+        "entity_type": "PERSON",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "instruction",
+          "task"
+        ]
+      },
+      {
+        "entity_type": "PERSON",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "instruction",
+          "task"
+        ]
+      },
+      {
+        "entity_type": "PERSON",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "instruction",
+          "task"
+        ]
+      },
+      {
+        "entity_type": "PERSON",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "instruction",
+          "task"
+        ]
+      },
+      {
+        "entity_type": "PERSON",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "instruction",
+          "task"
+        ]
+      },
+      {
+        "entity_type": "PERSON",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "instruction",
+          "task"
+        ]
+      }
+    ]
+  },
+  {
+    "detector": "regex",
+    "scope": "document",
+    "canaries": 125,
+    "documents": 70,
+    "requests": 70,
+    "leaked": [
+      {
+        "entity_type": "PERSON",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "export",
+          "instruction",
+          "payment",
+          "snapshot",
+          "task"
+        ]
+      },
+      {
+        "entity_type": "PERSON",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "export",
+          "instruction",
+          "payment",
+          "snapshot",
+          "task"
+        ]
+      },
+      {
+        "entity_type": "PERSON",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "export",
+          "instruction",
+          "payment",
+          "snapshot",
+          "task"
+        ]
+      },
+      {
+        "entity_type": "PERSON",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "export",
+          "instruction",
+          "payment",
+          "snapshot",
+          "task"
+        ]
+      },
+      {
+        "entity_type": "PERSON",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "export",
+          "instruction",
+          "payment",
+          "snapshot",
+          "task"
+        ]
+      },
+      {
+        "entity_type": "PHONE_NUMBER",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "export",
+          "snapshot"
+        ]
+      },
+      {
+        "entity_type": "PERSON",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "export",
+          "instruction",
+          "payment",
+          "snapshot",
+          "task"
+        ]
+      },
+      {
+        "entity_type": "PERSON",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "export",
+          "instruction",
+          "payment",
+          "snapshot",
+          "task"
+        ]
+      },
+      {
+        "entity_type": "PERSON",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "export",
+          "instruction",
+          "payment",
+          "snapshot",
+          "task"
+        ]
+      },
+      {
+        "entity_type": "PERSON",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "export",
+          "instruction",
+          "payment",
+          "snapshot",
+          "task"
+        ]
+      },
+      {
+        "entity_type": "PERSON",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "export",
+          "instruction",
+          "payment",
+          "snapshot",
+          "task"
+        ]
+      }
+    ]
+  },
+  {
+    "detector": "presidio",
+    "scope": "member",
+    "canaries": 125,
+    "documents": 70,
+    "requests": 70,
+    "leaked": [
+      {
+        "entity_type": "MEMBER_ID",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "instruction"
+        ]
+      },
+      {
+        "entity_type": "US_SSN",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "export"
+        ]
+      },
+      {
+        "entity_type": "STREET_ADDRESS",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "instruction"
+        ]
+      },
+      {
+        "entity_type": "MEMBER_ID",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "instruction",
+          "task"
+        ]
+      },
+      {
+        "entity_type": "STREET_ADDRESS",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "instruction"
+        ]
+      },
+      {
+        "entity_type": "MEMBER_ID",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "instruction",
+          "task"
+        ]
+      },
+      {
+        "entity_type": "STREET_ADDRESS",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "instruction"
+        ]
+      },
+      {
+        "entity_type": "MEMBER_ID",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "instruction",
+          "task"
+        ]
+      },
+      {
+        "entity_type": "STREET_ADDRESS",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "instruction"
+        ]
+      },
+      {
+        "entity_type": "MEMBER_ID",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "instruction",
+          "task"
+        ]
+      },
+      {
+        "entity_type": "STREET_ADDRESS",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "instruction"
+        ]
+      },
+      {
+        "entity_type": "MEMBER_ID",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "instruction",
+          "task"
+        ]
+      },
+      {
+        "entity_type": "ROUTING_NUMBER",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "task"
+        ]
+      },
+      {
+        "entity_type": "BANK_ACCOUNT",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "task"
+        ]
+      },
+      {
+        "entity_type": "STREET_ADDRESS",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "instruction"
+        ]
+      },
+      {
+        "entity_type": "MEMBER_ID",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "instruction"
+        ]
+      },
+      {
+        "entity_type": "STREET_ADDRESS",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "instruction"
+        ]
+      },
+      {
+        "entity_type": "MEMBER_ID",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "instruction",
+          "task"
+        ]
+      },
+      {
+        "entity_type": "ROUTING_NUMBER",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "task"
+        ]
+      },
+      {
+        "entity_type": "BANK_ACCOUNT",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "task"
+        ]
+      },
+      {
+        "entity_type": "MEMBER_ID",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "instruction",
+          "task"
+        ]
+      },
+      {
+        "entity_type": "STREET_ADDRESS",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "instruction"
+        ]
+      },
+      {
+        "entity_type": "MEMBER_ID",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "instruction",
+          "task"
+        ]
+      }
+    ]
+  },
+  {
+    "detector": "presidio",
+    "scope": "document",
+    "canaries": 125,
+    "documents": 70,
+    "requests": 70,
+    "leaked": [
+      {
+        "entity_type": "DATE_OF_BIRTH",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "export",
+          "snapshot"
+        ]
+      },
+      {
+        "entity_type": "MEMBER_ID",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "instruction",
+          "snapshot"
+        ]
+      },
+      {
+        "entity_type": "POLICY_NUMBER",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "export"
+        ]
+      },
+      {
+        "entity_type": "CLAIM_NUMBER",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "snapshot"
+        ]
+      },
+      {
+        "entity_type": "CLAIM_NUMBER",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "snapshot"
+        ]
+      },
+      {
+        "entity_type": "CLAIM_NUMBER",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "snapshot"
+        ]
+      },
+      {
+        "entity_type": "CLAIM_NUMBER",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "snapshot"
+        ]
+      },
+      {
+        "entity_type": "DATE_OF_BIRTH",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "export",
+          "snapshot"
+        ]
+      },
+      {
+        "entity_type": "US_SSN",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "export"
+        ]
+      },
+      {
+        "entity_type": "STREET_ADDRESS",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "instruction",
+          "snapshot"
+        ]
+      },
+      {
+        "entity_type": "MEMBER_ID",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "instruction",
+          "snapshot",
+          "task"
+        ]
+      },
+      {
+        "entity_type": "POLICY_NUMBER",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "export"
+        ]
+      },
+      {
+        "entity_type": "POLICY_NUMBER",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "export"
+        ]
+      },
+      {
+        "entity_type": "CLAIM_NUMBER",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "snapshot"
+        ]
+      },
+      {
+        "entity_type": "CLAIM_NUMBER",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "snapshot"
+        ]
+      },
+      {
+        "entity_type": "CLAIM_NUMBER",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "snapshot"
+        ]
+      },
+      {
+        "entity_type": "CLAIM_NUMBER",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "snapshot"
+        ]
+      },
+      {
+        "entity_type": "DATE_OF_BIRTH",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "export",
+          "snapshot"
+        ]
+      },
+      {
+        "entity_type": "STREET_ADDRESS",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "export",
+          "instruction",
+          "snapshot"
+        ]
+      },
+      {
+        "entity_type": "MEMBER_ID",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "instruction",
+          "snapshot",
+          "task"
+        ]
+      },
+      {
+        "entity_type": "POLICY_NUMBER",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "export"
+        ]
+      },
+      {
+        "entity_type": "DATE_OF_BIRTH",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "export",
+          "snapshot"
+        ]
+      },
+      {
+        "entity_type": "STREET_ADDRESS",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "export",
+          "instruction",
+          "snapshot"
+        ]
+      },
+      {
+        "entity_type": "MEMBER_ID",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "instruction",
+          "snapshot",
+          "task"
+        ]
+      },
+      {
+        "entity_type": "POLICY_NUMBER",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "export"
+        ]
+      },
+      {
+        "entity_type": "CLAIM_NUMBER",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "snapshot"
+        ]
+      },
+      {
+        "entity_type": "DATE_OF_BIRTH",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "export",
+          "snapshot"
+        ]
+      },
+      {
+        "entity_type": "PHONE_NUMBER",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "export",
+          "snapshot"
+        ]
+      },
+      {
+        "entity_type": "STREET_ADDRESS",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "export",
+          "instruction",
+          "snapshot"
+        ]
+      },
+      {
+        "entity_type": "MEMBER_ID",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "instruction",
+          "snapshot",
+          "task"
+        ]
+      },
+      {
+        "entity_type": "POLICY_NUMBER",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "export"
+        ]
+      },
+      {
+        "entity_type": "PERSON",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "payment",
+          "snapshot",
+          "task"
+        ]
+      },
+      {
+        "entity_type": "DATE_OF_BIRTH",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "export",
+          "snapshot"
+        ]
+      },
+      {
+        "entity_type": "STREET_ADDRESS",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "export",
+          "instruction",
+          "snapshot"
+        ]
+      },
+      {
+        "entity_type": "MEMBER_ID",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "instruction",
+          "snapshot",
+          "task"
+        ]
+      },
+      {
+        "entity_type": "POLICY_NUMBER",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "export"
+        ]
+      },
+      {
+        "entity_type": "POLICY_NUMBER",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "export"
+        ]
+      },
+      {
+        "entity_type": "CLAIM_NUMBER",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "snapshot"
+        ]
+      },
+      {
+        "entity_type": "CLAIM_NUMBER",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "snapshot"
+        ]
+      },
+      {
+        "entity_type": "CLAIM_NUMBER",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "snapshot"
+        ]
+      },
+      {
+        "entity_type": "CLAIM_NUMBER",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "snapshot"
+        ]
+      },
+      {
+        "entity_type": "CLAIM_NUMBER",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "snapshot"
+        ]
+      },
+      {
+        "entity_type": "ROUTING_NUMBER",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "task"
+        ]
+      },
+      {
+        "entity_type": "BANK_ACCOUNT",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "task"
+        ]
+      },
+      {
+        "entity_type": "DATE_OF_BIRTH",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "export",
+          "snapshot"
+        ]
+      },
+      {
+        "entity_type": "STREET_ADDRESS",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "export",
+          "instruction",
+          "snapshot"
+        ]
+      },
+      {
+        "entity_type": "MEMBER_ID",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "instruction",
+          "snapshot"
+        ]
+      },
+      {
+        "entity_type": "POLICY_NUMBER",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "export"
+        ]
+      },
+      {
+        "entity_type": "POLICY_NUMBER",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "export"
+        ]
+      },
+      {
+        "entity_type": "CLAIM_NUMBER",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "snapshot"
+        ]
+      },
+      {
+        "entity_type": "CLAIM_NUMBER",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "snapshot"
+        ]
+      },
+      {
+        "entity_type": "CLAIM_NUMBER",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "snapshot"
+        ]
+      },
+      {
+        "entity_type": "DATE_OF_BIRTH",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "export",
+          "snapshot"
+        ]
+      },
+      {
+        "entity_type": "STREET_ADDRESS",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "export",
+          "instruction",
+          "snapshot"
+        ]
+      },
+      {
+        "entity_type": "MEMBER_ID",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "instruction",
+          "snapshot",
+          "task"
+        ]
+      },
+      {
+        "entity_type": "POLICY_NUMBER",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "export"
+        ]
+      },
+      {
+        "entity_type": "POLICY_NUMBER",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "export"
+        ]
+      },
+      {
+        "entity_type": "CLAIM_NUMBER",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "snapshot"
+        ]
+      },
+      {
+        "entity_type": "CLAIM_NUMBER",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "snapshot"
+        ]
+      },
+      {
+        "entity_type": "CLAIM_NUMBER",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "snapshot"
+        ]
+      },
+      {
+        "entity_type": "CLAIM_NUMBER",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "snapshot"
+        ]
+      },
+      {
+        "entity_type": "CLAIM_NUMBER",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "snapshot"
+        ]
+      },
+      {
+        "entity_type": "ROUTING_NUMBER",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "task"
+        ]
+      },
+      {
+        "entity_type": "BANK_ACCOUNT",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "task"
+        ]
+      },
+      {
+        "entity_type": "DATE_OF_BIRTH",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "export",
+          "snapshot"
+        ]
+      },
+      {
+        "entity_type": "MEMBER_ID",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "instruction",
+          "snapshot",
+          "task"
+        ]
+      },
+      {
+        "entity_type": "POLICY_NUMBER",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "export"
+        ]
+      },
+      {
+        "entity_type": "CLAIM_NUMBER",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "snapshot"
+        ]
+      },
+      {
+        "entity_type": "CLAIM_NUMBER",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "snapshot"
+        ]
+      },
+      {
+        "entity_type": "PERSON",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "task"
+        ]
+      },
+      {
+        "entity_type": "DATE_OF_BIRTH",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "export",
+          "snapshot"
+        ]
+      },
+      {
+        "entity_type": "STREET_ADDRESS",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "export",
+          "instruction"
+        ]
+      },
+      {
+        "entity_type": "MEMBER_ID",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "instruction",
+          "snapshot",
+          "task"
+        ]
+      },
+      {
+        "entity_type": "POLICY_NUMBER",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "export"
+        ]
+      },
+      {
+        "entity_type": "CLAIM_NUMBER",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "snapshot"
+        ]
+      },
+      {
+        "entity_type": "CLAIM_NUMBER",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "snapshot"
+        ]
+      }
+    ]
+  },
+  {
+    "detector": "presidio_gliner",
+    "scope": "member",
+    "canaries": 125,
+    "documents": 70,
+    "requests": 70,
+    "leaked": [
+      {
+        "entity_type": "MEMBER_ID",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "instruction"
+        ]
+      },
+      {
+        "entity_type": "MEMBER_ID",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "instruction",
+          "task"
+        ]
+      },
+      {
+        "entity_type": "MEMBER_ID",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "instruction",
+          "task"
+        ]
+      },
+      {
+        "entity_type": "MEMBER_ID",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "instruction",
+          "task"
+        ]
+      },
+      {
+        "entity_type": "MEMBER_ID",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "instruction",
+          "task"
+        ]
+      },
+      {
+        "entity_type": "MEMBER_ID",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "instruction",
+          "task"
+        ]
+      },
+      {
+        "entity_type": "ROUTING_NUMBER",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "task"
+        ]
+      },
+      {
+        "entity_type": "MEMBER_ID",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "instruction"
+        ]
+      },
+      {
+        "entity_type": "MEMBER_ID",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "instruction",
+          "task"
+        ]
+      },
+      {
+        "entity_type": "ROUTING_NUMBER",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "task"
+        ]
+      },
+      {
+        "entity_type": "MEMBER_ID",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "instruction",
+          "task"
+        ]
+      },
+      {
+        "entity_type": "MEMBER_ID",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "instruction",
+          "task"
+        ]
+      }
+    ]
+  },
+  {
+    "detector": "presidio_gliner",
+    "scope": "document",
+    "canaries": 125,
+    "documents": 70,
+    "requests": 70,
+    "leaked": [
+      {
+        "entity_type": "MEMBER_ID",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "instruction",
+          "snapshot"
+        ]
+      },
+      {
+        "entity_type": "POLICY_NUMBER",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "export"
+        ]
+      },
+      {
+        "entity_type": "CLAIM_NUMBER",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "snapshot"
+        ]
+      },
+      {
+        "entity_type": "CLAIM_NUMBER",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "snapshot"
+        ]
+      },
+      {
+        "entity_type": "CLAIM_NUMBER",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "snapshot"
+        ]
+      },
+      {
+        "entity_type": "CLAIM_NUMBER",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "snapshot"
+        ]
+      },
+      {
+        "entity_type": "STREET_ADDRESS",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "export"
+        ]
+      },
+      {
+        "entity_type": "MEMBER_ID",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "instruction",
+          "snapshot",
+          "task"
+        ]
+      },
+      {
+        "entity_type": "POLICY_NUMBER",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "export"
+        ]
+      },
+      {
+        "entity_type": "POLICY_NUMBER",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "export"
+        ]
+      },
+      {
+        "entity_type": "CLAIM_NUMBER",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "snapshot"
+        ]
+      },
+      {
+        "entity_type": "CLAIM_NUMBER",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "snapshot"
+        ]
+      },
+      {
+        "entity_type": "CLAIM_NUMBER",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "snapshot"
+        ]
+      },
+      {
+        "entity_type": "CLAIM_NUMBER",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "snapshot"
+        ]
+      },
+      {
+        "entity_type": "STREET_ADDRESS",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "export"
+        ]
+      },
+      {
+        "entity_type": "MEMBER_ID",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "instruction",
+          "snapshot",
+          "task"
+        ]
+      },
+      {
+        "entity_type": "POLICY_NUMBER",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "export"
+        ]
+      },
+      {
+        "entity_type": "MEMBER_ID",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "instruction",
+          "snapshot",
+          "task"
+        ]
+      },
+      {
+        "entity_type": "POLICY_NUMBER",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "export"
+        ]
+      },
+      {
+        "entity_type": "CLAIM_NUMBER",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "snapshot"
+        ]
+      },
+      {
+        "entity_type": "STREET_ADDRESS",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "export"
+        ]
+      },
+      {
+        "entity_type": "MEMBER_ID",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "instruction",
+          "snapshot",
+          "task"
+        ]
+      },
+      {
+        "entity_type": "POLICY_NUMBER",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "export"
+        ]
+      },
+      {
+        "entity_type": "STREET_ADDRESS",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "export"
+        ]
+      },
+      {
+        "entity_type": "MEMBER_ID",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "instruction",
+          "snapshot",
+          "task"
+        ]
+      },
+      {
+        "entity_type": "POLICY_NUMBER",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "export"
+        ]
+      },
+      {
+        "entity_type": "POLICY_NUMBER",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "export"
+        ]
+      },
+      {
+        "entity_type": "CLAIM_NUMBER",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "snapshot"
+        ]
+      },
+      {
+        "entity_type": "CLAIM_NUMBER",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "snapshot"
+        ]
+      },
+      {
+        "entity_type": "CLAIM_NUMBER",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "snapshot"
+        ]
+      },
+      {
+        "entity_type": "CLAIM_NUMBER",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "snapshot"
+        ]
+      },
+      {
+        "entity_type": "CLAIM_NUMBER",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "snapshot"
+        ]
+      },
+      {
+        "entity_type": "ROUTING_NUMBER",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "task"
+        ]
+      },
+      {
+        "entity_type": "STREET_ADDRESS",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "export"
+        ]
+      },
+      {
+        "entity_type": "MEMBER_ID",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "instruction",
+          "snapshot"
+        ]
+      },
+      {
+        "entity_type": "POLICY_NUMBER",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "export"
+        ]
+      },
+      {
+        "entity_type": "POLICY_NUMBER",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "export"
+        ]
+      },
+      {
+        "entity_type": "CLAIM_NUMBER",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "snapshot"
+        ]
+      },
+      {
+        "entity_type": "CLAIM_NUMBER",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "snapshot"
+        ]
+      },
+      {
+        "entity_type": "CLAIM_NUMBER",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "snapshot"
+        ]
+      },
+      {
+        "entity_type": "MEMBER_ID",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "instruction",
+          "snapshot",
+          "task"
+        ]
+      },
+      {
+        "entity_type": "POLICY_NUMBER",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "export"
+        ]
+      },
+      {
+        "entity_type": "POLICY_NUMBER",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "export"
+        ]
+      },
+      {
+        "entity_type": "CLAIM_NUMBER",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "snapshot"
+        ]
+      },
+      {
+        "entity_type": "CLAIM_NUMBER",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "snapshot"
+        ]
+      },
+      {
+        "entity_type": "CLAIM_NUMBER",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "snapshot"
+        ]
+      },
+      {
+        "entity_type": "CLAIM_NUMBER",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "snapshot"
+        ]
+      },
+      {
+        "entity_type": "CLAIM_NUMBER",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "snapshot"
+        ]
+      },
+      {
+        "entity_type": "ROUTING_NUMBER",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "task"
+        ]
+      },
+      {
+        "entity_type": "MEMBER_ID",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "instruction",
+          "snapshot",
+          "task"
+        ]
+      },
+      {
+        "entity_type": "POLICY_NUMBER",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "export"
+        ]
+      },
+      {
+        "entity_type": "CLAIM_NUMBER",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "snapshot"
+        ]
+      },
+      {
+        "entity_type": "CLAIM_NUMBER",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "snapshot"
+        ]
+      },
+      {
+        "entity_type": "MEMBER_ID",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "instruction",
+          "snapshot",
+          "task"
+        ]
+      },
+      {
+        "entity_type": "POLICY_NUMBER",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "export"
+        ]
+      },
+      {
+        "entity_type": "CLAIM_NUMBER",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "snapshot"
+        ]
+      },
+      {
+        "entity_type": "CLAIM_NUMBER",
+        "member_number": "[redacted]",
+        "surfaces": [
+          "snapshot"
+        ]
+      }
+    ]
+  },
+  {
+    "detector": "full",
+    "scope": "member",
+    "canaries": 125,
+    "documents": 70,
+    "requests": 70,
+    "leaked": []
+  },
+  {
+    "detector": "full",
+    "scope": "document",
+    "canaries": 125,
+    "documents": 70,
+    "requests": 70,
+    "leaked": []
+  }
+]

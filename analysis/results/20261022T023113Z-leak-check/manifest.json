@@ -1,0 +1,28 @@
+{
+  "run_id": "20261022T023113Z-leak-check",
+  "kind": "leak-check",
+  "git": {
+    "sha": "038444212c5db2e52fb7d533e02df45a7ad3b7eb",
+    "dirty": false
+  },
+  "started": "2026-10-22T02:31:13.150710+00:00",
+  "finished": "2026-10-22T02:35:22.654637+00:00",
+  "python": "3.14.7",
+  "machine": "x86_64",
+  "models": {
+    "gliner": "urchade/gliner_multi_pii-v1",
+    "spacy": "en_core_web_lg-3.8.0"
+  },
+  "config": {
+    "detectors": [
+      "regex",
+      "presidio",
+      "presidio_gliner",
+      "full"
+    ],
+    "scopes": [
+      "member",
+      "document"
+    ]
+  }
+}

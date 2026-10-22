@@ -1,0 +1,690 @@
+{
+  "regex": {
+    "synthetic": {
+      "documents": 371,
+      "gold_spans": 2426,
+      "per_type": {
+        "BANK_ACCOUNT": {
+          "tp": 61,
+          "fp": 0,
+          "fn": 0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0
+        },
+        "CLAIM_NUMBER": {
+          "tp": 283,
+          "fp": 1,
+          "fn": 0,
+          "precision": 0.9964788732394366,
+          "recall": 1.0,
+          "f1": 0.9982363315696648
+        },
+        "DATE_OF_BIRTH": {
+          "tp": 240,
+          "fp": 0,
+          "fn": 0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0
+        },
+        "EMAIL_ADDRESS": {
+          "tp": 249,
+          "fp": 0,
+          "fn": 0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0
+        },
+        "MEMBER_ID": {
+          "tp": 249,
+          "fp": 0,
+          "fn": 0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0
+        },
+        "PERSON": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 506,
+          "precision": null,
+          "recall": 0.0,
+          "f1": 0.0
+        },
+        "PHONE_NUMBER": {
+          "tp": 250,
+          "fp": 5,
+          "fn": 4,
+          "precision": 0.9803921568627451,
+          "recall": 0.984251968503937,
+          "f1": 0.9823182711198428
+        },
+        "POLICY_NUMBER": {
+          "tp": 162,
+          "fp": 0,
+          "fn": 0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0
+        },
+        "ROUTING_NUMBER": {
+          "tp": 61,
+          "fp": 0,
+          "fn": 0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0
+        },
+        "STREET_ADDRESS": {
+          "tp": 296,
+          "fp": 19,
+          "fn": 5,
+          "precision": 0.9396825396825397,
+          "recall": 0.9833887043189369,
+          "f1": 0.961038961038961
+        },
+        "US_SSN": {
+          "tp": 60,
+          "fp": 0,
+          "fn": 0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0
+        }
+      },
+      "micro": {
+        "tp": 1911,
+        "fp": 25,
+        "fn": 515,
+        "precision": 0.9870867768595041,
+        "recall": 0.7877164056059357,
+        "f1": 0.8762035763411279
+      },
+      "char_recall": 0.8486987608689066,
+      "other_type_predictions": 0,
+      "ms_per_1k_chars": 7.491350757955412
+    },
+    "ai4privacy": {
+      "documents": 600,
+      "gold_spans": 793,
+      "per_type": {
+        "CREDIT_CARD": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 11,
+          "precision": null,
+          "recall": 0.0,
+          "f1": 0.0
+        },
+        "EMAIL_ADDRESS": {
+          "tp": 64,
+          "fp": 0,
+          "fn": 0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0
+        },
+        "PERSON": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 534,
+          "precision": null,
+          "recall": 0.0,
+          "f1": 0.0
+        },
+        "PHONE_NUMBER": {
+          "tp": 41,
+          "fp": 19,
+          "fn": 50,
+          "precision": 0.6833333333333333,
+          "recall": 0.45054945054945056,
+          "f1": 0.543046357615894
+        },
+        "STREET_ADDRESS": {
+          "tp": 6,
+          "fp": 0,
+          "fn": 74,
+          "precision": 1.0,
+          "recall": 0.075,
+          "f1": 0.13953488372093023
+        },
+        "US_SSN": {
+          "tp": 6,
+          "fp": 18,
+          "fn": 7,
+          "precision": 0.25,
+          "recall": 0.46153846153846156,
+          "f1": 0.32432432432432434
+        }
+      },
+      "micro": {
+        "tp": 117,
+        "fp": 37,
+        "fn": 676,
+        "precision": 0.7597402597402597,
+        "recall": 0.14754098360655737,
+        "f1": 0.2470960929250264
+      },
+      "char_recall": 0.17373002965655793,
+      "other_type_predictions": 7,
+      "ms_per_1k_chars": 2.698134819465339
+    }
+  },
+  "presidio": {
+    "synthetic": {
+      "documents": 371,
+      "gold_spans": 2426,
+      "per_type": {
+        "BANK_ACCOUNT": {
+          "tp": 56,
+          "fp": 55,
+          "fn": 5,
+          "precision": 0.5045045045045045,
+          "recall": 0.9180327868852459,
+          "f1": 0.6511627906976745
+        },
+        "CLAIM_NUMBER": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 283,
+          "precision": null,
+          "recall": 0.0,
+          "f1": 0.0
+        },
+        "DATE_OF_BIRTH": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 240,
+          "precision": null,
+          "recall": 0.0,
+          "f1": 0.0
+        },
+        "EMAIL_ADDRESS": {
+          "tp": 249,
+          "fp": 0,
+          "fn": 0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0
+        },
+        "MEMBER_ID": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 249,
+          "precision": null,
+          "recall": 0.0,
+          "f1": 0.0
+        },
+        "PERSON": {
+          "tp": 444,
+          "fp": 188,
+          "fn": 62,
+          "precision": 0.7025316455696202,
+          "recall": 0.8774703557312253,
+          "f1": 0.7803163444639719
+        },
+        "PHONE_NUMBER": {
+          "tp": 250,
+          "fp": 141,
+          "fn": 4,
+          "precision": 0.639386189258312,
+          "recall": 0.984251968503937,
+          "f1": 0.7751937984496124
+        },
+        "POLICY_NUMBER": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 162,
+          "precision": null,
+          "recall": 0.0,
+          "f1": 0.0
+        },
+        "ROUTING_NUMBER": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 61,
+          "precision": null,
+          "recall": 0.0,
+          "f1": 0.0
+        },
+        "STREET_ADDRESS": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 301,
+          "precision": null,
+          "recall": 0.0,
+          "f1": 0.0
+        },
+        "US_SSN": {
+          "tp": 60,
+          "fp": 0,
+          "fn": 0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0
+        }
+      },
+      "micro": {
+        "tp": 1059,
+        "fp": 384,
+        "fn": 1367,
+        "precision": 0.7338877338877339,
+        "recall": 0.4365210222588623,
+        "f1": 0.5474282760403205
+      },
+      "char_recall": 0.7459932741539673,
+      "other_type_predictions": 1170,
+      "ms_per_1k_chars": 36.21510906403947
+    },
+    "ai4privacy": {
+      "documents": 600,
+      "gold_spans": 793,
+      "per_type": {
+        "CREDIT_CARD": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 11,
+          "precision": null,
+          "recall": 0.0,
+          "f1": 0.0
+        },
+        "EMAIL_ADDRESS": {
+          "tp": 64,
+          "fp": 0,
+          "fn": 0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0
+        },
+        "PERSON": {
+          "tp": 348,
+          "fp": 65,
+          "fn": 186,
+          "precision": 0.8426150121065376,
+          "recall": 0.651685393258427,
+          "f1": 0.7349524815205913
+        },
+        "PHONE_NUMBER": {
+          "tp": 35,
+          "fp": 11,
+          "fn": 56,
+          "precision": 0.7608695652173914,
+          "recall": 0.38461538461538464,
+          "f1": 0.5109489051094891
+        },
+        "STREET_ADDRESS": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 80,
+          "precision": null,
+          "recall": 0.0,
+          "f1": 0.0
+        },
+        "US_SSN": {
+          "tp": 5,
+          "fp": 4,
+          "fn": 8,
+          "precision": 0.5555555555555556,
+          "recall": 0.38461538461538464,
+          "f1": 0.45454545454545453
+        }
+      },
+      "micro": {
+        "tp": 452,
+        "fp": 80,
+        "fn": 341,
+        "precision": 0.849624060150376,
+        "recall": 0.5699873896595208,
+        "f1": 0.6822641509433962
+      },
+      "char_recall": 0.7352913039318856,
+      "other_type_predictions": 402,
+      "ms_per_1k_chars": 51.547427565307146
+    }
+  },
+  "presidio_gliner": {
+    "synthetic": {
+      "documents": 371,
+      "gold_spans": 2426,
+      "per_type": {
+        "BANK_ACCOUNT": {
+          "tp": 61,
+          "fp": 55,
+          "fn": 0,
+          "precision": 0.5258620689655172,
+          "recall": 1.0,
+          "f1": 0.6892655367231638
+        },
+        "CLAIM_NUMBER": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 283,
+          "precision": null,
+          "recall": 0.0,
+          "f1": 0.0
+        },
+        "DATE_OF_BIRTH": {
+          "tp": 229,
+          "fp": 11,
+          "fn": 11,
+          "precision": 0.9541666666666667,
+          "recall": 0.9541666666666667,
+          "f1": 0.9541666666666667
+        },
+        "EMAIL_ADDRESS": {
+          "tp": 249,
+          "fp": 26,
+          "fn": 0,
+          "precision": 0.9054545454545454,
+          "recall": 1.0,
+          "f1": 0.950381679389313
+        },
+        "MEMBER_ID": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 249,
+          "precision": null,
+          "recall": 0.0,
+          "f1": 0.0
+        },
+        "PERSON": {
+          "tp": 503,
+          "fp": 131,
+          "fn": 3,
+          "precision": 0.7933753943217665,
+          "recall": 0.9940711462450593,
+          "f1": 0.8824561403508772
+        },
+        "PHONE_NUMBER": {
+          "tp": 254,
+          "fp": 132,
+          "fn": 0,
+          "precision": 0.6580310880829016,
+          "recall": 1.0,
+          "f1": 0.79375
+        },
+        "POLICY_NUMBER": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 162,
+          "precision": null,
+          "recall": 0.0,
+          "f1": 0.0
+        },
+        "ROUTING_NUMBER": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 61,
+          "precision": null,
+          "recall": 0.0,
+          "f1": 0.0
+        },
+        "STREET_ADDRESS": {
+          "tp": 193,
+          "fp": 139,
+          "fn": 108,
+          "precision": 0.5813253012048193,
+          "recall": 0.6411960132890365,
+          "f1": 0.6097946287519748
+        },
+        "US_SSN": {
+          "tp": 60,
+          "fp": 61,
+          "fn": 0,
+          "precision": 0.49586776859504134,
+          "recall": 1.0,
+          "f1": 0.6629834254143646
+        }
+      },
+      "micro": {
+        "tp": 1549,
+        "fp": 555,
+        "fn": 877,
+        "precision": 0.7362167300380228,
+        "recall": 0.6384995877988459,
+        "f1": 0.6838852097130242
+      },
+      "char_recall": 0.8952949374375132,
+      "other_type_predictions": 766,
+      "ms_per_1k_chars": 2546.8631229256384
+    },
+    "ai4privacy": {
+      "documents": 600,
+      "gold_spans": 793,
+      "per_type": {
+        "CREDIT_CARD": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 10,
+          "precision": 1.0,
+          "recall": 0.09090909090909091,
+          "f1": 0.16666666666666666
+        },
+        "EMAIL_ADDRESS": {
+          "tp": 64,
+          "fp": 4,
+          "fn": 0,
+          "precision": 0.9411764705882353,
+          "recall": 1.0,
+          "f1": 0.9696969696969697
+        },
+        "PERSON": {
+          "tp": 500,
+          "fp": 128,
+          "fn": 34,
+          "precision": 0.7961783439490446,
+          "recall": 0.9363295880149812,
+          "f1": 0.8605851979345955
+        },
+        "PHONE_NUMBER": {
+          "tp": 80,
+          "fp": 12,
+          "fn": 11,
+          "precision": 0.8695652173913043,
+          "recall": 0.8791208791208791,
+          "f1": 0.8743169398907104
+        },
+        "STREET_ADDRESS": {
+          "tp": 40,
+          "fp": 14,
+          "fn": 40,
+          "precision": 0.7407407407407407,
+          "recall": 0.5,
+          "f1": 0.5970149253731343
+        },
+        "US_SSN": {
+          "tp": 4,
+          "fp": 3,
+          "fn": 9,
+          "precision": 0.5714285714285714,
+          "recall": 0.3076923076923077,
+          "f1": 0.4
+        }
+      },
+      "micro": {
+        "tp": 689,
+        "fp": 161,
+        "fn": 104,
+        "precision": 0.8105882352941176,
+        "recall": 0.8688524590163934,
+        "f1": 0.8387096774193549
+      },
+      "char_recall": 0.990720367358653,
+      "other_type_predictions": 436,
+      "ms_per_1k_chars": 2641.581749263586
+    }
+  },
+  "full": {
+    "synthetic": {
+      "documents": 371,
+      "gold_spans": 2426,
+      "per_type": {
+        "BANK_ACCOUNT": {
+          "tp": 61,
+          "fp": 0,
+          "fn": 0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0
+        },
+        "CLAIM_NUMBER": {
+          "tp": 283,
+          "fp": 1,
+          "fn": 0,
+          "precision": 0.9964788732394366,
+          "recall": 1.0,
+          "f1": 0.9982363315696648
+        },
+        "DATE_OF_BIRTH": {
+          "tp": 240,
+          "fp": 11,
+          "fn": 0,
+          "precision": 0.9561752988047809,
+          "recall": 1.0,
+          "f1": 0.9775967413441955
+        },
+        "EMAIL_ADDRESS": {
+          "tp": 249,
+          "fp": 25,
+          "fn": 0,
+          "precision": 0.9087591240875912,
+          "recall": 1.0,
+          "f1": 0.9521988527724665
+        },
+        "MEMBER_ID": {
+          "tp": 249,
+          "fp": 0,
+          "fn": 0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0
+        },
+        "PERSON": {
+          "tp": 501,
+          "fp": 116,
+          "fn": 5,
+          "precision": 0.8119935170178282,
+          "recall": 0.9901185770750988,
+          "f1": 0.8922528940338379
+        },
+        "PHONE_NUMBER": {
+          "tp": 254,
+          "fp": 10,
+          "fn": 0,
+          "precision": 0.9621212121212122,
+          "recall": 1.0,
+          "f1": 0.9806949806949807
+        },
+        "POLICY_NUMBER": {
+          "tp": 162,
+          "fp": 0,
+          "fn": 0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0
+        },
+        "ROUTING_NUMBER": {
+          "tp": 56,
+          "fp": 0,
+          "fn": 5,
+          "precision": 1.0,
+          "recall": 0.9180327868852459,
+          "f1": 0.9572649572649573
+        },
+        "STREET_ADDRESS": {
+          "tp": 197,
+          "fp": 133,
+          "fn": 104,
+          "precision": 0.5969696969696969,
+          "recall": 0.654485049833887,
+          "f1": 0.624405705229794
+        },
+        "US_SSN": {
+          "tp": 60,
+          "fp": 62,
+          "fn": 0,
+          "precision": 0.4918032786885246,
+          "recall": 1.0,
+          "f1": 0.6593406593406593
+        }
+      },
+      "micro": {
+        "tp": 2312,
+        "fp": 358,
+        "fn": 114,
+        "precision": 0.8659176029962546,
+        "recall": 0.9530090684253916,
+        "f1": 0.9073783359497645
+      },
+      "char_recall": 0.9993031781137335,
+      "other_type_predictions": 0,
+      "ms_per_1k_chars": 1722.2703836141452
+    },
+    "ai4privacy": {
+      "documents": 600,
+      "gold_spans": 793,
+      "per_type": {
+        "CREDIT_CARD": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 11,
+          "precision": null,
+          "recall": 0.0,
+          "f1": 0.0
+        },
+        "EMAIL_ADDRESS": {
+          "tp": 64,
+          "fp": 5,
+          "fn": 0,
+          "precision": 0.927536231884058,
+          "recall": 1.0,
+          "f1": 0.9624060150375939
+        },
+        "PERSON": {
+          "tp": 511,
+          "fp": 116,
+          "fn": 23,
+          "precision": 0.8149920255183413,
+          "recall": 0.9569288389513109,
+          "f1": 0.880275624461671
+        },
+        "PHONE_NUMBER": {
+          "tp": 83,
+          "fp": 20,
+          "fn": 8,
+          "precision": 0.8058252427184466,
+          "recall": 0.9120879120879121,
+          "f1": 0.8556701030927835
+        },
+        "STREET_ADDRESS": {
+          "tp": 41,
+          "fp": 11,
+          "fn": 39,
+          "precision": 0.7884615384615384,
+          "recall": 0.5125,
+          "f1": 0.6212121212121212
+        },
+        "US_SSN": {
+          "tp": 6,
+          "fp": 1,
+          "fn": 7,
+          "precision": 0.8571428571428571,
+          "recall": 0.46153846153846156,
+          "f1": 0.6
+        }
+      },
+      "micro": {
+        "tp": 705,
+        "fp": 153,
+        "fn": 88,
+        "precision": 0.8216783216783217,
+        "recall": 0.8890290037831021,
+        "f1": 0.8540278619018776
+      },
+      "char_recall": 0.9342772409834498,
+      "other_type_predictions": 16,
+      "ms_per_1k_chars": 2052.3050641035484
+    }
+  }
+}

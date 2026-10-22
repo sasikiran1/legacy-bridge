@@ -1,0 +1,22 @@
+{
+  "run_id": "20261022T025101Z-pii-benchmark",
+  "kind": "pii-benchmark",
+  "git": {
+    "sha": "584a3e74174bb6cfb8f57cd6b7a500516867cd9c",
+    "dirty": false
+  },
+  "started": "2026-10-22T02:51:01.163680+00:00",
+  "finished": "2026-10-22T03:04:48.313218+00:00",
+  "python": "3.14.7",
+  "machine": "x86_64",
+  "models": {
+    "gliner": "urchade/gliner_multi_pii-v1",
+    "spacy": "en_core_web_lg-3.8.0"
+  },
+  "config": {
+    "synthetic_members": 60,
+    "ai4privacy_rows": 600,
+    "ai4privacy_file": "ai4privacy/open-pii-masking-500k-ai4privacy/data/validation/test.jsonl",
+    "match": "same type, char IoU >= 0.5"
+  }
+}
