@@ -1,0 +1,65 @@
+# PII policy, validated by proxy/policy.py.
+#   entities           which types are tokenized and the detector confidence each needs
+#   structured_fields  JSON keys whose values are a known type (schema-aware masking, no NER guesswork)
+#   rehydration        where the executor may restore each type (ADR 0003); anything not listed is denied
+
+version: 1
+
+entities:
+  PERSON: {min_score: 0.5}
+  EMAIL_ADDRESS: {min_score: 0.5}
+  PHONE_NUMBER: {min_score: 0.4}
+  US_SSN: {min_score: 0.5}
+  DATE_OF_BIRTH: {min_score: 0.5}
+  STREET_ADDRESS: {min_score: 0.5}
+  MEMBER_ID: {min_score: 0.5}
+  POLICY_NUMBER: {min_score: 0.5}
+  CLAIM_NUMBER: {min_score: 0.5}
+  BANK_ACCOUNT: {min_score: 0.5}
+  ROUTING_NUMBER: {min_score: 0.5}
+  CREDIT_CARD: {min_score: 0.5}
+  IBAN_CODE: {min_score: 0.5}
+  CREDENTIAL: {min_score: 0.5, rehydratable: false}
+
+structured_fields:
+  PERSON: [firstName, lastName, given, family, payeeName, fullName, displayName]
+  US_SSN: [ssn, socialSecurityNumber]
+  EMAIL_ADDRESS: [email, emailAddress]
+  PHONE_NUMBER: [phone, phoneNo, phoneNumber]
+  DATE_OF_BIRTH: [dateOfBirth, dob]
+  STREET_ADDRESS: [street, line1, mailingAddress]
+  MEMBER_ID: [memberNumber, memberNo]
+  POLICY_NUMBER: [policyNumber, policyNo]
+  CLAIM_NUMBER: [claimNumber, claimNo]
+  BANK_ACCOUNT: [bankAccount]
+  ROUTING_NUMBER: [bankRouting]
+  CREDENTIAL: [password, passphrase, apiKey, token]
+
+# Keyed by tool name (public-API tools use the OpenAPI operationId), then argument name.
+rehydration:
+  searchMembers: {}
+  getMember: {memberNumber: [MEMBER_ID]}
+  updateAddress:
+    memberNumber: [MEMBER_ID]
+    street: [STREET_ADDRESS]
+  updateContact:
+    memberNumber: [MEMBER_ID]
+    email: [EMAIL_ADDRESS]
+    phone: [PHONE_NUMBER]
+  listPolicies: {memberNumber: [MEMBER_ID]}
+  getPolicy: {policyNumber: [POLICY_NUMBER]}
+  listClaims: {memberNumber: [MEMBER_ID]}
+  getClaim: {claimNumber: [CLAIM_NUMBER]}
+  requestReconsideration: {claimNumber: [CLAIM_NUMBER]}
+  submitReimbursement:
+    memberNumber: [MEMBER_ID]
+    claimNumber: [CLAIM_NUMBER]
+    payeeName: [PERSON]
+    bankRouting: [ROUTING_NUMBER]
+    bankAccount: [BANK_ACCOUNT]
+  listNotes: {memberNumber: [MEMBER_ID]}
+  # Free-text notes may reference people and case numbers, never SSNs, birth dates or bank details.
+  addNote:
+    memberNumber: [MEMBER_ID]
+    body: [PERSON, MEMBER_ID, POLICY_NUMBER, CLAIM_NUMBER]
+  deleteNote: {}

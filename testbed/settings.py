@@ -11,7 +11,7 @@ from pydantic import BaseModel, ConfigDict
 ENV_FILE = Path(__file__).resolve().parent.parent / ".env"
 
 
-def _dotenv(path: Path) -> dict[str, str]:
+def read_dotenv(path: Path) -> dict[str, str]:
     if not path.exists():
         return {}
     values = {}
@@ -34,7 +34,7 @@ class Settings(BaseModel):
 
 @cache
 def settings() -> Settings:
-    file = _dotenv(ENV_FILE)
+    file = read_dotenv(ENV_FILE)
 
     def get(key: str) -> str:
         value = os.environ.get(key) or file.get(key)

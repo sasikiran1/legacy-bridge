@@ -4,12 +4,21 @@ version = "0.1.0"
 description = "API-first agent with browser fallback and a reversible PII proxy"
 requires-python = ">=3.14,<3.15"
 dependencies = [
+    "cryptography>=50.0.2",
+    "en-core-web-lg",
     "faker>=40.43.0",
+    "fastapi>=0.159.1",
     "httpx>=0.28.1",
+    "huggingface-hub>=1.0",
     "playwright>=1.64.0",
+    "polars>=2.0.0",
+    "presidio-analyzer[gliner]>=2.2.364",
     "psycopg[binary]>=3.3.6",
     "pydantic>=2.14.1",
     "pyyaml>=6.0.3",
+    "redis>=8.1.0",
+    "torch>=2.14.1",
+    "uvicorn>=0.54.0",
 ]
 
 [dependency-groups]
@@ -25,6 +34,16 @@ dev = [
 [tool.uv]
 package = false
 
+# CPU-only torch: the default PyPI wheel bundles CUDA libraries (several GB) that the proxy does not need.
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[tool.uv.sources]
+torch = { index = "pytorch-cpu" }
+en-core-web-lg = { url = "https://github.com/explosion/spacy-models/releases/download/en_core_web_lg-3.8.0/en_core_web_lg-3.8.0-py3-none-any.whl" }
+
 [tool.ruff]
 line-length = 110
 target-version = "py314"
@@ -32,7 +51,7 @@ extend-exclude = ["portal"]
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "B", "UP", "SIM", "RUF", "ASYNC", "PT", "N", "S"]
-ignore = ["S101", "S311", "RUF001", "RUF003"]
+ignore = ["S101", "S311", "RUF001", "RUF003", "N818"]
 
 [tool.ruff.lint.per-file-ignores]
 "tests/**" = ["S105", "S106"]
@@ -40,7 +59,7 @@ ignore = ["S101", "S311", "RUF001", "RUF003"]
 [tool.mypy]
 strict = true
 python_version = "3.14"
-files = ["testbed", "tests"]
+files = ["testbed", "proxy", "analysis", "tests"]
 plugins = ["pydantic.mypy"]
 
 [tool.pytest.ini_options]
@@ -51,5 +70,7 @@ asyncio_default_fixture_loop_scope = "session"
 asyncio_default_test_loop_scope = "session"
 markers = [
     "oracle: drives the running portal stack with Playwright (needs `docker compose up`)",
+    "models: loads the spaCy and GLiNER detection models (slow first run; downloads ~1.2 GB)",
+    "redis: needs the Redis service (REDIS_URL)",
 ]
-addopts = "-m 'not oracle'"
+addopts = "-m 'not oracle and not models and not redis'"
