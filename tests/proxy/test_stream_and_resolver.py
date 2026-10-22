@@ -103,3 +103,15 @@ async def test_ui_fields_receive_only_the_types_their_label_allows(tmp_path: Pat
         await k.resolver.resolve_field("t1", "browser_type", "New note", token)
     with pytest.raises(RehydrationDenied):
         await k.resolver.resolve_field("t1", "browser_type", None, token)
+
+
+async def test_near_miss_placeholders_are_refused_not_typed(tmp_path: Path) -> None:
+    k = kit(tmp_path)
+    member = await k.masker.mask_text("M1234567", "t1", "agent")
+    with pytest.raises(RehydrationDenied, match="malformed placeholder"):
+        await k.resolver.resolve("t1", "getMember", {"memberNumber": member[:-1]})
+    with pytest.raises(RehydrationDenied, match="malformed placeholder"):
+        await k.resolver.resolve_field("t1", "browser_type", "Member number", member[1:])
+    assert await k.resolver.resolve("t1", "addNote", {"body": "Ref ID:1234 per call"}) == {
+        "body": "Ref ID:1234 per call"
+    }

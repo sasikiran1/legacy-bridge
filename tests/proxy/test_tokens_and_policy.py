@@ -104,4 +104,5 @@ def test_role_nouns_are_not_names() -> None:
     text = "from an administrator or The user, says Ada Quinby."
     assert not plausible(_span(5, 21, "PERSON", 0.9), text)
     assert not plausible(_span(25, 33, "PERSON", 0.9), text)
+    assert not plausible(_span(0, 10, "PERSON", 0.9), "Payee name")
     assert plausible(_span(40, 50, "PERSON", 0.9), text)

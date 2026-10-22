@@ -102,6 +102,8 @@ class ToolArgumentResolver:
         self._audit = audit
         self._policy = policy
         self._allowed_hosts = allowed_hosts
+        types = "|".join(sorted(map(re.escape, policy.entities)))
+        self._malformed = re.compile(rf"\[{{0,2}}(?:{types}):[0-9a-f]{{4,}}\]{{0,2}}")
 
     async def resolve(
         self, task_id: str, tool: str, arguments: Mapping[str, object], target_host: str | None = None
@@ -134,6 +136,11 @@ class ToolArgumentResolver:
         by_label: bool = False,
     ) -> str:
         destination = f"tool:{tool}.{argument}"
+        if fragment := self._malformed.search(TOKEN_RE.sub("", text)):
+            # A near-miss such as "[[MEMBER_ID:975008917f]" would otherwise reach the portal literally.
+            raise RehydrationDenied(
+                f"malformed placeholder {fragment.group()!r}: copy placeholders exactly, including [[ and ]]"
+            )
         pieces, cursor = [], 0
         for match in TOKEN_RE.finditer(text):
             token, entity_type = match.group(), match.group(1)

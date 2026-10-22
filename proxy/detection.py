@@ -226,6 +226,9 @@ ROLE_WORDS = frozenset(
         "reviewer",
         "payee",
         "patient",
+        "name",
+        "names",
+        "full",
     ]
 )
 
