@@ -96,3 +96,12 @@ def test_numeric_entity_types_need_digits() -> None:
     assert not plausible(_span(0, 13, "DATE_OF_BIRTH", 0.9), text)
     assert plausible(_span(14, 24, "DATE_OF_BIRTH", 0.9), text)
     assert plausible(_span(0, 4, "PERSON", 0.9), text)
+
+
+def test_role_nouns_are_not_names() -> None:
+    from proxy.detection import plausible
+
+    text = "from an administrator or The user, says Ada Quinby."
+    assert not plausible(_span(5, 21, "PERSON", 0.9), text)
+    assert not plausible(_span(25, 33, "PERSON", 0.9), text)
+    assert plausible(_span(40, 50, "PERSON", 0.9), text)

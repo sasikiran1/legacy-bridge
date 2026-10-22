@@ -199,12 +199,47 @@ NUMERIC_TYPES = frozenset(
 )
 
 
+ROLE_WORDS = frozenset(
+    [
+        "a",
+        "an",
+        "the",
+        "our",
+        "your",
+        "their",
+        "user",
+        "users",
+        "administrator",
+        "admin",
+        "developer",
+        "system",
+        "member",
+        "members",
+        "clerk",
+        "staff",
+        "operator",
+        "customer",
+        "agent",
+        "assistant",
+        "supervisor",
+        "manager",
+        "reviewer",
+        "payee",
+        "patient",
+    ]
+)
+
+
 def plausible(span: Span, text: str) -> bool:
     """Numeric entity types need at least two digits: NER tags column headers such as "Date of birth" or
-    "SSN" as the entities they describe."""
+    "SSN" as the entities they describe. A PERSON span made only of role nouns ("the user", "an
+    administrator") is not a name; GLiNER scores those above 0.75 in some sentences."""
+    value = text[span.start : span.end]
+    if span.entity_type == "PERSON":
+        return not all(word.strip(".,;:'\"()").lower() in ROLE_WORDS for word in value.split())
     if span.entity_type not in NUMERIC_TYPES:
         return True
-    return sum(ch.isdigit() for ch in text[span.start : span.end]) >= 2
+    return sum(ch.isdigit() for ch in value) >= 2
 
 
 def trim_street_spans(spans: Sequence[Span], text: str) -> list[Span]:
