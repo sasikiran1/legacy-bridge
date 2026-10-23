@@ -28,7 +28,7 @@ def test_breaker_opens_after_three_failures_and_half_opens_after_the_interval() 
         breaker.record(False)
     assert state(breaker) is BreakerState.OPEN
     assert not breaker.allow()
-    clock.now = 31
+    clock.now = 11
     assert breaker.allow()
     assert state(breaker) is BreakerState.HALF_OPEN
     breaker.record(True)
@@ -40,15 +40,27 @@ def test_failed_probe_reopens_with_a_doubled_interval() -> None:
     breaker = Breaker(clock=clock)
     for _ in range(3):
         breaker.record(False)
-    clock.now = 31
+    clock.now = 11
     assert breaker.allow()
     breaker.record(False)
     assert state(breaker) is BreakerState.OPEN
-    assert breaker.open_seconds == 60
-    clock.now = 31 + 59
+    assert breaker.open_seconds == 20
+    clock.now = 11 + 19
     assert not breaker.allow()
-    clock.now = 31 + 61
+    clock.now = 11 + 21
     assert breaker.allow()
+
+
+def test_the_doubled_interval_stops_at_the_cap() -> None:
+    clock = Clock()
+    breaker = Breaker(clock=clock)
+    for _ in range(3):
+        breaker.record(False)
+    for _ in range(6):
+        clock.now += breaker.open_seconds + 1
+        assert breaker.allow()
+        breaker.record(False)
+    assert breaker.open_seconds == 60
 
 
 def test_breaker_trips_on_failure_ratio_without_consecutive_failures() -> None:

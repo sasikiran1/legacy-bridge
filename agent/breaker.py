@@ -1,8 +1,9 @@
-"""Per-endpoint circuit breakers (ADR 0004 starting parameters).
+"""Per-endpoint circuit breakers (ADR 0004).
 
 Closed: calls flow. Open after 3 consecutive failures or >= 50% failures over the last 10 calls: calls are
 refused, so the agent goes straight to the browser. After the open interval one probe is allowed (half-open):
-success closes the breaker, failure reopens it with the interval doubled, up to 10 minutes.
+success closes the breaker, failure reopens it with the interval doubled, from 10 s up to a 60 s cap. The cap
+bounds time back on the API after an outage; the recovery experiment set it (analysis/breaker_recovery).
 
 A failed write to this API never mutates state (404/410/501/5xx/schema rejection), so the probe may be the
 real call; ADR 0004's read-only-probe refinement is left for when a write could partially succeed.
@@ -28,14 +29,14 @@ class Breaker:
     consecutive_threshold: int = 3
     window: int = 10
     ratio_threshold: float = 0.5
-    base_open_seconds: float = 30.0
-    max_open_seconds: float = 600.0
+    base_open_seconds: float = 10.0
+    max_open_seconds: float = 60.0
     clock: Callable[[], float] = time.monotonic
     outcomes: deque[bool] = field(default_factory=lambda: deque(maxlen=10))
     consecutive_failures: int = 0
     state: BreakerState = BreakerState.CLOSED
     opened_at: float = 0.0
-    open_seconds: float = 30.0
+    open_seconds: float = 10.0
     transitions: list[tuple[float, BreakerState]] = field(default_factory=list)
 
     def _set(self, state: BreakerState) -> None:
@@ -77,8 +78,8 @@ class BreakerRegistry:
     def __init__(
         self,
         clock: Callable[[], float] = time.monotonic,
-        base_open_seconds: float = 30.0,
-        max_open_seconds: float = 600.0,
+        base_open_seconds: float = 10.0,
+        max_open_seconds: float = 60.0,
     ) -> None:
         """`base_open_seconds` 0 makes every call a probe, which is the same as having no breaker."""
         self._clock = clock
