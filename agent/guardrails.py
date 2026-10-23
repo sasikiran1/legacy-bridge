@@ -102,9 +102,9 @@ class PromptGuardScanner:
         chunks = [ids[i : i + 510] for i in range(0, max(1, len(ids)), 446)] or [[]]
         best = 0.0
         for chunk in chunks:
-            inputs = self._tokenizer.prepare_for_model(chunk, return_tensors="pt", add_special_tokens=True)
+            input_ids = torch.tensor([[self._tokenizer.cls_token_id, *chunk, self._tokenizer.sep_token_id]])
             with torch.no_grad():
-                logits = self._model(input_ids=inputs["input_ids"].unsqueeze(0)).logits
+                logits = self._model(input_ids=input_ids).logits
             best = max(best, float(torch.softmax(logits, dim=-1)[0, -1]))
         return ScanResult(flagged=best >= self._threshold, score=best, scanner=self.name)
 
