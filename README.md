@@ -61,7 +61,7 @@ Results, each linked to the file it comes from:
 | Canary values in recorded provider payloads, production detector ([leak check](analysis/results/20261022T120500Z-leak-check/leak.json)) | 0 of 125 per agent session; 0 of 125 with each document isolated |
 | Same check with Presidio's default analyzer | 23 / 76 of 125 leaked |
 | Detection micro-F1, synthetic portal text / ai4privacy English rows ([benchmark](analysis/results/20261022T134635Z-pii-benchmark/pii_benchmark.json)) | 0.936 / 0.881 (Presidio default: 0.547 / 0.682) |
-| Latency the proxy adds, p50 / p95, CPU detection, Redis vault ([latency](analysis/results/20261022T135447Z-proxy-latency/proxy_latency.json)) | 243 ms / 1,498 ms |
+| Latency the proxy adds, p50 / p95, CPU detection, Redis vault ([latency](analysis/results/20261023T035708Z-proxy-latency/proxy_latency.json)) | 259 ms / 1,596 ms |
 | Prompt-token overhead of tokenization, gpt-oss tokenizer ([tokens](analysis/results/20261022T023527Z-token-overhead/token_overhead.json)) | +35% on PII-dense documents |
 
 ```bash

@@ -1,12 +1,12 @@
 {
-  "run_id": "20261022T135447Z-proxy-latency",
+  "run_id": "20261023T035708Z-proxy-latency",
   "kind": "proxy-latency",
   "git": {
-    "sha": "2208dda693e14ba2c9a74bb584329eb8dc80869c",
+    "sha": "6363e01d731bd4039732f532c4fc372f935ba40d",
     "dirty": false
   },
-  "started": "2026-10-22T13:54:47.762312+00:00",
-  "finished": "2026-10-22T13:56:42.144048+00:00",
+  "started": "2026-10-23T03:57:08.462721+00:00",
+  "finished": "2026-10-23T03:59:12.032015+00:00",
   "python": "3.14.7",
   "machine": "x86_64",
   "models": {
