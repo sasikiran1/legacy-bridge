@@ -5,7 +5,7 @@
 Reads every analysis/results/*-agent-run with the given label (live or recorded), groups rows by the model
 that served them and the scenario, keeps the latest row per (model, scenario, task), and writes the per-model
 figures with the run ids they come from. A row served by more than one model (a fallback) is reported
-separately.
+separately, as are runs on different runtime (Ollama) releases.
 """
 
 from __future__ import annotations
@@ -28,9 +28,11 @@ def rows_by_model(
         manifest = json.loads((directory / "manifest.json").read_text(encoding="utf-8"))
         if manifest["config"].get("label") != label:
             continue
+        # Runs on different runtime releases are kept apart; manifests before M3 did not record it.
+        runtime = manifest.get("models", {}).get("runtime", "runtime not recorded")
         for line in (directory / "agent_runs.jsonl").read_text(encoding="utf-8").splitlines():
             row = json.loads(line)
-            model = " + ".join(row["models"]) or "no model call"
+            model = f"{' + '.join(row['models']) or 'no model call'} @ {runtime}"
             rows[(model, row["scenario"], row["task_id"])] = row
             sources.setdefault((model, row["scenario"]), set()).add(directory.name)
     return rows, sources

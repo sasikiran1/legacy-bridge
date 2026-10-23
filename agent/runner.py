@@ -22,6 +22,7 @@ from __future__ import annotations
 import argparse
 import asyncio
 import json
+import os
 import shutil
 import sys
 import time
@@ -134,6 +135,19 @@ def replay_differences(rows: list[TaskRun]) -> list[str]:
             if recorded.get(field) != replayed[field]
         ]
     return differences
+
+
+async def ollama_version() -> str:
+    """The local runtime's version, so runs on different Ollama releases are never compared unknowingly."""
+    base = os.environ.get("OLLAMA_BASE_URL", "").removesuffix("/").removesuffix("/v1")
+    if not base:
+        return "unknown"
+    try:
+        async with httpx.AsyncClient(timeout=5) as http:
+            response = await http.get(f"{base}/api/version")
+            return f"ollama {response.json()['version']}"
+    except httpx.HTTPError, ValueError, KeyError:
+        return "unknown"
 
 
 async def ensure_agent_database(url: str) -> None:
@@ -323,7 +337,13 @@ async def main_async(args: argparse.Namespace) -> int:
             "".join(r.model_dump_json() + "\n" for r in rows), encoding="utf-8"
         )
         served = sorted({m for r in rows for m in r.models})
-        run.finish(models={"profile": settings.profile.value, "served": ", ".join(served)})
+        run.finish(
+            models={
+                "profile": settings.profile.value,
+                "served": ", ".join(served),
+                "runtime": await ollama_version(),
+            }
+        )
         destination = str(run.directory)
     await masker.aclose()
     await proxy_http.aclose()

@@ -112,6 +112,10 @@ services:
       INJECTION_SCANNER: ${INJECTION_SCANNER:-none}
       HF_TOKEN: ${HF_TOKEN:-}
       OTEL_EXPORTER_OTLP_ENDPOINT: ${AGENT_OTLP_ENDPOINT:-}
+      # Read only to record the Ollama version in run manifests; model calls always go through the proxy.
+      OLLAMA_BASE_URL: ${OLLAMA_DOCKER_URL:-http://host.docker.internal:11434/v1}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     shm_size: 1gb
     depends_on:
       portal:
