@@ -74,10 +74,16 @@ class Breaker:
 
 
 class BreakerRegistry:
-    def __init__(self, clock: Callable[[], float] = time.monotonic, base_open_seconds: float = 30.0) -> None:
+    def __init__(
+        self,
+        clock: Callable[[], float] = time.monotonic,
+        base_open_seconds: float = 30.0,
+        max_open_seconds: float = 600.0,
+    ) -> None:
         """`base_open_seconds` 0 makes every call a probe, which is the same as having no breaker."""
         self._clock = clock
         self._base_open_seconds = base_open_seconds
+        self._max_open_seconds = max_open_seconds
         self._breakers: dict[str, Breaker] = {}
 
     def get(self, operation_id: str) -> Breaker:
@@ -85,6 +91,7 @@ class BreakerRegistry:
             self._breakers[operation_id] = Breaker(
                 clock=self._clock,
                 base_open_seconds=self._base_open_seconds,
+                max_open_seconds=self._max_open_seconds,
                 open_seconds=self._base_open_seconds,
             )
         return self._breakers[operation_id]

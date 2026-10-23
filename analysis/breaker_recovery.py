@@ -2,14 +2,16 @@
 
     uv run python -m analysis.breaker_recovery
 
-A task needing `getMember` arrives every INTERVAL simulated seconds for DURATION seconds. Between OUTAGE_START
-and OUTAGE_END the portal's chaos endpoint breaks that operation. Each arrival asks the endpoint's breaker: if
-it allows the call, the real API executor calls the real portal (through the proxy's masking, like the agent);
-otherwise the task would go to the browser and nothing is called. Time is simulated, the portal is not: chaos
-is switched at the simulated outage boundaries, and every API outcome comes from a real HTTP response.
+A task needing `getMember` arrives every INTERVAL simulated seconds. From OUTAGE_START, for each length in
+OUTAGE_LENGTHS, the portal's chaos endpoint breaks that operation; the run continues AFTER seconds past the
+outage. Each arrival asks the endpoint's breaker: if it allows the call, the real API executor calls the real
+portal (through the proxy's masking, like the agent); otherwise the task would go to the browser and nothing
+is called. Time is simulated, the portal is not: chaos is switched at the simulated outage boundaries, and
+every API outcome comes from a real HTTP response.
 
-Compared: an initial open interval of 0 s (every call is a probe, i.e. no breaker) and the ADR's candidates,
-for a transient outage (500) and a removed endpoint (404). Results hold outcomes and counts only.
+Compared: breakers given as (initial open interval, cap on the doubled interval). An initial interval of 0 s
+makes every call a probe, i.e. no breaker. Outages are a transient failure (500) and a removed endpoint (404).
+Results hold outcomes and counts only.
 """
 
 from __future__ import annotations
@@ -38,10 +40,20 @@ from testbed.tasks import load_tasks
 
 OPERATION = "getMember"
 INTERVAL = 10.0
-DURATION = 1800.0
 OUTAGE_START = 300.0
-OUTAGE_END = 900.0
-OPEN_INTERVALS = (0.0, 10.0, 30.0, 60.0, 120.0)
+OUTAGE_LENGTHS = (120.0, 600.0, 1200.0)
+AFTER = 900.0
+BREAKERS = (
+    (0.0, 600.0),
+    (10.0, 600.0),
+    (30.0, 600.0),
+    (60.0, 600.0),
+    (120.0, 600.0),
+    (10.0, 60.0),
+    (10.0, 120.0),
+    (30.0, 60.0),
+    (30.0, 120.0),
+)
 OUTAGES = (ApiMode.SERVER_ERROR, ApiMode.NOT_FOUND)
 TASK_ID = "experiment/breaker-recovery"
 
@@ -55,22 +67,26 @@ class SimClock:
 
 
 async def timeline(
-    open_seconds: float,
+    breaker: tuple[float, float],
     outage: ApiMode,
+    length: float,
     admin: PortalAdmin,
     make_executor: Any,
     credentials: tuple[str, str],
     member_number: str,
 ) -> list[dict[str, Any]]:
     clock = SimClock()
-    executor: ApiExecutor = make_executor(BreakerRegistry(clock=clock, base_open_seconds=open_seconds))
+    base, cap = breaker
+    executor: ApiExecutor = make_executor(
+        BreakerRegistry(clock=clock, base_open_seconds=base, max_open_seconds=cap)
+    )
     await admin.apply(ChaosConfig())
     broken = False
     events = []
     try:
-        for step in range(int(DURATION / INTERVAL)):
+        for step in range(int((OUTAGE_START + length + AFTER) / INTERVAL)):
             clock.now = step * INTERVAL
-            should_break = OUTAGE_START <= clock.now < OUTAGE_END
+            should_break = OUTAGE_START <= clock.now < OUTAGE_START + length
             if should_break != broken:
                 await admin.apply(ChaosConfig(api={OPERATION: outage}) if should_break else ChaosConfig())
                 broken = should_break
@@ -86,14 +102,15 @@ async def timeline(
     return events
 
 
-def measure(events: list[dict[str, Any]]) -> dict[str, Any]:
-    after = [e for e in events if e["t"] >= OUTAGE_END]
+def measure(events: list[dict[str, Any]], length: float) -> dict[str, Any]:
+    end = OUTAGE_START + length
+    after = [e for e in events if e["t"] >= end]
     back = next((e["t"] for e in after if e["outcome"] == "api_ok"), None)
     return {
         "failed_api_calls_during_outage": sum(e["broken"] and e["outcome"] == "api_failed" for e in events),
         "browser_during_outage": sum(e["broken"] and e["outcome"] == "browser" for e in events),
         "browser_after_recovery": sum(e["outcome"] == "browser" for e in after),
-        "seconds_to_return_to_api": None if back is None else back - OUTAGE_END,
+        "seconds_to_return_to_api": None if back is None else back - end,
         "failed_api_calls_total": sum(e["outcome"] == "api_failed" for e in events),
     }
 
@@ -116,21 +133,24 @@ async def run_experiment() -> dict[str, Any]:
     try:
         async with PortalAdmin(testbed_settings()) as admin:
             for outage in OUTAGES:
-                for open_seconds in OPEN_INTERVALS:
-                    events = await timeline(
-                        open_seconds,
-                        outage,
-                        admin,
-                        make_executor,
-                        (task.user, settings.test_user_password),
-                        task.member_number,
-                    )
-                    figures = measure(events)
-                    results.setdefault(outage.value, {})[f"{open_seconds:g}"] = {
-                        **figures,
-                        "outcomes": [e["outcome"] for e in events],
-                    }
-                    print(f"{outage.value:16} open {open_seconds:5g}s  {figures}")
+                for length in OUTAGE_LENGTHS:
+                    for breaker in BREAKERS:
+                        events = await timeline(
+                            breaker,
+                            outage,
+                            length,
+                            admin,
+                            make_executor,
+                            (task.user, settings.test_user_password),
+                            task.member_number,
+                        )
+                        figures = measure(events, length)
+                        key = f"open {breaker[0]:g}s, cap {breaker[1]:g}s"
+                        results.setdefault(outage.value, {}).setdefault(f"{length:g}s", {})[key] = {
+                            **figures,
+                            "outcomes": [e["outcome"] for e in events],
+                        }
+                        print(f"{outage.value:13} outage {length:5g}s  {key:22} {figures}")
     finally:
         async with httpx.AsyncClient(base_url=settings.proxy_url) as proxy:
             await proxy.delete(f"/v1/tasks/{TASK_ID}")
@@ -145,9 +165,10 @@ def main(argv: list[str] | None = None) -> int:
         config={
             "operation": OPERATION,
             "interval_s": INTERVAL,
-            "duration_s": DURATION,
-            "outage_s": [OUTAGE_START, OUTAGE_END],
-            "open_intervals_s": list(OPEN_INTERVALS),
+            "outage_start_s": OUTAGE_START,
+            "outage_lengths_s": list(OUTAGE_LENGTHS),
+            "after_s": AFTER,
+            "breakers_open_cap_s": [list(b) for b in BREAKERS],
             "outages": [o.value for o in OUTAGES],
         },
     )
