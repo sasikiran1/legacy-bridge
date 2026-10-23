@@ -1,12 +1,13 @@
 from __future__ import annotations
 
+import asyncio
 import json
 import os
 from pathlib import Path
 
 import pytest
 
-from proxy.audit import Action, AuditLog, verify
+from proxy.audit import Action, AuditLog, AuditLogDamaged, recover, verify
 from proxy.vault import MemoryVault, RedisVault, Sealer, TokenCollision, VaultEntry, VaultUnavailable
 from tests.proxy.fakes import VAULT_KEY
 
@@ -107,3 +108,39 @@ async def test_tampering_is_detected(tmp_path: Path, tamper: str) -> None:
     result = verify(path)
     assert not result.ok
     assert result.error is not None
+
+
+async def _log_with(path: Path, entries: int) -> str:
+    log = AuditLog(path)
+    for i in range(entries):
+        await log.record("t1", Action.MASK, "PERSON", f"[[PERSON:{i:010x}]]", "provider")
+    return log.head
+
+
+def test_a_torn_tail_blocks_the_log_until_it_is_recovered(tmp_path: Path) -> None:
+    path = tmp_path / "audit.jsonl"
+    head = asyncio.run(_log_with(path, 3))
+    with path.open("ab") as handle:
+        handle.write(b'{"seq": 4, "ts": "2026-' + b"\x00" * 64)
+    with pytest.raises(AuditLogDamaged, match="recover"):
+        AuditLog(path)
+    result = recover(path)
+    assert result.recovered
+    assert (result.entries, result.head) == (3, head)
+    assert result.original is not None
+    assert b"\x00" in Path(result.original).read_bytes()
+    reopened = AuditLog(path)
+    asyncio.run(reopened.record("t1", Action.UNMASK, "PERSON", "[[PERSON:0000000000]]", "tool:x.y"))
+    assert verify(path).ok
+    assert verify(path).entries == 4
+
+
+def test_damage_before_the_tail_is_not_recovered(tmp_path: Path) -> None:
+    path = tmp_path / "audit.jsonl"
+    asyncio.run(_log_with(path, 3))
+    lines = path.read_text(encoding="utf-8").splitlines(keepends=True)
+    path.write_text(lines[0] + lines[2] + lines[1], encoding="utf-8")
+    result = recover(path)
+    assert not result.recovered
+    assert "does not verify" in (result.error or "")
+    assert not list(tmp_path.glob("*.torn-*"))
