@@ -12,11 +12,18 @@ every API outcome comes from a real HTTP response.
 Compared: breakers given as (initial open interval, cap on the doubled interval). An initial interval of 0 s
 makes every call a probe, i.e. no breaker. Outages are a transient failure (500) and a removed endpoint (404).
 Results hold outcomes and counts only.
+
+Probe times are fixed by the doubling, so time back on the API after one outage depends on where that outage
+happens to end relative to the next probe. The `simulated` section therefore replays every outage length from
+SWEEP_MIN to SWEEP_MAX in INTERVAL steps through the same Breaker code (failure while the outage lasts,
+success after), and reports the mean and worst case; the portal runs validate that real 500/404 responses
+drive the breaker the same way.
 """
 
 from __future__ import annotations
 
 import asyncio
+import statistics
 import sys
 from typing import Any
 
@@ -43,6 +50,8 @@ INTERVAL = 10.0
 OUTAGE_START = 300.0
 OUTAGE_LENGTHS = (120.0, 600.0, 1200.0)
 AFTER = 900.0
+SWEEP_MIN = 60.0
+SWEEP_MAX = 1800.0
 BREAKERS = (
     (0.0, 600.0),
     (10.0, 600.0),
@@ -100,6 +109,43 @@ async def timeline(
         await admin.apply(ChaosConfig())
         await executor.aclose()
     return events
+
+
+def simulate(breaker: tuple[float, float], length: float) -> list[dict[str, Any]]:
+    """The portal timeline without the portal: the breaker sees failure during the outage, success after."""
+    clock = SimClock()
+    registry = BreakerRegistry(clock=clock, base_open_seconds=breaker[0], max_open_seconds=breaker[1])
+    events = []
+    for step in range(int((OUTAGE_START + length + AFTER) / INTERVAL)):
+        clock.now = step * INTERVAL
+        broken = OUTAGE_START <= clock.now < OUTAGE_START + length
+        gate = registry.get(OPERATION)
+        if gate.allow():
+            gate.record(not broken)
+            outcome = "api_failed" if broken else "api_ok"
+        else:
+            outcome = "browser"
+        events.append({"t": clock.now, "broken": broken, "outcome": outcome})
+    return events
+
+
+def phase_sweep() -> dict[str, Any]:
+    lengths = [SWEEP_MIN + INTERVAL * i for i in range(int((SWEEP_MAX - SWEEP_MIN) / INTERVAL) + 1)]
+    summary = {}
+    for breaker in BREAKERS:
+        runs = [measure(simulate(breaker, length), length) for length in lengths]
+        returns = [r["seconds_to_return_to_api"] for r in runs]
+        summary[f"open {breaker[0]:g}s, cap {breaker[1]:g}s"] = {
+            "outage_lengths": len(lengths),
+            "mean_seconds_to_return": round(statistics.mean(returns), 1),
+            "max_seconds_to_return": max(returns),
+            "mean_browser_after_recovery": round(
+                statistics.mean(r["browser_after_recovery"] for r in runs), 1
+            ),
+            "mean_failed_api_calls": round(statistics.mean(r["failed_api_calls_total"] for r in runs), 1),
+            "max_failed_api_calls": max(r["failed_api_calls_total"] for r in runs),
+        }
+    return summary
 
 
 def measure(events: list[dict[str, Any]], length: float) -> dict[str, Any]:
@@ -170,10 +216,13 @@ def main(argv: list[str] | None = None) -> int:
             "after_s": AFTER,
             "breakers_open_cap_s": [list(b) for b in BREAKERS],
             "outages": [o.value for o in OUTAGES],
+            "simulated_outage_lengths_s": [SWEEP_MIN, SWEEP_MAX, INTERVAL],
         },
     )
-    results = asyncio.run(run_experiment())
+    results = {"portal": asyncio.run(run_experiment()), "simulated": phase_sweep()}
     run.write("breaker_recovery.json", results)
+    for key, figures in results["simulated"].items():
+        print(f"simulated {key:22} {figures}")
     run.finish(models={})
     print(f"-> {run.directory}")
     return 0
