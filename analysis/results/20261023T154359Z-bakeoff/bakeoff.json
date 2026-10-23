@@ -1,0 +1,329 @@
+{
+  "gemma4-12b-16k @ ollama 0.40.9": {
+    "api_degraded": {
+      "tasks": 10,
+      "passed": 10,
+      "wrong_actions": 0,
+      "fell_back_to_browser": 10,
+      "claimed_success_but_failed": 0,
+      "outcomes": {
+        "success": 10
+      },
+      "median_llm_calls": 6.5,
+      "median_seconds": 81.3,
+      "median_prompt_tokens": 20390.5,
+      "models": [
+        "gemma4-12b-16k"
+      ],
+      "failed_tasks": [],
+      "median_output_tokens": 1062,
+      "runs": [
+        "20261023T041057Z-agent-run"
+      ]
+    },
+    "healthy": {
+      "tasks": 10,
+      "passed": 10,
+      "wrong_actions": 0,
+      "fell_back_to_browser": 5,
+      "claimed_success_but_failed": 0,
+      "outcomes": {
+        "success": 10
+      },
+      "median_llm_calls": 5.5,
+      "median_seconds": 43.029999999999994,
+      "median_prompt_tokens": 11161.0,
+      "models": [
+        "gemma4-12b-16k"
+      ],
+      "failed_tasks": [],
+      "median_output_tokens": 902,
+      "runs": [
+        "20261023T040052Z-agent-run"
+      ]
+    }
+  },
+  "gemma4-12b-16k @ runtime not recorded": {
+    "api_degraded": {
+      "tasks": 10,
+      "passed": 10,
+      "wrong_actions": 0,
+      "fell_back_to_browser": 10,
+      "claimed_success_but_failed": 0,
+      "outcomes": {
+        "success": 10
+      },
+      "median_llm_calls": 6.5,
+      "median_seconds": 83.58500000000001,
+      "median_prompt_tokens": 21042.0,
+      "models": [
+        "gemma4-12b-16k"
+      ],
+      "failed_tasks": [],
+      "median_output_tokens": 988,
+      "runs": [
+        "20261023T023106Z-agent-run"
+      ]
+    },
+    "healthy": {
+      "tasks": 10,
+      "passed": 10,
+      "wrong_actions": 0,
+      "fell_back_to_browser": 5,
+      "claimed_success_but_failed": 0,
+      "outcomes": {
+        "success": 10
+      },
+      "median_llm_calls": 5.5,
+      "median_seconds": 64.315,
+      "median_prompt_tokens": 11186.0,
+      "models": [
+        "gemma4-12b-16k"
+      ],
+      "failed_tasks": [],
+      "median_output_tokens": 902,
+      "runs": [
+        "20261023T021719Z-agent-run"
+      ]
+    }
+  },
+  "qwen2.5-14b-16k @ ollama 0.40.9": {
+    "api_degraded": {
+      "tasks": 10,
+      "passed": 6,
+      "wrong_actions": 0,
+      "fell_back_to_browser": 10,
+      "claimed_success_but_failed": 0,
+      "outcomes": {
+        "handoff": 1,
+        "success": 6,
+        "unverified": 3
+      },
+      "median_llm_calls": 5.5,
+      "median_seconds": 114.47,
+      "median_prompt_tokens": 11344.0,
+      "models": [
+        "qwen2.5-14b-16k"
+      ],
+      "failed_tasks": [
+        "add_note-01",
+        "update_address-01",
+        "update_contact-01",
+        "update_contact-02"
+      ],
+      "median_output_tokens": 826,
+      "runs": [
+        "20261023T050231Z-agent-run"
+      ]
+    },
+    "healthy": {
+      "tasks": 10,
+      "passed": 8,
+      "wrong_actions": 0,
+      "fell_back_to_browser": 5,
+      "claimed_success_but_failed": 0,
+      "outcomes": {
+        "handoff": 1,
+        "success": 8,
+        "unverified": 1
+      },
+      "median_llm_calls": 5.5,
+      "median_seconds": 42.915,
+      "median_prompt_tokens": 10465.5,
+      "models": [
+        "qwen2.5-14b-16k"
+      ],
+      "failed_tasks": [
+        "request_reconsideration-01",
+        "update_contact-02"
+      ],
+      "median_output_tokens": 524,
+      "runs": [
+        "20261023T045118Z-agent-run"
+      ]
+    }
+  },
+  "qwen2.5-14b-16k @ runtime not recorded": {
+    "healthy": {
+      "tasks": 10,
+      "passed": 9,
+      "wrong_actions": 0,
+      "fell_back_to_browser": 5,
+      "claimed_success_but_failed": 0,
+      "outcomes": {
+        "success": 9,
+        "unverified": 1
+      },
+      "median_llm_calls": 5.0,
+      "median_seconds": 34.425,
+      "median_prompt_tokens": 7670.0,
+      "models": [
+        "qwen2.5-14b-16k"
+      ],
+      "failed_tasks": [
+        "update_contact-02"
+      ],
+      "median_output_tokens": 524,
+      "runs": [
+        "20261023T031425Z-agent-run"
+      ]
+    }
+  },
+  "qwen3-14b-16k @ ollama 0.40.9": {
+    "api_degraded": {
+      "tasks": 10,
+      "passed": 9,
+      "wrong_actions": 0,
+      "fell_back_to_browser": 10,
+      "claimed_success_but_failed": 0,
+      "outcomes": {
+        "handoff": 1,
+        "success": 9
+      },
+      "median_llm_calls": 7.5,
+      "median_seconds": 233.825,
+      "median_prompt_tokens": 21608.0,
+      "models": [
+        "qwen3-14b-16k"
+      ],
+      "failed_tasks": [
+        "claim_status-01"
+      ],
+      "median_output_tokens": 3113,
+      "runs": [
+        "20261023T060451Z-agent-run"
+      ]
+    },
+    "healthy": {
+      "tasks": 10,
+      "passed": 8,
+      "wrong_actions": 0,
+      "fell_back_to_browser": 5,
+      "claimed_success_but_failed": 1,
+      "outcomes": {
+        "success": 9,
+        "unverified": 1
+      },
+      "median_llm_calls": 4.0,
+      "median_seconds": 116.55499999999999,
+      "median_prompt_tokens": 5096.0,
+      "models": [
+        "qwen3-14b-16k"
+      ],
+      "failed_tasks": [
+        "delete_note-01",
+        "update_contact-02"
+      ],
+      "median_output_tokens": 3368,
+      "runs": [
+        "20261023T054110Z-agent-run"
+      ]
+    }
+  },
+  "qwen3.5-9b-16k @ ollama 0.40.9": {
+    "api_degraded": {
+      "tasks": 10,
+      "passed": 9,
+      "wrong_actions": 0,
+      "fell_back_to_browser": 10,
+      "claimed_success_but_failed": 1,
+      "outcomes": {
+        "success": 10
+      },
+      "median_llm_calls": 7.5,
+      "median_seconds": 90.545,
+      "median_prompt_tokens": 23684.0,
+      "models": [
+        "qwen3.5-9b-16k"
+      ],
+      "failed_tasks": [
+        "update_address-01"
+      ],
+      "median_output_tokens": 1439,
+      "runs": [
+        "20261023T043527Z-agent-run"
+      ]
+    },
+    "healthy": {
+      "tasks": 10,
+      "passed": 8,
+      "wrong_actions": 0,
+      "fell_back_to_browser": 5,
+      "claimed_success_but_failed": 1,
+      "outcomes": {
+        "success": 9,
+        "unverified": 1
+      },
+      "median_llm_calls": 5.5,
+      "median_seconds": 49.79,
+      "median_prompt_tokens": 13216.0,
+      "models": [
+        "qwen3.5-9b-16k"
+      ],
+      "failed_tasks": [
+        "claim_status-01",
+        "update_contact-02"
+      ],
+      "median_output_tokens": 1292,
+      "runs": [
+        "20261023T042457Z-agent-run"
+      ]
+    }
+  },
+  "qwen3.5-9b-16k @ runtime not recorded": {
+    "api_degraded": {
+      "tasks": 10,
+      "passed": 7,
+      "wrong_actions": 0,
+      "fell_back_to_browser": 10,
+      "claimed_success_but_failed": 1,
+      "outcomes": {
+        "handoff": 1,
+        "success": 8,
+        "unverified": 1
+      },
+      "median_llm_calls": 8.0,
+      "median_seconds": 96.265,
+      "median_prompt_tokens": 23872.0,
+      "models": [
+        "qwen3.5-9b-16k"
+      ],
+      "failed_tasks": [
+        "submit_reimbursement-01",
+        "update_address-01",
+        "update_contact-01"
+      ],
+      "median_output_tokens": 1478,
+      "runs": [
+        "20261023T025756Z-agent-run"
+      ]
+    },
+    "healthy": {
+      "tasks": 10,
+      "passed": 7,
+      "wrong_actions": 0,
+      "fell_back_to_browser": 5,
+      "claimed_success_but_failed": 1,
+      "outcomes": {
+        "handoff": 1,
+        "success": 8,
+        "unverified": 1
+      },
+      "median_llm_calls": 5.5,
+      "median_seconds": 57.489999999999995,
+      "median_prompt_tokens": 13216.0,
+      "models": [
+        "qwen3.5-9b-16k"
+      ],
+      "failed_tasks": [
+        "claim_status-01",
+        "submit_reimbursement-01",
+        "update_contact-02"
+      ],
+      "median_output_tokens": 1295,
+      "runs": [
+        "20261023T024546Z-agent-run"
+      ]
+    }
+  }
+}
