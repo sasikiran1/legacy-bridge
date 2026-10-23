@@ -17,3 +17,4 @@ Short records: context, decision, alternatives, consequences. A decision is chan
 | [0011](0011-ascii-token-delimiters.md) | ASCII token delimiters (supersedes the rendering in 0001) | Accepted |
 | [0012](0012-masking-boundaries-for-the-agent.md) | Masking boundaries for the agent | Accepted |
 | [0013](0013-local-agent-model.md) | Local agent model: gemma4 12B | Accepted |
+| [0014](0014-injection-classifier-evidence.md) | Injection classifier: 86M, on locally, not relied on (settles the model choice in 0009) | Accepted |

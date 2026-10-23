@@ -112,11 +112,14 @@ def load_index() -> dict[str, dict[str, Any]]:
     return index
 
 
-def record_index(rows: list[TaskRun]) -> None:
-    """Stores what each recorded task did, so a replay can be checked against it."""
+def record_index(rows: list[TaskRun], scanner: str = "none") -> None:
+    """Stores what each recorded task did, and with which injection scanner, so a replay can be checked."""
     index = load_index()
     for row in rows:
-        index[f"{row.scenario}/{row.task_id}"] = row.model_dump(include=set(REPLAY_FIELDS))
+        index[f"{row.scenario}/{row.task_id}"] = {
+            **row.model_dump(include=set(REPLAY_FIELDS)),
+            "scanner": scanner,
+        }
     CASSETTE_INDEX.write_text(json.dumps(index, indent=1, sort_keys=True) + "\n", encoding="utf-8")
 
 
@@ -263,8 +266,18 @@ async def main_async(args: argparse.Namespace) -> int:
     scenario = load_scenarios()[args.scenario]
     tasks = load_tasks()
     if args.check_replay and not args.tasks:
-        recorded = {key.split("/", 1)[1] for key in load_index() if key.startswith(f"{scenario.name}/")}
-        tasks = tuple(t for t in tasks if t.id in recorded)
+        recorded = {
+            key.split("/", 1)[1]: entry.get("scanner", "none")
+            for key, entry in load_index().items()
+            if key.startswith(f"{scenario.name}/")
+        }
+        # A scanner flag changes which writes need approval, so a replay under another scanner is not the
+        # same run; those tasks are skipped and counted, never passed (CI has no Prompt Guard; ADR 0014).
+        skipped = sorted(t for t, s in recorded.items() if s != settings.injection_scanner)
+        if skipped:
+            names = ", ".join(skipped)
+            print(f"skipped {len(skipped)} tasks recorded with another injection scanner: {names}")
+        tasks = tuple(t for t in tasks if recorded.get(t.id) == settings.injection_scanner)
     elif not args.all:
         wanted = set(args.tasks.split(","))
         tasks = tuple(t for t in tasks if t.id in wanted)
@@ -356,7 +369,7 @@ async def main_async(args: argparse.Namespace) -> int:
         f"{sum(r.cassette_mismatches for r in rows)} cassette mismatches -> {destination}"
     )
     if args.record:
-        record_index(rows)
+        record_index(rows, settings.injection_scanner)
     if args.check_replay:
         differences = replay_differences(rows)
         for line in differences:

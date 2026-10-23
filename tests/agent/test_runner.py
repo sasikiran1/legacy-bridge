@@ -57,3 +57,12 @@ def test_recording_again_replaces_only_the_rerun_tasks() -> None:
     record_index([row("claim_status-01", outcome="error", passed=False)])
     assert replay_differences([row("claim_status-02")]) == []
     assert replay_differences([row("claim_status-01", outcome="error", passed=False)]) == []
+
+
+def test_the_index_records_which_injection_scanner_was_used() -> None:
+    record_index([row("claim_status-01")], scanner="promptguard")
+    record_index([row("claim_status-02")])
+    index = runner.load_index()
+    assert index["healthy/claim_status-01"]["scanner"] == "promptguard"
+    assert index["healthy/claim_status-02"]["scanner"] == "none"
+    assert replay_differences([row("claim_status-01")]) == []
