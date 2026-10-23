@@ -1,0 +1,37 @@
+{
+  "run_id": "20261023T025756Z-agent-run",
+  "kind": "agent-run",
+  "git": {
+    "sha": "e8a2f0bceb51b834b4caf5b45feb3f68a3b009bc",
+    "dirty": false
+  },
+  "started": "2026-10-23T02:57:56.358494+00:00",
+  "finished": "2026-10-23T03:13:34.024428+00:00",
+  "python": "3.14.7",
+  "machine": "x86_64",
+  "models": {
+    "profile": "local",
+    "served": "qwen3.5-9b-16k"
+  },
+  "config": {
+    "scenario": "api_degraded",
+    "tasks": [
+      "add_note-01",
+      "claim_status-01",
+      "delete_note-01",
+      "policy_lookup-01",
+      "policy_lookup-02",
+      "request_reconsideration-01",
+      "submit_reimbursement-01",
+      "update_address-01",
+      "update_contact-01",
+      "update_contact-02"
+    ],
+    "profile": "local",
+    "approvals": "task",
+    "resolve_walls": false,
+    "scanner": "none",
+    "record": false,
+    "label": "bakeoff"
+  }
+}
