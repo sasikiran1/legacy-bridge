@@ -92,12 +92,17 @@ models:
     provider: ollama
     license: Apache-2.0
     source: https://ollama.com/library/qwen3-vl
+  # Agent model, chosen by the M3 bake-off (ADR 0013). `gemma4:12b` with num_ctx 16384; `make local-model`.
+  - id: gemma4-12b-16k
+    provider: ollama
+    license: Apache-2.0
+    source: https://ollama.com/library/gemma4
 
 # Role → ordered fallback chain. A 429 or provider error moves to the next entry.
-# local_text is chosen in M3 by a small tool-calling bake-off; candidates are verified then.
+# local_text was chosen by the M3 bake-off (ADR 0013); LOCAL_TEXT_MODEL overrides it.
 roles:
   plan:        [openai/gpt-oss-20b, gemini-3.5-flash-lite, gemini-3.1-flash-lite]
   api_tier:    [openai/gpt-oss-20b, gemini-3.5-flash-lite, gemini-3.1-flash-lite]
   explore:     [openai/gpt-oss-120b, gemini-3.8-flash, gemini-3.6-flash, qwen/qwen3.8-27b]
-  local_text:  []
+  local_text:  [gemma4-12b-16k]
   vision:      [qwen3-vl:8b]

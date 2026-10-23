@@ -15,7 +15,7 @@ NODE_IMAGE := node:26.9.0
 .DEFAULT_GOAL := help
 .PHONY: help up down reset-db logs seed lint typecheck test portal-test web-build check probe oracles demo \
 	proxy-up leak proxy-demo bench-pii bench-latency bench-tokens audit-verify agent-stack record replay-check \
-	demo-fallback traces bakeoff ollama-switch
+	demo-fallback traces bakeoff ollama-switch local-model
 
 help: ## List targets
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*## "} {printf "  %-12s %s\n", $$1, $$2}'
@@ -153,3 +153,8 @@ ollama-switch:
 	done
 	curl -sf $(OLLAMA_URL)/api/generate -d '{"model": "$(MODEL)", "keep_alive": "30m"}' >/dev/null
 	curl -sf $(OLLAMA_URL)/api/ps | grep -q '"name":"$(MODEL)' || { echo "$(MODEL) did not load" >&2; exit 1; }
+
+local-model: ## Pull gemma4:12b and create the agent's 16k-context variant gemma4-12b-16k (ADR 0013)
+	curl -sf $(OLLAMA_URL)/api/pull -d '{"model": "gemma4:12b", "stream": false}' >/dev/null
+	curl -sf $(OLLAMA_URL)/api/create -d '{"model": "gemma4-12b-16k", "from": "gemma4:12b", \
+		"parameters": {"num_ctx": 16384}, "stream": false}'
