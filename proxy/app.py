@@ -18,6 +18,7 @@ Fails closed: if detection or the vault is unavailable, the request is not forwa
 
 from __future__ import annotations
 
+import asyncio
 import json
 import os
 from collections.abc import AsyncIterator, Awaitable, Callable
@@ -48,6 +49,8 @@ REHYDRATE_HEADER = "x-lb-rehydrate"
 CLIENT_DESTINATION = "client"
 AGENT_DESTINATION = "agent-state"
 RETRYABLE = {429, 500, 502, 503, 504}
+LOCAL_RETRIES = 1
+LOCAL_RETRY_SECONDS = 5.0
 
 Recording = tuple[str, int, dict[str, Any], str]
 
@@ -203,13 +206,21 @@ def create_app(build: Callable[[], Awaitable[Services]]) -> FastAPI:
         for model, provider in candidates:
             if not await services.router.acquire(model, tokens):
                 continue
-            upstream = services.http.build_request(
-                "POST",
-                f"{provider.base_url}/chat/completions",
-                json={**masked, "model": model},
-                headers=_auth(provider),
-            )
-            response = await services.http.send(upstream, stream=bool(masked.get("stream")))
+            attempts = 1 + LOCAL_RETRIES * (provider.trust == "local")
+            for attempt in range(attempts):
+                if attempt:
+                    # Ollama's runner can crash mid-request (a CUDA error) and restarts on the next one.
+                    await asyncio.sleep(LOCAL_RETRY_SECONDS)
+                upstream = services.http.build_request(
+                    "POST",
+                    f"{provider.base_url}/chat/completions",
+                    json={**masked, "model": model},
+                    headers=_auth(provider),
+                )
+                response = await services.http.send(upstream, stream=bool(masked.get("stream")))
+                if response.status_code < 500 or attempt == attempts - 1:
+                    break
+                await response.aclose()
             if response.status_code in RETRYABLE:
                 await response.aclose()
                 continue

@@ -7,6 +7,7 @@ from pathlib import Path
 import httpx
 import pytest
 
+from proxy import app as app_module
 from proxy.app import CALL_HEADER, REHYDRATE_HEADER, TASK_HEADER, Services, create_app
 from proxy.cassettes import CassetteStore, LlmMode
 from proxy.providers import Provider, Registry
@@ -143,3 +144,55 @@ async def test_replay_flags_a_changed_request_and_misses_unknown_calls(
         "/v1/chat/completions", json=changed, headers={TASK_HEADER: "t1", CALL_HEADER: "7"}
     )
     assert missing.status_code == 424
+
+
+class CrashOnce:
+    """A local runner that crashes on its first request and recovers, as Ollama's CUDA runner does."""
+
+    def __init__(self) -> None:
+        self.recorder = RecordingProvider()
+        self.calls = 0
+
+    def handler(self, request: httpx.Request) -> httpx.Response:
+        self.calls += 1
+        if self.calls == 1:
+            return httpx.Response(500, json={"error": "llama runner process has terminated"})
+        return self.recorder.handler(request)
+
+
+@pytest.mark.parametrize(
+    ("trust", "expected_calls", "status"), [("local", 2, 200), ("remote_untrusted", 1, 429)]
+)
+async def test_only_a_local_runner_is_retried_after_a_crash(
+    tmp_path: Path,
+    client_for: object,
+    monkeypatch: pytest.MonkeyPatch,
+    trust: str,
+    expected_calls: int,
+    status: int,
+) -> None:
+    monkeypatch.setattr(app_module, "LOCAL_RETRY_SECONDS", 0.0)
+    upstream = CrashOnce()
+    parts = kit(tmp_path)
+    services = Services(
+        masker=parts.masker,
+        rehydrator=parts.rehydrator,
+        vault=parts.vault,
+        registry=Registry(
+            {"local": Provider(name="local", base_url="http://local.invalid/v1", api_key=None, trust=trust)},
+            {"model-l": "local"},
+        ),
+        http=httpx.AsyncClient(transport=httpx.MockTransport(upstream.handler)),
+        audit=parts.audit,
+        router=Router({"local_text": ["model-l"]}, {}),
+        mode=LlmMode.LIVE,
+        cassettes=CassetteStore(tmp_path / "cassettes"),
+    )
+    client = await client_for(services)  # type: ignore[operator]
+    response = await client.post(
+        "/v1/chat/completions",
+        json={"model": "local_text", "messages": [{"role": "user", "content": "hello"}]},
+        headers={TASK_HEADER: "t1"},
+    )
+    assert response.status_code == status
+    assert upstream.calls == expected_calls
