@@ -1,0 +1,71 @@
+{
+  "run_id": "20261023T161000Z-breaker-recovery",
+  "kind": "breaker-recovery",
+  "git": {
+    "sha": "e60e0978f3de1b620548f23abc24bf722c168c6c",
+    "dirty": false
+  },
+  "started": "2026-10-23T16:10:00.859003+00:00",
+  "finished": "2026-10-23T16:15:53.291226+00:00",
+  "python": "3.14.7",
+  "machine": "x86_64",
+  "models": {},
+  "config": {
+    "operation": "getMember",
+    "interval_s": 10.0,
+    "outage_start_s": 300.0,
+    "outage_lengths_s": [
+      120.0,
+      600.0,
+      1200.0
+    ],
+    "after_s": 900.0,
+    "breakers_open_cap_s": [
+      [
+        0.0,
+        600.0
+      ],
+      [
+        10.0,
+        600.0
+      ],
+      [
+        30.0,
+        600.0
+      ],
+      [
+        60.0,
+        600.0
+      ],
+      [
+        120.0,
+        600.0
+      ],
+      [
+        10.0,
+        60.0
+      ],
+      [
+        10.0,
+        120.0
+      ],
+      [
+        30.0,
+        60.0
+      ],
+      [
+        30.0,
+        120.0
+      ]
+    ],
+    "outages": [
+      "SERVER_ERROR",
+      "NOT_FOUND"
+    ],
+    "simulated_outage_lengths_s": [
+      60.0,
+      1800.0,
+      10.0
+    ]
+  }
+}
