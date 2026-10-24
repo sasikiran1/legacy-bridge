@@ -1,0 +1,39 @@
+{
+  "run_id": "20261024T180948Z-agent-run",
+  "kind": "agent-run",
+  "git": {
+    "sha": "68440a453dac5931e77c1361b5890c5e99f75373",
+    "dirty": false
+  },
+  "started": "2026-10-24T18:09:48.159404+00:00",
+  "finished": "2026-10-24T19:39:02.799386+00:00",
+  "python": "3.14.7",
+  "machine": "x86_64",
+  "models": {
+    "profile": "local",
+    "served": "gemma4-12b-16k",
+    "runtime": "ollama 0.40.10"
+  },
+  "config": {
+    "scenario": "api_degraded",
+    "tasks": [
+      "add_note-01",
+      "claim_status-01",
+      "delete_note-01",
+      "policy_lookup-01",
+      "policy_lookup-02",
+      "request_reconsideration-01",
+      "submit_reimbursement-01",
+      "update_address-01",
+      "update_contact-01",
+      "update_contact-02"
+    ],
+    "profile": "local",
+    "approvals": "task",
+    "resolve_walls": false,
+    "scanner": "promptguard",
+    "snapshots": "trimmed",
+    "record": false,
+    "label": "trim"
+  }
+}
