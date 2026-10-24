@@ -292,6 +292,11 @@ class BrowserSession:
             "omit",
             "--viewport-size",
             "1280x900",
+            # Refs are numbered when an element is first snapshotted. Action responses carry a snapshot taken
+            # 500 ms after the action, before the page's data may have loaded, so refs depended on timing and
+            # a replay could click a different element. Refs are assigned only by `snapshot()` after settling.
+            "--snapshot-mode",
+            "none",
         ]
         if chrome:
             args += ["--executable-path", chrome[-1]]
