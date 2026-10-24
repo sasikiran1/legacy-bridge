@@ -91,6 +91,23 @@ Each milestone ends with green tests, a demo command, and an interview brief (wh
 
 ## M3: Agent
 
+**Done 2026-10-24.** Deviations from the plan below:
+- **The local model is gemma4 12B,** chosen by a bake-off of four Apache-2.0 models on 10 tasks and two scenarios (ADR 0013).
+- **No replay-tier stub in the graph.** The tier arrives whole in M4.
+- **Response validation checks the documented fields,** not generated Pydantic models. Missing documented fields mark schema drift.
+- **Breakers:**
+  - Breakers hold their state in memory per agent process, not in Postgres.
+  - The parameters were set by the recovery experiment: 10 s, doubling to a 60 s cap (ADR 0004).
+- **Prompt Guard 2 runs (86M), but flagged none of the held-out planted injections** (ADR 0014). It is kept as defense in depth. The structural guardrails are the measured defense.
+- **The hosted fallback chain is built and unit-tested, but not exercised.** There are no Groq or Gemini keys yet.
+- **OTel spans come from the agent only.** The proxy's own spans move to M5, with the Grafana dashboard.
+- **Added during M3:**
+  - recorded scanner verdicts, so CI replays without the gated model
+  - browser refs assigned only after the page settles, so replays click the same elements
+  - fsynced audit entries with an explicit torn-write recovery
+  - a leak gate over committed results and cassettes, which caught one real leak before commit (ADR 0012 amendment)
+- **Measured on the 10-task development subset only,** one recording per scenario. The full matrix is M5.
+
 - **LangGraph state machine:** plan → API tier → replay tier (stub until M4) → exploration → handoff. Postgres checkpointer; interrupts.
 - **API tier:**
   - tools generated from the portal's OpenAPI spec, with entity-typed arguments for the rehydration policy
