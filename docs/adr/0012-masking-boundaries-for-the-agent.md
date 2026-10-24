@@ -45,3 +45,14 @@ The canary leak gate stays at zero with all four changes (tests/leak).
 - A value the model reconstructs that is neither patterned nor already known (for example, a real-looking name it invents) is not masked on the way out. The model never saw real names, so such a value is not a leak of task data.
 - The detector configuration changed after the M2 benchmark. The M2 numbers in the README describe the M2 configuration, and the benchmark is rerun with the M3 configuration in the M3 results.
 - Masking quality is now partly a task-success concern, not only a privacy one. The agent's failure analysis should check for masking-induced failures.
+
+## Amendment (2026-10-24)
+
+Decision 3 is widened: a one-word NER span also propagates when it is a numeric entity type with at least six digits.
+
+Under DOM drift, a canary bank account number reached a recorded prompt:
+- NER tokenized it in the task instruction, beside "bank account number".
+- It missed the same number on the review page, where the label had drifted to "Account no.".
+- As a single-word NER span, the value had not been propagated, so the known-values pass could not re-catch it.
+
+The cassette leak gate found it before the recording was committed. Long digit strings carry none of the risk that made single-word propagation unsafe: a mis-tagged word such as "Member" being masked on every later page.

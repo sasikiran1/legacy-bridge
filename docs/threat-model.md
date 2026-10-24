@@ -103,9 +103,10 @@ The attacker cannot read `.env`, run code on the host, or modify container image
 
 ## Residual risk and limitations
 
-- **The injection classifier is not running yet.** Prompt Guard 2 is gated and access has not been granted (ADR 0009), so the agent currently runs with structural defenses only: spotlighting, action allowlists, approvals and post-conditions. Results record which scanner ran.
+- **The injection classifier barely helps on these attacks.** Prompt Guard 2 (86M) runs locally, but on the held-out split it flagged none of the planted injections. It catches explicit "ignore all previous instructions" text, not the authority-styled requests the portal plants (ADR 0014). The structural defenses carry the load: spotlighting, action allowlists, approvals and post-conditions. Results record which scanner ran.
 
 - **Detection is probabilistic.** Recall below 100% means T1 relies on the second pass and canaries to catch misses. Canaries only catch values we planted. A real deployment would need ongoing recall measurement on its own data.
+  - **Context changes defeat NER.** Under DOM drift, a canary account number escaped detection beside the renamed label "Account no.". The leak gate caught it in an uncommitted recording. Long numbers seen earlier in a task are now re-caught by value (ADR 0012 amendment). A value never seen in a recognisable context, on a page that renames its labels, would still rely on NER alone.
 - **Token-derivation key in CI.** Replay determinism needs CI to derive the same tokens as recording did, so cassette recording and CI use a fixed, non-secret derivation key. The data is synthetic, so linkage is harmless here. With real data, a secret key would be required, and cross-run cassette replay would break by design (ADR 0001).
 - **Tokens still carry the entity type and co-reference structure.** The provider learns "a PERSON who lives at an ADDRESS", just not which person. That leakage is accepted.
 - **Prompt Guard 2 and datamarking reduce, but do not eliminate, injection success.** Adaptive attacks may bypass the classifier (per its model card). Post-conditions and approval gates are the backstop.
