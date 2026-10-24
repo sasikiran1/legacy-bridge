@@ -111,6 +111,7 @@ services:
       AGENT_DB_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/agent
       AGENT_PROFILE: ${AGENT_PROFILE:-local}
       INJECTION_SCANNER: ${INJECTION_SCANNER:-none}
+      AGENT_SNAPSHOTS: ${AGENT_SNAPSHOTS:-raw}
       HF_TOKEN: ${HF_TOKEN:-}
       OTEL_EXPORTER_OTLP_ENDPOINT: ${AGENT_OTLP_ENDPOINT:-}
       # Read only to record the Ollama version in run manifests; model calls always go through the proxy.

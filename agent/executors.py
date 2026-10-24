@@ -234,6 +234,39 @@ _LOGIN_CODE = """async (page) => {
 }"""
 
 
+ACTIONABLE = frozenset(
+    {"button", "link", "textbox", "searchbox", "combobox", "checkbox", "radio", "option", "menuitem", "tab"}
+)
+_LINE = re.compile(r"^(?P<indent>\s*)- (?P<quote>'?)(?P<role>[a-z]+)(?P<rest>.*)$")
+_NOISE = re.compile(r" \[(?:cursor=pointer|level=\d+|active)\]")
+_REF_ATTR = re.compile(r" \[ref=(?:f\d+)?e\d+\]")
+
+
+def trim_snapshot(snapshot: str) -> str:
+    """The page as the model needs it: refs only on elements it can act on, no unnamed wrappers, no console,
+    footer or cursor annotations. The executors keep the raw snapshot for ref lookup and wall detection."""
+    out: list[str] = []
+    dropped: list[int] = []  # indents of removed wrapper lines whose children are pulled up a level
+    for line in snapshot.splitlines():
+        if line.startswith("- Console:") or line.lstrip().startswith("- contentinfo"):
+            continue
+        indent = len(line) - len(line.lstrip())
+        while dropped and indent <= dropped[-1]:
+            dropped.pop()
+        content = line.lstrip()
+        match = _LINE.match(line)
+        if match:
+            rest = _NOISE.sub("", match["rest"])
+            if match["role"] not in ACTIONABLE:
+                rest = _REF_ATTR.sub("", rest)
+            if match["role"] in ("generic", "rowgroup", "group") and rest.strip() in ("", ":"):
+                dropped.append(indent)
+                continue
+            content = f"- {match['quote']}{match['role']}{rest}"
+        out.append(" " * max(0, indent - 2 * len(dropped)) + content)
+    return "\n".join(out)
+
+
 def element_index(snapshot: str) -> dict[str, tuple[str, str]]:
     """ref -> (role, accessible name) from a Playwright MCP accessibility snapshot."""
     return {m["ref"]: (m["role"], (m["name"] or "").replace('\\"', '"')) for m in _ELEMENT.finditer(snapshot)}
@@ -268,8 +301,14 @@ class BrowserSession:
     """
 
     def __init__(
-        self, portal_origin: str, portal_host: str, resolver: ToolArgumentResolver, masker: MaskClient
+        self,
+        portal_origin: str,
+        portal_host: str,
+        resolver: ToolArgumentResolver,
+        masker: MaskClient,
+        trim: bool = False,
     ) -> None:
+        self._trim = trim
         self._origin = portal_origin
         self._host = portal_host
         self._resolver = resolver
@@ -377,7 +416,8 @@ class BrowserSession:
                 return BrowserObservation(text="", error=error)
             await self._settle()
         raw = await self.snapshot()
-        return BrowserObservation(text=await self._masker.text(task_id, raw), raw=raw)
+        shown = trim_snapshot(raw) if self._trim else raw
+        return BrowserObservation(text=await self._masker.text(task_id, shown), raw=raw)
 
     async def _resolve(self, task_id: str, tool: str, arguments: dict[str, Any]) -> dict[str, Any]:
         if tool == "browser_navigate":

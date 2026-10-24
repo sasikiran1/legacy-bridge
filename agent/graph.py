@@ -26,7 +26,7 @@ from langgraph.graph import END, START, StateGraph
 from langgraph.graph.state import CompiledStateGraph
 from langgraph.types import interrupt
 
-from agent.executors import FALLBACK, ApiResult, BrowserObservation
+from agent.executors import FALLBACK, ApiResult, BrowserObservation, trim_snapshot
 from agent.guardrails import (
     CONFIRMATION,
     InjectionScanner,
@@ -426,7 +426,8 @@ def build_graph(rt: Runtime, checkpointer: BaseCheckpointSaver[Any] | None = Non
         raw = await browser.login(state["username"], rt.password)
         if is_verification_wall(raw):
             return {"handoff_reason": "verification wall at sign-in"}
-        return {"last_observation": await rt.masker.text(state["task_key"], raw), "handoff_reason": None}
+        shown = trim_snapshot(raw) if settings.snapshots == "trimmed" else raw
+        return {"last_observation": await rt.masker.text(state["task_key"], shown), "handoff_reason": None}
 
     async def explore_step(state: AgentState) -> dict[str, Any]:
         if state.get("explore_steps", 0) >= settings.max_explore_steps:

@@ -209,7 +209,13 @@ async def run_task(
     masker: MaskClient = services["masker"]
 
     async def open_browser() -> BrowserSession:
-        session = BrowserSession(settings.portal_origin, settings.portal_host, services["resolver"], masker)
+        session = BrowserSession(
+            settings.portal_origin,
+            settings.portal_host,
+            services["resolver"],
+            masker,
+            trim=settings.snapshots == "trimmed",
+        )
         return await session.start()
 
     script_path = REPLAY_DIR / f"{script_key(task.intent.value, task.params)}.yaml"
@@ -376,6 +382,7 @@ async def main_async(args: argparse.Namespace) -> int:
             "approvals": args.approvals,
             "resolve_walls": args.resolve_walls,
             "scanner": settings.injection_scanner,
+            "snapshots": settings.snapshots,
             "record": args.record,
             "label": args.label,
         },

@@ -39,6 +39,8 @@ class AgentSettings(BaseModel):
     test_user_password: str
     profile: Profile
     injection_scanner: str
+    snapshots: str = "raw"
+    """raw, or trimmed (agent.executors.trim_snapshot): what the browser tier shows the model."""
     max_api_steps: int = 8
     max_explore_steps: int = 24
 
@@ -75,4 +77,5 @@ def agent_settings() -> AgentSettings:
         test_user_password=get("PORTAL_TEST_USER_PASSWORD"),
         profile=Profile(get("AGENT_PROFILE", Profile.LOCAL.value)),
         injection_scanner=get("INJECTION_SCANNER", "none"),
+        snapshots=get("AGENT_SNAPSHOTS", "raw"),
     )
