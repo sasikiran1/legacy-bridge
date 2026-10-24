@@ -1,4 +1,4 @@
-version: 1
+version: 2
 intent: update_contact
 params:
 - email
@@ -6,7 +6,7 @@ steps:
 - action: type
   target:
     role: textbox
-    name: Member name or number
+    name: Search members
   value: ${member_number}
   submit: true
 - action: click
@@ -16,17 +16,21 @@ steps:
 - action: click
   target:
     role: button
-    name: Edit contact details
+    name: Got it
+- action: click
+  target:
+    role: button
+    name: Modify contact info
 - action: type
   target:
     role: textbox
-    name: E-mail
+    name: Email address
   value: ${email}
 - action: click
   target:
     role: button
-    name: Save contact details
+    name: Update contact info
 provenance:
-  task: api_degraded/update_contact-01
-  cassettes: api_degraded_update_contact-01
+  task: dom_drift/update_contact-01
+  cassettes: dom_drift_update_contact-01
   compiled: '2026-10-24'

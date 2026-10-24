@@ -1,0 +1,15 @@
+{
+  "updateAddress": "closed",
+  "submitReimbursement": "closed",
+  "listNotes": "closed",
+  "addNote": "closed",
+  "requestReconsideration": "closed",
+  "updateContact": "open",
+  "getPolicy": "closed",
+  "searchMembers": "closed",
+  "getMember": "closed",
+  "listPolicies": "closed",
+  "listClaims": "closed",
+  "getClaim": "closed",
+  "deleteNote": "half_open"
+}
