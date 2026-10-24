@@ -26,6 +26,13 @@ MIN_TRUSTED_DIGITS = 6
 detected beside "Bank account number" must also be caught beside the drifted label "Account no."."""
 
 
+def _inside_word(text: str, start: int, end: int) -> bool:
+    """Whether text[start:end] is glued to a letter or digit on a side where the value is alphanumeric."""
+    before = start > 0 and text[start - 1].isalnum() and text[start].isalnum()
+    after = end < len(text) and text[end].isalnum() and text[end - 1].isalnum()
+    return before or after
+
+
 def trusted(span: Span, value: str) -> bool:
     """Whether a masked value is re-matched wherever it reappears in the task: structured fields and pattern
     rules, multi-word NER spans, and long numbers. Single words from NER are not, because a mis-tagged word
@@ -148,6 +155,11 @@ class Masker:
                 continue
             start = text.find(entry.value)
             while start != -1:
+                end = start + len(entry.value)
+                if _inside_word(text, start, end):
+                    # "eric" inside "generic" is not the value; masking it broke snapshots ("ge[[PERSON]]").
+                    start = text.find(entry.value, start + 1)
+                    continue
                 spans.append(
                     Span(
                         start=start,

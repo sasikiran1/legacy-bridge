@@ -138,3 +138,12 @@ async def test_a_long_number_from_ner_is_caught_beside_a_drifted_label(tmp_path:
     await k.masker.mask_text("Pay to bank account number 440091773312.", "t1", "groq")
     page = await k.masker.mask_text('- rowheader "Account no."\n- cell "440091773312"', "t1", "groq")
     assert "440091773312" not in page
+
+
+async def test_a_known_value_is_not_masked_inside_another_word(tmp_path: Path) -> None:
+    """Regression: a short known value was masked inside 'generic', breaking a page snapshot."""
+    k = kit(tmp_path)
+    await k.masker.mask_value({"firstName": "eric"}, "t1", "groq")
+    page = await k.masker.mask_text("- generic [ref=e6]: Logged in as eric (clerk04)", "t1", "groq")
+    assert page.startswith("- generic [ref=e6]")
+    assert "as eric" not in page
