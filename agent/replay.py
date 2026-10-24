@@ -101,6 +101,10 @@ def _fits(masked: str, value: str) -> bool:
     return re.fullmatch(pattern, value, re.S) is not None
 
 
+def _texts(step: Step) -> list[str]:
+    return [t for t in (step.url, step.value, step.target.name if step.target else None) if t]
+
+
 def _identifies(cell: str, param: str, value: str, tokens: dict[str, str]) -> bool:
     """Whether a row cell shows this parameter: its own token, or enough literal text to match its value.
     A cell that is only some other token (a masked name) would otherwise "fit" any value."""
@@ -149,6 +153,12 @@ class Compiler:
             steps.append(step)
         if not steps:
             raise CompileError("no executed browser actions to compile")
+        # A cached wrong action: the source run skipped a field whose value happened not to change, so the
+        # script would report success for other tasks without writing it. Every parameter must be written.
+        used = {m.group(1) for step in steps for text in _texts(step) for m in _PARAM.finditer(text)}
+        used |= {step.target.within_row for step in steps if step.target and step.target.within_row}
+        if unused := sorted(set(params) - used):
+            raise CompileError(f"the source run never wrote {', '.join(unused)}; the script would skip it")
         return ReplayScript(
             intent=intent,
             params=sorted(params),
