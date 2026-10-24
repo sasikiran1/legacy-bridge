@@ -1,0 +1,20 @@
+{
+  "run_id": "20261024T224238Z-snapshot-ab",
+  "kind": "snapshot-ab",
+  "git": {
+    "sha": "66d7884f6767f7535b7b1ac8023df30ffbe42fb0",
+    "dirty": false
+  },
+  "started": "2026-10-24T22:42:38.615637+00:00",
+  "finished": "2026-10-24T22:42:44.524628+00:00",
+  "python": "3.14.7",
+  "machine": "x86_64",
+  "models": {
+    "served": "gemma4-12b-16k",
+    "runtime": "ollama 0.40.10"
+  },
+  "config": {
+    "trimmed": "trim",
+    "raw": "trim-control"
+  }
+}

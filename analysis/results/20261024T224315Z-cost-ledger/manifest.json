@@ -1,0 +1,25 @@
+{
+  "run_id": "20261024T224315Z-cost-ledger",
+  "kind": "cost-ledger",
+  "git": {
+    "sha": "9be01c940ba42bf946c3ae8ddf170ac407096479",
+    "dirty": false
+  },
+  "started": "2026-10-24T22:43:15.323309+00:00",
+  "finished": "2026-10-24T22:43:23.073942+00:00",
+  "python": "3.14.7",
+  "machine": "x86_64",
+  "models": {
+    "price_model": "openai/gpt-oss-120b",
+    "price_date": "2026-10-24"
+  },
+  "config": {
+    "labels": [
+      "m3",
+      "heal",
+      "trim",
+      "trim-control"
+    ],
+    "price_model": "openai/gpt-oss-120b"
+  }
+}

@@ -1,0 +1,130 @@
+{
+  "runs": {
+    "trimmed": {
+      "20261024T180948Z-agent-run": {
+        "snapshots": "trimmed",
+        "runtime": "ollama 0.40.10",
+        "served": "gemma4-12b-16k"
+      },
+      "20261024T193921Z-agent-run": {
+        "snapshots": "trimmed",
+        "runtime": "ollama 0.40.10",
+        "served": "gemma4-12b-16k"
+      }
+    },
+    "raw": {
+      "20261024T202604Z-agent-run": {
+        "snapshots": "raw",
+        "runtime": "ollama 0.40.10",
+        "served": "gemma4-12b-16k"
+      },
+      "20261024T213907Z-agent-run": {
+        "snapshots": "raw",
+        "runtime": "ollama 0.40.10",
+        "served": "gemma4-12b-16k"
+      }
+    }
+  },
+  "scenarios": {
+    "api_degraded": {
+      "tasks": 10,
+      "passed": {
+        "trimmed": 9,
+        "raw": 9
+      },
+      "wrong_actions": {
+        "trimmed": 0,
+        "raw": 0
+      },
+      "failed_tasks": {
+        "trimmed": [
+          "update_address-01"
+        ],
+        "raw": [
+          "update_contact-02"
+        ]
+      },
+      "browser_tasks_in_both": 10,
+      "prompt_tokens_per_call": {
+        "trimmed": 2504.7,
+        "raw": 2807.4
+      },
+      "reduction_per_call": 0.108,
+      "median_llm_calls": {
+        "trimmed": 7.0,
+        "raw": 6.5
+      },
+      "median_seconds": {
+        "trimmed": 335.05,
+        "raw": 361.63
+      }
+    },
+    "dom_drift": {
+      "tasks": 10,
+      "passed": {
+        "trimmed": 8,
+        "raw": 10
+      },
+      "wrong_actions": {
+        "trimmed": 0,
+        "raw": 0
+      },
+      "failed_tasks": {
+        "trimmed": [
+          "update_contact-01",
+          "update_contact-02"
+        ],
+        "raw": []
+      },
+      "browser_tasks_in_both": 5,
+      "prompt_tokens_per_call": {
+        "trimmed": 2306.3,
+        "raw": 3200.9
+      },
+      "reduction_per_call": 0.279,
+      "median_llm_calls": {
+        "trimmed": 8,
+        "raw": 9
+      },
+      "median_seconds": {
+        "trimmed": 448.16,
+        "raw": 573.26
+      }
+    },
+    "all": {
+      "tasks": 20,
+      "passed": {
+        "trimmed": 17,
+        "raw": 19
+      },
+      "wrong_actions": {
+        "trimmed": 0,
+        "raw": 0
+      },
+      "failed_tasks": {
+        "trimmed": [
+          "update_address-01",
+          "update_contact-01",
+          "update_contact-02"
+        ],
+        "raw": [
+          "update_contact-02"
+        ]
+      },
+      "browser_tasks_in_both": 15,
+      "prompt_tokens_per_call": {
+        "trimmed": 2436.6,
+        "raw": 2962.2
+      },
+      "reduction_per_call": 0.177,
+      "median_llm_calls": {
+        "trimmed": 8,
+        "raw": 8
+      },
+      "median_seconds": {
+        "trimmed": 395.86,
+        "raw": 507.55
+      }
+    }
+  }
+}
