@@ -235,12 +235,14 @@ ROLE_WORDS = frozenset(
 
 def plausible(span: Span, text: str) -> bool:
     """Numeric entity types need at least two digits: NER tags column headers such as "Date of birth" or
-    "SSN" as the entities they describe; for the same reason an email address needs an "@" (the "Email" row
-    label was tagged). A PERSON span made only of role nouns ("the user", "an administrator") is not a name;
-    GLiNER scores those above 0.75 in some sentences."""
+    "SSN" as the entities they describe; for the same reason an email address needs an "@" and a street
+    address a digit (the "Email" and "Street address" labels were tagged). A PERSON span made only of role
+    nouns ("the user", "an administrator") is not a name; GLiNER scores those above 0.75 in some sentences."""
     value = text[span.start : span.end]
     if span.entity_type == "EMAIL_ADDRESS":
         return "@" in value
+    if span.entity_type == "STREET_ADDRESS":
+        return any(ch.isdigit() for ch in value)
     if span.entity_type == "PERSON":
         return not all(word.strip(".,;:'\"()").lower() in ROLE_WORDS for word in value.split())
     if span.entity_type not in NUMERIC_TYPES:

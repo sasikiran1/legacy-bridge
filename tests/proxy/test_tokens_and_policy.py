@@ -107,4 +107,6 @@ def test_role_nouns_are_not_names() -> None:
     assert not plausible(_span(0, 10, "PERSON", 0.9), "Payee name")
     assert not plausible(_span(0, 5, "EMAIL_ADDRESS", 0.9), "Email")
     assert plausible(_span(0, 11, "EMAIL_ADDRESS", 0.9), "a@b.example")
+    assert not plausible(_span(0, 14, "STREET_ADDRESS", 0.9), "Street address")
+    assert plausible(_span(0, 10, "STREET_ADDRESS", 0.9), "12 Elm St.")
     assert plausible(_span(40, 50, "PERSON", 0.9), text)
