@@ -26,6 +26,7 @@ from langgraph.types import interrupt
 
 from agent.executors import FALLBACK, ApiResult, BrowserObservation
 from agent.guardrails import (
+    CONFIRMATION,
     InjectionScanner,
     approval_for_click,
     approval_for_operation,
@@ -38,7 +39,6 @@ from agent.prompts import AGENT_TOOLS, API, BROWSER_TOOL_SPECS, EXPLORE, PLAN
 from agent.settings import AgentSettings
 from agent.telemetry import tracer
 
-_SUCCESS = re.compile(r"\b(saved|submitted|added|deleted|requested)\b", re.I)
 _KEEP_OBSERVATIONS = 2
 
 
@@ -512,7 +512,7 @@ def build_graph(rt: Runtime, checkpointer: BaseCheckpointSaver[Any] | None = Non
             # a summary alone never verifies anything.
             verified = state.get("plan", {}).get("kind") != "write" and bool(state.get("answer"))
         elif any(w["tier"] == "browser" for w in writes):
-            verified = bool(_SUCCESS.search(state.get("last_observation", "")))
+            verified = bool(CONFIRMATION.search(state.get("last_observation", "")))
         else:
             verified = all(w["ok"] for w in writes)
         return {"verified": verified, "outcome": "success" if verified else "unverified"}

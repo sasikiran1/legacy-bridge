@@ -55,6 +55,10 @@ def is_verification_wall(snapshot: str) -> bool:
     return bool(_WALL.search(snapshot))
 
 
+CONFIRMATION = re.compile(r"\b(saved|submitted|added|deleted|requested)\b", re.I)
+"""The portal's confirmation wording after a write; a browser write is verified only if the page shows it."""
+
+
 def spotlight(text: str, source: str) -> str:
     """Delimits untrusted content so the system prompt can tell the model it is data, never instructions."""
     return f'<untrusted_content source="{source}">\n{text}\n</untrusted_content>'
