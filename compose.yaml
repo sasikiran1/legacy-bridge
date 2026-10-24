@@ -71,6 +71,7 @@ services:
       GEMINI_API_KEY: ${GEMINI_API_KEY:-}
       OLLAMA_BASE_URL: ${OLLAMA_DOCKER_URL:-http://host.docker.internal:11434/v1}
       LLM_MODE: ${LLM_MODE:-replay}
+      CASSETTE_MISMATCH_DIR: ${CASSETTE_MISMATCH_DIR:-}
       LOCAL_TEXT_MODEL: ${LOCAL_TEXT_MODEL:-}
     extra_hosts:
       - "host.docker.internal:host-gateway"

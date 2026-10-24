@@ -24,6 +24,7 @@ import os
 from collections.abc import AsyncIterator, Awaitable, Callable
 from contextlib import asynccontextmanager
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Any
 
 import httpx
@@ -253,10 +254,13 @@ async def _replay(
         exchange = services.cassettes.load(task_id, call)
     except CassetteMiss as e:
         return _error(424, str(e), "cassette_miss")
-    headers = {
-        "x-lb-model": exchange.served_by,
-        "x-lb-cassette": "hit" if exchange.request_sha256 == request_digest(masked) else "mismatch",
-    }
+    hit = exchange.request_sha256 == request_digest(masked)
+    headers = {"x-lb-model": exchange.served_by, "x-lb-cassette": "hit" if hit else "mismatch"}
+    if not hit and (debug_dir := os.environ.get("CASSETTE_MISMATCH_DIR")):
+        # The replayed request (tokens only, like the cassette), for diffing against the recording.
+        path = Path(debug_dir) / task_id.replace("/", "_") / f"{call:03d}.json"
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps(masked, indent=1, ensure_ascii=False), encoding="utf-8")
     if exchange.stream:
 
         async def lines() -> AsyncIterator[str]:
