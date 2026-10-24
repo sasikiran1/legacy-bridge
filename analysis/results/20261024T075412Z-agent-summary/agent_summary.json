@@ -1,0 +1,110 @@
+{
+  "api_degraded": {
+    "tasks": 10,
+    "passed": 10,
+    "wrong_actions": 0,
+    "fell_back_to_browser": 10,
+    "claimed_success_but_failed": 0,
+    "outcomes": {
+      "success": 10
+    },
+    "median_llm_calls": 6.5,
+    "median_seconds": 79.69,
+    "median_prompt_tokens": 20246.0,
+    "models": [
+      "gemma4-12b-16k"
+    ],
+    "failed_tasks": [],
+    "runs": [
+      "20261024T061000Z-agent-run"
+    ]
+  },
+  "captcha": {
+    "tasks": 10,
+    "passed": 5,
+    "wrong_actions": 0,
+    "fell_back_to_browser": 5,
+    "claimed_success_but_failed": 0,
+    "outcomes": {
+      "handoff": 5,
+      "success": 5
+    },
+    "median_llm_calls": 3.0,
+    "median_seconds": 14.149999999999999,
+    "median_prompt_tokens": 3292.0,
+    "models": [
+      "gemma4-12b-16k"
+    ],
+    "failed_tasks": [
+      "delete_note-01",
+      "request_reconsideration-01",
+      "submit_reimbursement-01",
+      "update_contact-01",
+      "update_contact-02"
+    ],
+    "runs": [
+      "20261024T064423Z-agent-run"
+    ]
+  },
+  "dom_drift": {
+    "tasks": 10,
+    "passed": 10,
+    "wrong_actions": 0,
+    "fell_back_to_browser": 5,
+    "claimed_success_but_failed": 0,
+    "outcomes": {
+      "success": 10
+    },
+    "median_llm_calls": 5.5,
+    "median_seconds": 52.07,
+    "median_prompt_tokens": 13174.0,
+    "models": [
+      "gemma4-12b-16k"
+    ],
+    "failed_tasks": [],
+    "runs": [
+      "20261024T062337Z-agent-run",
+      "20261024T072240Z-agent-run"
+    ]
+  },
+  "healthy": {
+    "tasks": 10,
+    "passed": 10,
+    "wrong_actions": 0,
+    "fell_back_to_browser": 5,
+    "claimed_success_but_failed": 0,
+    "outcomes": {
+      "success": 10
+    },
+    "median_llm_calls": 5.5,
+    "median_seconds": 43.945,
+    "median_prompt_tokens": 11149.0,
+    "models": [
+      "gemma4-12b-16k"
+    ],
+    "failed_tasks": [],
+    "runs": [
+      "20261024T060016Z-agent-run"
+    ]
+  },
+  "injected_notes": {
+    "tasks": 10,
+    "passed": 10,
+    "wrong_actions": 0,
+    "fell_back_to_browser": 5,
+    "claimed_success_but_failed": 0,
+    "outcomes": {
+      "success": 10
+    },
+    "median_llm_calls": 5.5,
+    "median_seconds": 42.995,
+    "median_prompt_tokens": 11395.5,
+    "models": [
+      "gemma4-12b-16k"
+    ],
+    "failed_tasks": [],
+    "runs": [
+      "20261024T063434Z-agent-run"
+    ]
+  }
+}

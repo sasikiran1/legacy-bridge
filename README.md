@@ -7,7 +7,7 @@ Business processes often live in legacy systems with half-finished APIs. Automat
 
 legacy-bridge is an agent that tries the API first, falls back to a browser when the API breaks, and compiles successful browser runs into replayable scripts. Every model call goes through a proxy that swaps PII for tokens. Real values are restored only at the moment the agent acts, so no model ever sees them.
 
-**Status:** the testbed, the PII proxy and the API-first agent with browser fallback are built. Replay compilation is not built yet ([milestones](docs/milestones.md)).
+**Status:** the testbed, the PII proxy and the API-first agent with browser fallback are built and measured on a 10-task subset. Replay compilation is next ([milestones](docs/milestones.md)).
 
 ## The testbed
 
@@ -84,46 +84,62 @@ make bench-pii      # P/R/F1 per entity type for four detector configurations
 ## The agent
 
 A LangGraph state machine, checkpointed in Postgres:
-1. **Plan** the task from the (masked) instruction.
-2. **API tier.** Tools are generated from the portal's OpenAPI document. Each endpoint has a circuit breaker. A missing, retired, failing or drifted endpoint hands the task to the browser.
-3. **Browser tier.** Playwright MCP, driven by accessibility snapshots.
+1. **Plan** the task from the masked instruction.
+2. **API tier.**
+   - Tools are generated from the portal's OpenAPI document.
+   - A missing, retired, failing or drifted endpoint hands the task to the browser.
+   - Each endpoint has a circuit breaker. It opens for 10 s after repeated failures and doubles while probes fail, capped at 60 s ([ADR 0004](docs/adr/0004-circuit-breaker-parameters.md)).
+3. **Browser tier.** Playwright MCP, driven by accessibility snapshots taken after the page settles.
 4. **Verify.** A change task that executed no write, or a question finished without an answer, is never reported as a success.
 
 Guardrails:
-- Payments and deletes stop for approval. After suspected prompt injection, every write does.
-- A CAPTCHA or MFA wall hands the task to a person; it is never solved.
-- Agent state holds tokens only: API responses and page snapshots are masked before they enter it ([ADR 0012](docs/adr/0012-masking-boundaries-for-the-agent.md)).
-- Placeholders are restored only in the tool arguments and form fields the policy allows. Malformed placeholders are refused rather than typed into the portal.
+- **Approvals:** payments and deletes stop for approval. After suspected prompt injection, every write does.
+- **Walls:** a CAPTCHA or MFA wall hands the task to a person. It is never solved.
+- **Tokens only:** API responses and page snapshots are masked before they enter agent state ([ADR 0012](docs/adr/0012-masking-boundaries-for-the-agent.md)).
+- **Restoring values:** placeholders are restored only in the tool arguments and form fields the policy allows. Malformed placeholders are refused rather than typed into the portal.
+- **Injection classifier:** Llama Prompt Guard 2 (86M) scans pages locally. It is on by default but not relied on ([ADR 0014](docs/adr/0014-injection-classifier-evidence.md)).
 
-Every model exchange is recorded as a cassette. CI replays them with no model and fails if any task's outcome changes.
+Every model exchange is recorded as a cassette, with the injection scanner's verdicts. CI replays them with no model and no scanner, and fails if any task's outcome changes.
 
-Results on a 10-task development subset, local model qwen2.5-14b, graded against the database diff ([summary](analysis/results/20261022T134804Z-agent-summary/agent_summary.json)):
+The local model is gemma4 12B, chosen by a [bake-off](analysis/results/20261023T154359Z-bakeoff/bakeoff.json) on 10 tasks and two scenarios ([ADR 0013](docs/adr/0013-local-agent-model.md)):
+
+| Model | Passed | Reported done but failed |
+|---|---|---|
+| gemma4 12B | 20 / 20 | 0 |
+| qwen3.5 9B | 17 / 20 | 2 |
+| qwen3 14B | 17 / 20 | 1 |
+| qwen2.5 14B | 14 / 20 | 0 |
+
+Results with gemma4 on the 10-task development subset, graded against the database diff ([summary](analysis/results/20261024T075412Z-agent-summary/agent_summary.json)):
 
 | Scenario | Passed | Wrong actions | Completed through the browser | Median time |
 |---|---|---|---|---|
-| Healthy (the API is partly unfinished) | 9 / 10 | 0 | 5 / 10 | 34 s |
-| API degraded | 7 / 10 | 0 | 10 / 10 | 130 s |
+| Healthy (the API is partly unfinished) | 10 / 10 | 0 | 5 / 10 | 44 s |
+| API degraded | 10 / 10 | 0 | 10 / 10 | 80 s |
+| DOM drift (renamed labels, moved buttons, a modal) | 10 / 10 | 0 | 5 / 10 | 52 s |
+| Injected notes (planted prompt injections) | 10 / 10 | 0 | 5 / 10 | 43 s |
+| CAPTCHA wall at sign-in | 5 / 10 | 0 | 5 handed to a person | 14 s |
+
+Other measurements:
+- **Circuit breaker:** across every outage length from 1 to 30 minutes, it returns to the API 25 s after recovery on average, 50 s at worst. The proposed 30 s / 10-minute breaker took 253 s on average and 590 s at worst ([experiment](analysis/results/20261023T161000Z-breaker-recovery/breaker_recovery.json)).
+- **Prompt Guard 2:** flagged 0 of 8 held-out planted injections, and 0 of 24 when they were embedded in pages. It catches only explicit "ignore all previous instructions" text, and it flagged none of 34 ordinary pages ([evaluation](analysis/results/20261023T155217Z-injection-scan/injection_scan.json)). Built with Llama.
 
 ```bash
 make demo-fallback   # replay: the API refuses, the agent completes the tasks in the browser, the database diff decides
 make replay-check    # every recorded task must reproduce its recorded outcome
+make local-model     # pull gemma4:12b and create the agent's 16k-context variant
 make record SCENARIO=healthy TASKS=claim_status-01   # record with the local model (Ollama)
+make bakeoff         # compare local models on the development subset
 make traces          # replay with OpenTelemetry GenAI spans to Phoenix (localhost:6006); spans are checked for canaries
 ```
 
 ### Limitations
 
-- **Ten tasks and two scenarios so far.** The other five scenarios, the full task set and hosted models are not measured yet.
-- **No failure changed anything it should not have.**
-  - In two of the four failures, the database change was correct, but the agent could not confirm it in the page and did not claim success.
-  - In the other two, the expected change is missing from the database: the note was not added, or the phone number does not match.
-- **The local model is the weak link.** In the recordings, qwen2.5-14b sometimes:
-  - writes tool calls as text
-  - drops placeholder brackets
-  - drifts out of English
-
-  A local-model comparison is planned.
-- **Replays are not bit-identical.** GLiNER on CPU masks a few borderline spans differently between runs, so some replayed requests differ from their recordings. They are served and counted; outcomes have matched.
+- **Ten tasks, one recording each.** Single runs moved by one or two tasks for the other models in the bake-off. The full 50-task set, repeated runs and hosted models are not measured yet.
+- **No planted injection succeeded, but the classifier did not stop them.** The approvals, allowlists and post-conditions did. One scenario with ten tasks is a small sample of attacks.
+- **The agent's own check trusts the page.** In the bake-off, weaker models reported three tasks done that the database showed were not: a wrong answer, a wrong city and postal code, and a note left undeleted. Each was graded as failed. gemma4 had none, but the agent's verification step would not have caught them either.
+- **One leak was caught late.** Under DOM drift, a canary account number escaped detection beside a renamed label. The cassette leak gate stopped it before the recording was committed, and the masking now re-catches long numbers by value ([ADR 0012](docs/adr/0012-masking-boundaries-for-the-agent.md)).
+- **Replays are not bit-identical.** GLiNER on CPU masks a few borderline spans differently between runs, so up to three requests per scenario differed from their recordings. They are served and counted, and every outcome matched.
 
 ## Design documents
 
