@@ -1,4 +1,4 @@
-"""Recorded LLM exchanges and run results are committed, so they must never contain a canary value."""
+"""Recorded LLM exchanges, run results and replay scripts are committed: none may contain a canary value."""
 
 from __future__ import annotations
 
@@ -11,6 +11,7 @@ from proxy.cassettes import CASSETTE_DIR
 from testbed.seed import load_canaries
 
 RESULTS_DIR = Path(__file__).resolve().parents[2] / "analysis" / "results"
+REPLAY_DIR = Path(__file__).resolve().parents[2] / "agent" / "replays"
 
 
 def readable(path: Path) -> str:
@@ -37,8 +38,12 @@ def leaks(root: Path, patterns: tuple[str, ...]) -> list[tuple[str, str]]:
 
 @pytest.mark.parametrize(
     ("root", "patterns"),
-    [(CASSETTE_DIR, ("*.json",)), (RESULTS_DIR, ("*.json", "*.jsonl", "*.csv", "*.md"))],
-    ids=["cassettes", "results"],
+    [
+        (CASSETTE_DIR, ("*.json",)),
+        (RESULTS_DIR, ("*.json", "*.jsonl", "*.csv", "*.md")),
+        (REPLAY_DIR, ("*.yaml",)),
+    ],
+    ids=["cassettes", "results", "replay scripts"],
 )
 def test_no_committed_file_contains_a_canary_value(root: Path, patterns: tuple[str, ...]) -> None:
     assert leaks(root, patterns) == []
