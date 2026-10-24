@@ -1,0 +1,21 @@
+version: 1
+intent: add_note
+params:
+- body
+steps:
+- action: navigate
+  url: /members/${member_number}
+- action: type
+  target:
+    role: textbox
+    name: New note
+  value: ${body}
+  submit: true
+- action: click
+  target:
+    role: button
+    name: Add note
+provenance:
+  task: api_degraded/add_note-01
+  cassettes: api_degraded_add_note-01
+  compiled: '2026-10-24'

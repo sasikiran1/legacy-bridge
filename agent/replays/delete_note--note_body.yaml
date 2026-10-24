@@ -1,0 +1,20 @@
+version: 1
+intent: delete_note
+params:
+- note_body
+steps:
+- action: navigate
+  url: /members/${member_number}
+- action: click
+  target:
+    role: button
+    name: Delete
+    within_row: note_body
+- action: click
+  target:
+    role: button
+    name: Yes, delete note
+provenance:
+  task: api_degraded/delete_note-01
+  cassettes: api_degraded_delete_note-01
+  compiled: '2026-10-24'

@@ -1,0 +1,15 @@
+version: 1
+intent: request_reconsideration
+params:
+- claim_number
+steps:
+- action: navigate
+  url: /claims/${claim_number}
+- action: click
+  target:
+    role: button
+    name: Request reconsideration
+provenance:
+  task: api_degraded/request_reconsideration-01
+  cassettes: api_degraded_request_reconsideration-01
+  compiled: '2026-10-24'

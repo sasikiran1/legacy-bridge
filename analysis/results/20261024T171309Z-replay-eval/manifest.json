@@ -1,0 +1,22 @@
+{
+  "run_id": "20261024T171309Z-replay-eval",
+  "kind": "replay-eval",
+  "git": {
+    "sha": "c9c56beecf6f89bcc19608af9fc3042c99251ee5",
+    "dirty": true
+  },
+  "started": "2026-10-24T17:13:09.655929+00:00",
+  "finished": "2026-10-24T17:15:01.604639+00:00",
+  "python": "3.14.7",
+  "machine": "x86_64",
+  "models": {
+    "replay": "none (no model calls)"
+  },
+  "config": {
+    "source": "api_degraded",
+    "scenarios": [
+      "healthy",
+      "dom_drift"
+    ]
+  }
+}

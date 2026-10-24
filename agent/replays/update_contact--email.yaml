@@ -1,0 +1,32 @@
+version: 1
+intent: update_contact
+params:
+- email
+steps:
+- action: type
+  target:
+    role: textbox
+    name: Member name or number
+  value: ${member_number}
+  submit: true
+- action: click
+  target:
+    role: link
+    name: ${member_number}
+- action: click
+  target:
+    role: button
+    name: Edit contact details
+- action: type
+  target:
+    role: textbox
+    name: E-mail
+  value: ${email}
+- action: click
+  target:
+    role: button
+    name: Save contact details
+provenance:
+  task: api_degraded/update_contact-01
+  cassettes: api_degraded_update_contact-01
+  compiled: '2026-10-24'

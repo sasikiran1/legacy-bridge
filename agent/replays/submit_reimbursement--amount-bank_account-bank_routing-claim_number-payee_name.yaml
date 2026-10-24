@@ -1,0 +1,55 @@
+version: 1
+intent: submit_reimbursement
+params:
+- amount
+- bank_account
+- bank_routing
+- claim_number
+- payee_name
+steps:
+- action: click
+  target:
+    role: link
+    name: New Reimbursement
+- action: type
+  target:
+    role: textbox
+    name: Member number
+  value: ${member_number}
+- action: type
+  target:
+    role: textbox
+    name: Claim number
+  value: ${claim_number}
+- action: type
+  target:
+    role: textbox
+    name: Amount (USD)
+  value: ${amount}
+- action: type
+  target:
+    role: textbox
+    name: Payee name
+  value: ${payee_name}
+- action: type
+  target:
+    role: textbox
+    name: Bank routing number
+  value: ${bank_routing}
+- action: type
+  target:
+    role: textbox
+    name: Bank account number
+  value: ${bank_account}
+- action: click
+  target:
+    role: button
+    name: Continue to review
+- action: click
+  target:
+    role: button
+    name: Confirm submission
+provenance:
+  task: api_degraded/submit_reimbursement-01
+  cassettes: api_degraded_submit_reimbursement-01
+  compiled: '2026-10-24'
