@@ -37,13 +37,14 @@ def arm(label: str) -> tuple[dict[tuple[str, str], dict[str, Any]], dict[str, An
 
 
 def per_call(rows: list[dict[str, Any]]) -> float:
-    return round(sum(r["tokens_in"] for r in rows) / sum(r["llm_calls"] for r in rows), 1)
+    tokens: int = sum(r["tokens_in"] for r in rows)
+    calls: int = sum(r["llm_calls"] for r in rows)
+    return round(tokens / calls, 1)
 
 
 def compare(trimmed: list[dict[str, Any]], raw: list[dict[str, Any]]) -> dict[str, Any]:
-    browser = [
-        (t, r) for t, r in zip(trimmed, raw, strict=True) if "explore" in t["tiers"] and "explore" in r["tiers"]
-    ]
+    pairs = zip(trimmed, raw, strict=True)
+    browser = [(t, r) for t, r in pairs if "explore" in t["tiers"] and "explore" in r["tiers"]]
     figures: dict[str, Any] = {
         "tasks": len(trimmed),
         "passed": {"trimmed": sum(r["passed"] for r in trimmed), "raw": sum(r["passed"] for r in raw)},
@@ -101,8 +102,9 @@ def main(argv: list[str] | None = None) -> int:
     for scenario, f in results.items():
         tokens = f.get("prompt_tokens_per_call", {})
         print(
-            f"{scenario:14} passed {f['passed']['trimmed']}/{f['tasks']} trimmed vs {f['passed']['raw']}/{f['tasks']} "
-            f"raw; tokens/call {tokens.get('trimmed')} vs {tokens.get('raw')} ({f.get('reduction_per_call')})"
+            f"{scenario:14} passed {f['passed']['trimmed']}/{f['tasks']} trimmed vs "
+            f"{f['passed']['raw']}/{f['tasks']} raw; "
+            f"tokens/call {tokens.get('trimmed')} vs {tokens.get('raw')} ({f.get('reduction_per_call')})"
         )
     print(f"-> {run.directory}")
     return 0

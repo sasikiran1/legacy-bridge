@@ -30,7 +30,7 @@ def price_on(model: str, day: dt.date) -> dict[str, Any]:
         start = dt.date.fromisoformat(str(price["effective_from"]))
         end = dt.date.fromisoformat(str(price["effective_to"])) if price.get("effective_to") else None
         if start <= day and (end is None or day <= end):
-            return {key: value.isoformat() if isinstance(value, dt.date) else value for key, value in price.items()}
+            return {k: v.isoformat() if isinstance(v, dt.date) else v for k, v in price.items()}
     raise LookupError(f"no {model} price in effect on {day}")
 
 
