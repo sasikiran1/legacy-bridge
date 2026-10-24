@@ -35,7 +35,7 @@ HOSTS_PER_ATTACK = 3
 def benign_texts() -> list[tuple[str, str]]:
     """(source id, text) for every distinct tool result in the healthy cassettes."""
     seen: dict[str, str] = {}
-    for path in sorted(CASSETTE_DIR.glob("healthy_*/*.json")):
+    for path in sorted(CASSETTE_DIR.glob("healthy_*/[0-9][0-9][0-9].json")):
         messages = json.loads(path.read_text(encoding="utf-8"))["request"]["messages"]
         for index, message in enumerate(messages):
             if message.get("role") != "tool" or not message.get("content"):

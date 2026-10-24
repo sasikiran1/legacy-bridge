@@ -41,7 +41,13 @@ from agent import openapi
 from agent.breaker import BreakerRegistry
 from agent.executors import ApiExecutor, BrowserSession
 from agent.graph import Runtime, build_graph
-from agent.guardrails import ApprovalKind, build_scanner
+from agent.guardrails import (
+    ApprovalKind,
+    InjectionScanner,
+    RecordingScanner,
+    ReplayScanner,
+    build_scanner,
+)
 from agent.llm import LlmClient, LlmError
 from agent.masking import MaskClient, MaskingUnavailable
 from agent.settings import AgentSettings, agent_settings
@@ -61,7 +67,7 @@ from testbed.tasks import Intent, Task, load_tasks
 AGENT_AUDIT = Path(__file__).resolve().parent.parent / ".cache" / "audit" / "agent.jsonl"
 CASSETTE_INDEX = CASSETTE_DIR / "index.json"
 READ_INTENTS = {Intent.CLAIM_STATUS, Intent.POLICY_LOOKUP}
-REPLAY_FIELDS = ("outcome", "passed", "wrong_action", "tiers", "llm_calls")
+REPLAY_FIELDS = ("outcome", "passed", "wrong_action", "tiers", "llm_calls", "quarantined")
 
 
 class TaskRun(BaseModel):
@@ -135,7 +141,7 @@ def replay_differences(rows: list[TaskRun]) -> list[str]:
         differences += [
             f"{row.task_id}: {field} recorded {recorded.get(field)!r}, replayed {replayed[field]!r}"
             for field in REPLAY_FIELDS
-            if recorded.get(field) != replayed[field]
+            if field in recorded and recorded[field] != replayed[field]
         ]
     return differences
 
@@ -173,9 +179,16 @@ async def run_task(
     approvals: str,
     resolve_walls: bool,
     record: bool,
+    replay: bool = False,
 ) -> TaskRun:
     admin: PortalAdmin = services["admin"]
     task_key = f"{scenario.name}/{task.id}"
+    scans = CASSETTE_DIR / task_key.replace("/", "_") / "scans.json"
+    scanner: InjectionScanner = services["scanner"]
+    if record:
+        scanner = RecordingScanner(scanner, scans)
+    elif replay:
+        scanner = ReplayScanner(scans, scanner.name)
     await admin.apply(scenario.chaos)
     await admin.reset()
     await services["proxy_http"].delete(f"/v1/tasks/{task_key}")
@@ -194,7 +207,7 @@ async def run_task(
         llm=services["llm"],
         api=services["api"],
         masker=masker,
-        scanner=services["scanner"],
+        scanner=scanner,
         password=settings.test_user_password,
         open_browser=open_browser,
     )
@@ -266,18 +279,8 @@ async def main_async(args: argparse.Namespace) -> int:
     scenario = load_scenarios()[args.scenario]
     tasks = load_tasks()
     if args.check_replay and not args.tasks:
-        recorded = {
-            key.split("/", 1)[1]: entry.get("scanner", "none")
-            for key, entry in load_index().items()
-            if key.startswith(f"{scenario.name}/")
-        }
-        # A scanner flag changes which writes need approval, so a replay under another scanner is not the
-        # same run; those tasks are skipped and counted, never passed (CI has no Prompt Guard; ADR 0014).
-        skipped = sorted(t for t, s in recorded.items() if s != settings.injection_scanner)
-        if skipped:
-            names = ", ".join(skipped)
-            print(f"skipped {len(skipped)} tasks recorded with another injection scanner: {names}")
-        tasks = tuple(t for t in tasks if recorded.get(t.id) == settings.injection_scanner)
+        recorded = {key.split("/", 1)[1] for key in load_index() if key.startswith(f"{scenario.name}/")}
+        tasks = tuple(t for t in tasks if t.id in recorded)
     elif not args.all:
         wanted = set(args.tasks.split(","))
         tasks = tuple(t for t in tasks if t.id in wanted)
@@ -317,7 +320,8 @@ async def main_async(args: argparse.Namespace) -> int:
             "llm": LlmClient(settings.proxy_url),
             "api": api,
             "resolver": resolver,
-            "scanner": build_scanner(settings.injection_scanner),
+            # A replay check serves the recorded verdicts (ReplayScanner), so it never needs the gated model.
+            "scanner": build_scanner("none" if args.check_replay else settings.injection_scanner),
             "checkpointer": saver,
             "proxy_http": proxy_http,
             "rehydrator": Rehydrator(vault, audit),
@@ -332,6 +336,7 @@ async def main_async(args: argparse.Namespace) -> int:
                 args.approvals,
                 args.resolve_walls,
                 args.record,
+                args.check_replay,
             )
             rows.append(row)
             print(

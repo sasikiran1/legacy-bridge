@@ -48,3 +48,10 @@ The only injection either model flags is the explicit "Ignore all previous instr
 - **Results must say the scanner barely helps.** Injection results are reported per defense, and the headline is the structural defenses' attack success rate, not the classifier's.
 - **Attribution:** Llama 4 Community License attribution ("Built with Llama") is shown wherever the scanner is used in published results.
 - **Small benign set:** 34 texts. The false-positive rate is not established beyond this corpus.
+
+## Amendment (2026-10-24)
+
+Decision 4 is changed. Skipping tasks recorded with a different scanner would have skipped every recording, because recordings run with the scanner and CI runs without it. Instead:
+- each recording stores the scanner's verdicts as `scans.json` beside its cassettes, and a replay serves them in order, so a replay never needs the gated model
+- recordings made before verdicts were stored replay as never flagged, which is exact for them: none was quarantined
+- the cassette index now records `quarantined`, and a replay check compares it

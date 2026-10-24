@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
+import json
 import re
 from enum import StrEnum
+from pathlib import Path
 from typing import Protocol
 
 from pydantic import BaseModel, ConfigDict
@@ -107,6 +109,42 @@ class PromptGuardScanner:
                 logits = self._model(input_ids=input_ids).logits
             best = max(best, float(torch.softmax(logits, dim=-1)[0, -1]))
         return ScanResult(flagged=best >= self._threshold, score=best, scanner=self.name)
+
+
+class RecordingScanner:
+    """Saves each verdict with the task's cassettes, so a replay can reproduce them without the model."""
+
+    def __init__(self, inner: InjectionScanner, path: Path) -> None:
+        self.name = inner.name
+        self._inner = inner
+        self._path = path
+        self._verdicts: list[dict[str, object]] = []
+
+    def scan(self, text: str) -> ScanResult:
+        result = self._inner.scan(text)
+        self._verdicts.append({"flagged": result.flagged, "score": round(result.score, 4)})
+        self._path.parent.mkdir(parents=True, exist_ok=True)
+        self._path.write_text(json.dumps(self._verdicts, indent=1) + "\n", encoding="utf-8")
+        return result
+
+
+class ReplayScanner:
+    """Serves recorded verdicts in order. A task recorded without them (no scanner, or nothing flagged before
+    verdicts were recorded) replays as never flagged."""
+
+    def __init__(self, path: Path, name: str) -> None:
+        self.name = name
+        self._verdicts = json.loads(path.read_text(encoding="utf-8")) if path.exists() else []
+        self._next = 0
+
+    def scan(self, text: str) -> ScanResult:
+        verdict = (
+            self._verdicts[self._next]
+            if self._next < len(self._verdicts)
+            else {"flagged": False, "score": 0.0}
+        )
+        self._next += 1
+        return ScanResult(flagged=bool(verdict["flagged"]), score=float(verdict["score"]), scanner=self.name)
 
 
 def build_scanner(name: str) -> InjectionScanner:

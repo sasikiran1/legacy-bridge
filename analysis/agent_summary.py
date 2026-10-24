@@ -40,7 +40,8 @@ def cassette_models(row: dict[str, Any]) -> set[str]:
     """Rows recorded before runs tracked their models; the cassettes name who served each call."""
     directory = CASSETTE_DIR / f"{row['scenario']}_{row['task_id']}"
     return {
-        json.loads(path.read_text(encoding="utf-8"))["served_by"] for path in sorted(directory.glob("*.json"))
+        json.loads(path.read_text(encoding="utf-8"))["served_by"]
+        for path in sorted(directory.glob("[0-9][0-9][0-9].json"))
     }
 
 
