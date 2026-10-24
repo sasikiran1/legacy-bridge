@@ -14,6 +14,7 @@ from collections.abc import Callable
 
 from playwright.async_api import Locator as PageLocator
 from playwright.async_api import Page, async_playwright
+from playwright.async_api import TimeoutError as PlaywrightTimeout
 from pydantic import BaseModel, ConfigDict
 
 from agent.guardrails import CONFIRMATION, ApprovalKind, approval_for_click, is_verification_wall
@@ -21,6 +22,7 @@ from agent.replay import Locator, ReplayScript
 
 Approve = Callable[[ApprovalKind, str], bool]
 STEP_TIMEOUT_MS = 10_000
+CONFIRM_TIMEOUT_MS = 5_000
 
 
 class ReplayResult(BaseModel):
@@ -52,6 +54,15 @@ async def _find(page: Page, target: Locator, script: ReplayScript, params: dict[
         if await candidate.count() == 1:
             return candidate
     raise StepFailed(f"no single {target.role} {target.name!r}{' in its row' if target.within_row else ''}")
+
+
+async def _confirmed(page: Page) -> bool:
+    """The portal shows its confirmation in a status box that renders after the write returns."""
+    try:
+        await page.get_by_text(CONFIRMATION).first.wait_for(state="visible", timeout=CONFIRM_TIMEOUT_MS)
+    except PlaywrightTimeout:
+        return False
+    return True
 
 
 async def _login(page: Page, origin: str, username: str, password: str) -> None:
@@ -118,12 +129,11 @@ async def run_script(
                         else:
                             await element.select_option(script.fill(str(step.value), params))
                     await page.wait_for_load_state("networkidle")
-                except (StepFailed, TimeoutError) as e:
+                except (StepFailed, PlaywrightTimeout) as e:
                     return result("step_failed", failed_step=index, error=str(e)[:300])
                 except Exception as e:  # Playwright's own errors (detached element, navigation) end the run
                     return result("step_failed", failed_step=index, error=f"{type(e).__name__}: {e}"[:300])
                 done = index + 1
-            confirmed = bool(CONFIRMATION.search(await page.locator("body").inner_text()))
-            return result("success" if confirmed else "unverified")
+            return result("success" if await _confirmed(page) else "unverified")
         finally:
             await browser.close()

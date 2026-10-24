@@ -164,8 +164,11 @@ class Compiler:
         whole = tokens.get(text) or next((name for name, value in values.items() if value == text), None)
         if whole:
             return f"${{{whole}}}"
+        # A partly masked text (a note with an email in it) maps to the parameter it fits, but only when
+        # enough literal text constrains the fit: a lone unmapped token fits anything (an error below).
+        literal = TOKEN_RE.sub("", text).strip()
         for name, value in values.items():
-            if TOKEN_RE.search(text) and _fits(text, value):
+            if TOKEN_RE.search(text) and len(literal) >= MIN_ANCHOR_LITERAL and _fits(text, value):
                 return f"${{{name}}}"
         templated = TOKEN_RE.sub(
             lambda m: f"${{{tokens[m.group()]}}}" if m.group() in tokens else m.group(), text
