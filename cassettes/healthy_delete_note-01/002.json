@@ -1,7 +1,7 @@
 {
  "task_id": "healthy/delete_note-01",
  "call": 2,
- "request_sha256": "c0840bdbe76f0f6a07cd1d22f48be422af6c46bc9bfbc5fe21104fb622c88856",
+ "request_sha256": "fc30750861dc1834cf1c29636909a8b0385a1644c511c941f0d03674e263a5c5",
  "request": {
   "model": "local_text",
   "messages": [
@@ -18,7 +18,7 @@
     "content": "",
     "tool_calls": [
      {
-      "id": "call_ew33m1ts",
+      "id": "call_030vrumh",
       "type": "function",
       "function": {
        "name": "listNotes",
@@ -29,7 +29,7 @@
    },
    {
     "role": "tool",
-    "tool_call_id": "call_ew33m1ts",
+    "tool_call_id": "call_030vrumh",
     "content": "<untrusted_content source=\"portal-api\">\nHTTP 200: [{\"id\": 73, \"author\": \"[[PERSON:5e5ec3fc50]]\", \"body\": \"Member requested that statements go to [[EMAIL_ADDRESS:530fc4a024]] going forward.\", \"createdAt\": \"2026-01-12T10:33:14Z\"}]\n</untrusted_content>"
    }
   ],
@@ -380,6 +380,6 @@
  "served_by": "gemma4-12b-16k",
  "status": 200,
  "stream": false,
- "body": "{\"id\":\"chatcmpl-234\",\"object\":\"chat.completion\",\"created\":1792772421,\"model\":\"gemma4-12b-16k\",\"system_fingerprint\":\"fp_ollama\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"\",\"tool_calls\":[{\"id\":\"call_q40s73yt\",\"index\":0,\"type\":\"function\",\"function\":{\"name\":\"deleteNote\",\"arguments\":\"{\\\"noteId\\\":73}\"}}]},\"finish_reason\":\"tool_calls\"}],\"usage\":{\"prompt_tokens\":1595,\"prompt_tokens_details\":{\"cached_tokens\":1448},\"completion_tokens\":19,\"total_tokens\":1614}}\n",
- "recorded_at": "2026-10-23T16:20:21+00:00"
+ "body": "{\"id\":\"chatcmpl-895\",\"object\":\"chat.completion\",\"created\":1792821671,\"model\":\"gemma4-12b-16k\",\"system_fingerprint\":\"fp_ollama\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"\",\"tool_calls\":[{\"id\":\"call_mf9j6jdq\",\"index\":0,\"type\":\"function\",\"function\":{\"name\":\"deleteNote\",\"arguments\":\"{\\\"noteId\\\":73}\"}}]},\"finish_reason\":\"tool_calls\"}],\"usage\":{\"prompt_tokens\":1595,\"prompt_tokens_details\":{\"cached_tokens\":1448},\"completion_tokens\":19,\"total_tokens\":1614}}\n",
+ "recorded_at": "2026-10-24T06:01:11+00:00"
 }

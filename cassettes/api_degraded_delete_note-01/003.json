@@ -1,7 +1,7 @@
 {
  "task_id": "api_degraded/delete_note-01",
  "call": 3,
- "request_sha256": "bd0a807c0c53472676700bd18a949261c3e1ca01e14494dac8cbba2d5130c1ce",
+ "request_sha256": "637cb1ff5e0f8448b7426343d96b324611961d45916350b17dd9ddb05414c850",
  "request": {
   "model": "local_text",
   "messages": [
@@ -18,7 +18,7 @@
     "content": "",
     "tool_calls": [
      {
-      "id": "call_tzc9wodo",
+      "id": "call_bm0u9k8k",
       "type": "function",
       "function": {
        "name": "listNotes",
@@ -29,7 +29,7 @@
    },
    {
     "role": "tool",
-    "tool_call_id": "call_tzc9wodo",
+    "tool_call_id": "call_bm0u9k8k",
     "content": "<untrusted_content source=\"portal-api\">\nHTTP 0 (policy_denied): 'dee6ee156d' is part of a placeholder: write it in full, as [[MEMBER_ID:dee6ee156d]]\n</untrusted_content>"
    },
    {
@@ -37,7 +37,7 @@
     "content": "",
     "tool_calls": [
      {
-      "id": "call_ozxi1bff",
+      "id": "call_af6mjx19",
       "type": "function",
       "function": {
        "name": "listNotes",
@@ -48,7 +48,7 @@
    },
    {
     "role": "tool",
-    "tool_call_id": "call_ozxi1bff",
+    "tool_call_id": "call_af6mjx19",
     "content": "<untrusted_content source=\"portal-api\">\nHTTP 200: [{\"id\": 73, \"author\": \"[[PERSON:2e33a421a1]]\", \"body\": \"Member requested that statements go to [[EMAIL_ADDRESS:3721b9f91f]] going forward.\", \"createdAt\": \"2026-01-12T10:33:14Z\"}]\n</untrusted_content>"
    }
   ],
@@ -399,6 +399,6 @@
  "served_by": "gemma4-12b-16k",
  "status": 200,
  "stream": false,
- "body": "{\"id\":\"chatcmpl-502\",\"object\":\"chat.completion\",\"created\":1792806885,\"model\":\"gemma4-12b-16k\",\"system_fingerprint\":\"fp_ollama\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"\",\"tool_calls\":[{\"id\":\"call_ruqqhvqq\",\"index\":0,\"type\":\"function\",\"function\":{\"name\":\"deleteNote\",\"arguments\":\"{\\\"noteId\\\":73}\"}}]},\"finish_reason\":\"tool_calls\"}],\"usage\":{\"prompt_tokens\":1699,\"prompt_tokens_details\":{\"cached_tokens\":1551},\"completion_tokens\":23,\"total_tokens\":1722}}\n",
- "recorded_at": "2026-10-24T01:54:45+00:00"
+ "body": "{\"id\":\"chatcmpl-935\",\"object\":\"chat.completion\",\"created\":1792822355,\"model\":\"gemma4-12b-16k\",\"system_fingerprint\":\"fp_ollama\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"\",\"tool_calls\":[{\"id\":\"call_7c8si4o4\",\"index\":0,\"type\":\"function\",\"function\":{\"name\":\"deleteNote\",\"arguments\":\"{\\\"noteId\\\":73}\"}}]},\"finish_reason\":\"tool_calls\"}],\"usage\":{\"prompt_tokens\":1699,\"prompt_tokens_details\":{\"cached_tokens\":1551},\"completion_tokens\":23,\"total_tokens\":1722}}\n",
+ "recorded_at": "2026-10-24T06:12:35+00:00"
 }
