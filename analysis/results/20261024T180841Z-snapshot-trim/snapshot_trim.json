@@ -1,0 +1,12 @@
+{
+  "pages": 140,
+  "actionable_refs_lost": 0,
+  "openai/gpt-oss-20b": {
+    "raw_tokens_total": 127962,
+    "trimmed_tokens_total": 75990,
+    "reduction_total": 0.406,
+    "median_reduction_per_page": 0.397,
+    "median_raw_tokens_per_page": 571.0,
+    "median_trimmed_tokens_per_page": 362.5
+  }
+}

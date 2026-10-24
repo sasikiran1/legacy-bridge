@@ -1,0 +1,21 @@
+{
+  "run_id": "20261024T180841Z-snapshot-trim",
+  "kind": "snapshot-trim",
+  "git": {
+    "sha": "4d10b0e6b8d3603128c2634896c5a3795ded6621",
+    "dirty": false
+  },
+  "started": "2026-10-24T18:08:41.870704+00:00",
+  "finished": "2026-10-24T18:08:51.024724+00:00",
+  "python": "3.14.7",
+  "machine": "x86_64",
+  "models": {
+    "openai/gpt-oss-20b": "tokenizer only"
+  },
+  "config": {
+    "pages": 140,
+    "tokenizers": [
+      "openai/gpt-oss-20b"
+    ]
+  }
+}
