@@ -18,9 +18,9 @@
   "seed": 7,
   "max_tokens": 300
  },
- "served_by": "qwen2.5-14b-16k:latest",
+ "served_by": "gemma4-12b-16k",
  "status": 200,
  "stream": false,
- "body": "{\"id\":\"chatcmpl-725\",\"object\":\"chat.completion\",\"created\":1792672536,\"model\":\"qwen2.5-14b-16k:latest\",\"system_fingerprint\":\"fp_ollama\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"{\\\"intent\\\": \\\"add_note_to_record\\\", \\\"kind\\\": \\\"write\\\", \\\"parameters\\\": {\\\"person\\\": \\\"[[PERSON:a9c7039a59]]\\\", \\\"member_id\\\": \\\"[[MEMBER_ID:2f5b91e271]]\\\", \\\"note\\\": \\\"Member confirmed receipt of the explanation of benefits for claim [[CLAIM_NUMBER:a3f44180c7]].\\\"}}\"},\"finish_reason\":\"stop\"}],\"usage\":{\"prompt_tokens\":283,\"prompt_tokens_details\":{\"cached_tokens\":0},\"completion_tokens\":88,\"total_tokens\":371}}\n",
- "recorded_at": "2026-10-22T12:35:36+00:00"
+ "body": "{\"id\":\"chatcmpl-268\",\"object\":\"chat.completion\",\"created\":1792772379,\"model\":\"gemma4-12b-16k\",\"system_fingerprint\":\"fp_ollama\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"\",\"reasoning\":\"The user wants to add a note to a specific member's record.\\nMember ID: [[MEMBER_ID:2f5b91e271]]\\nPerson: [[PERSON:a9c7039a59]]\\nNote content: \\\"Member confirmed receipt of the explanation of benefits for claim [[CLAIM_NUMBER:a3f44180c7]].\\\"\\n\\nI need to identify the correct tool/intent for adding a note.\\nThe available tools (implied by the prompt's context of a health insurer's member services portal) would likely include something like `add_note` or `update_record_note`.\\n\\nLooking at the instructions:\\n- Intent: `add_note` or `create_note`\\n- Kind: `write`\\n- Parameters: `member_id`, `note`\\n\\nLet's check the specific requirements:\\n- Use placeholders exactly.\\n- JSON only.\\n\\nIntent: `add_note`\\nKind: `write`\\nParameters:\\n- `member_id`: \\\"[[MEMBER_ID:2f5b91e271]]\\\"\\n- `note`: \\\"Member confirmed receipt of the explanation of benefits for claim [[CLAIM_NUMBER:a3f44180c7]].\\\"\\n\\nWait, the prompt says \\\"Add a note to the record of [[PERSON:a9c\"},\"finish_reason\":\"length\"}],\"usage\":{\"prompt_tokens\":302,\"prompt_tokens_details\":{\"cached_tokens\":0},\"completion_tokens\":300,\"total_tokens\":602}}\n",
+ "recorded_at": "2026-10-23T16:19:39+00:00"
 }

@@ -245,9 +245,9 @@
    }
   ]
  },
- "served_by": "qwen2.5-14b-16k:latest",
+ "served_by": "gemma4-12b-16k",
  "status": 200,
  "stream": false,
- "body": "{\"id\":\"chatcmpl-878\",\"object\":\"chat.completion\",\"created\":1792674647,\"model\":\"qwen2.5-14b-16k:latest\",\"system_fingerprint\":\"fp_ollama\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"\",\"tool_calls\":[{\"id\":\"call_034f5ez7\",\"index\":0,\"type\":\"function\",\"function\":{\"name\":\"browser_type\",\"arguments\":\"{\\\"element\\\":\\\"Member name or number\\\",\\\"target\\\":\\\"e14\\\",\\\"text\\\":\\\"[[PERSON:e94f275fc6]]\\\",\\\"submit\\\":true}\"}},{\"id\":\"call_7e39lurf\",\"index\":1,\"type\":\"function\",\"function\":{\"name\":\"browser_wait_for\",\"arguments\":\"{\\\"text\\\":\\\"MEMBER SERVICES PORTAL\\\",\\\"time\\\":5}\"}}]},\"finish_reason\":\"tool_calls\"}],\"usage\":{\"prompt_tokens\":1414,\"prompt_tokens_details\":{\"cached_tokens\":1064},\"completion_tokens\":504,\"total_tokens\":1918}}\n",
- "recorded_at": "2026-10-22T13:10:47+00:00"
+ "body": "{\"id\":\"chatcmpl-808\",\"object\":\"chat.completion\",\"created\":1792808180,\"model\":\"gemma4-12b-16k\",\"system_fingerprint\":\"fp_ollama\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"\",\"reasoning\":\"The user wants to change the phone number for a specific member.\\nI need to:\\n1.  Navigate to the member's record using their member ID.\\n2.  Update the phone number.\\n3.  Confirm the change.\\n\\nThe member ID is `[[MEMBER_ID:56ef55f42c]]`.\\nThe new phone number is `[[PHONE_NUMBER:4fee6d4537]]`.\\n\\nCurrent page is the home page with a \\\"Member Search\\\" section.\\nI can either use the search box or go directly to the member's URL.\\nThe instructions say \\\"Member records are at http://portal:8080/members/\\u003cmember number\\u003e\\\".\\nSo I can go directly to `http://portal:8080/members/[[MEMBER_ID:56ef55f42c]]`.\\n\\nLet's start by navigating to the member's record.\",\"tool_calls\":[{\"id\":\"call_564f7ogv\",\"index\":0,\"type\":\"function\",\"function\":{\"name\":\"browser_navigate\",\"arguments\":\"{\\\"url\\\":\\\"http://portal:8080/members/[[MEMBER_ID:56ef55f42c]]\\\"}\"}}]},\"finish_reason\":\"tool_calls\"}],\"usage\":{\"prompt_tokens\":1478,\"prompt_tokens_details\":{\"cached_tokens\":0},\"completion_tokens\":248,\"total_tokens\":1726}}\n",
+ "recorded_at": "2026-10-24T02:16:20+00:00"
 }

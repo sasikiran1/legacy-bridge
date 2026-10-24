@@ -245,9 +245,9 @@
    }
   ]
  },
- "served_by": "qwen2.5-14b-16k:latest",
+ "served_by": "gemma4-12b-16k",
  "status": 200,
  "stream": false,
- "body": "{\"id\":\"chatcmpl-798\",\"object\":\"chat.completion\",\"created\":1792672894,\"model\":\"qwen2.5-14b-16k:latest\",\"system_fingerprint\":\"fp_ollama\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"\",\"tool_calls\":[{\"id\":\"call_ko8z3b99\",\"index\":0,\"type\":\"function\",\"function\":{\"name\":\"browser_navigate\",\"arguments\":\"{\\\"url\\\":\\\"http://portal:8080/members/[[MEMBER_ID:1e3cc0407a]]\\\"}\"}}]},\"finish_reason\":\"tool_calls\"}],\"usage\":{\"prompt_tokens\":1417,\"prompt_tokens_details\":{\"cached_tokens\":1062},\"completion_tokens\":46,\"total_tokens\":1463}}\n",
- "recorded_at": "2026-10-22T12:41:34+00:00"
+ "body": "{\"id\":\"chatcmpl-206\",\"object\":\"chat.completion\",\"created\":1792772738,\"model\":\"gemma4-12b-16k\",\"system_fingerprint\":\"fp_ollama\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"\",\"reasoning\":\"The user wants to change the email address for a specific member.\\nMember ID: [[MEMBER_ID:1e3cc0407a]]\\nNew Email: [[EMAIL_ADDRESS:6a5e4c51d6]]\\n\\nI need to:\\n1. Navigate to the member's record. I can do this by searching for the member ID or going directly to the URL.\\n2. The member search is at `http://portal:8080/`.\\n3. I'll use the member ID to find the record.\\n4. Once on the member's page, I'll find the email field and update it.\\n5. Confirm the change.\\n\\nLet's start by navigating to the member's record. I can use the member ID directly in the URL: `http://portal:8080/members/[[MEMBER_ID:1e3cc0407a]]`.\",\"tool_calls\":[{\"id\":\"call_locy5n27\",\"index\":0,\"type\":\"function\",\"function\":{\"name\":\"browser_navigate\",\"arguments\":\"{\\\"url\\\":\\\"http://portal:8080/members/[[MEMBER_ID:1e3cc0407a]]\\\"}\"}}]},\"finish_reason\":\"tool_calls\"}],\"usage\":{\"prompt_tokens\":1480,\"prompt_tokens_details\":{\"cached_tokens\":510},\"completion_tokens\":248,\"total_tokens\":1728}}\n",
+ "recorded_at": "2026-10-23T16:25:38+00:00"
 }

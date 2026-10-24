@@ -18,9 +18,9 @@
   "seed": 7,
   "max_tokens": 300
  },
- "served_by": "qwen2.5-14b-16k:latest",
+ "served_by": "gemma4-12b-16k",
  "status": 200,
  "stream": false,
- "body": "{\"id\":\"chatcmpl-357\",\"object\":\"chat.completion\",\"created\":1792674610,\"model\":\"qwen2.5-14b-16k:latest\",\"system_fingerprint\":\"fp_ollama\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"{\\\"intent\\\": \\\"change_phone_number\\\", \\\"kind\\\": \\\"write\\\", \\\"parameters\\\": {\\\"person\\\": \\\"[[PERSON:e94f275fc6]]\\\", \\\"member_id\\\": \\\"[[MEMBER_ID:56ef55f42c]]\\\", \\\"new_phone_number\\\": \\\"[[PHONE_NUMBER:4fee6d4537]]\\\"}}\"},\"finish_reason\":\"stop\"}],\"usage\":{\"prompt_tokens\":268,\"prompt_tokens_details\":{\"cached_tokens\":217},\"completion_tokens\":76,\"total_tokens\":344}}\n",
- "recorded_at": "2026-10-22T13:10:10+00:00"
+ "body": "{\"id\":\"chatcmpl-269\",\"object\":\"chat.completion\",\"created\":1792808147,\"model\":\"gemma4-12b-16k\",\"system_fingerprint\":\"fp_ollama\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"```json\\n{\\\"intent\\\": \\\"update_phone_number\\\", \\\"kind\\\": \\\"write\\\", \\\"parameters\\\": {\\\"member_id\\\": \\\"[[MEMBER_ID:56ef55f42c]]\\\", \\\"phone_number\\\": \\\"[[PHONE_NUMBER:4fee6d4537]]\\\"}}\\n```\",\"reasoning\":\"The user wants to change the phone number for a specific member.\\nMember ID: [[MEMBER_ID:56ef55f42c]]\\nNew Phone Number: [[PHONE_NUMBER:4fee6d4537]]\\nAction: Update/Change phone number.\\n\\nThe intent should be `update_phone_number`.\\nThe kind is `write`.\\nParameters:\\n- `member_id`: [[MEMBER_ID:56ef55f42c]]\\n- `phone_number`: [[PHONE_NUMBER:4fee6d4537]]\"},\"finish_reason\":\"stop\"}],\"usage\":{\"prompt_tokens\":286,\"prompt_tokens_details\":{\"cached_tokens\":0},\"completion_tokens\":200,\"total_tokens\":486}}\n",
+ "recorded_at": "2026-10-24T02:15:47+00:00"
 }

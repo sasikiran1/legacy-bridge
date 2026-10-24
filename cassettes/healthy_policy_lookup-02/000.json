@@ -18,9 +18,9 @@
   "seed": 7,
   "max_tokens": 300
  },
- "served_by": "qwen2.5-14b-16k:latest",
+ "served_by": "gemma4-12b-16k",
  "status": 200,
  "stream": false,
- "body": "{\"id\":\"chatcmpl-507\",\"object\":\"chat.completion\",\"created\":1792672692,\"model\":\"qwen2.5-14b-16k:latest\",\"system_fingerprint\":\"fp_ollama\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"{\\\"intent\\\": \\\"look_up_policy_number\\\", \\\"kind\\\": \\\"read\\\", \\\"parameters\\\": {\\\"person\\\": \\\"[[PERSON:1158ed94c7]]\\\", \\\"member_id\\\": \\\"[[MEMBER_ID:c8bf68e8b6]]\\\", \\\"policy_type\\\": \\\"Basic Health\\\"}}\"},\"finish_reason\":\"stop\"}],\"usage\":{\"prompt_tokens\":262,\"prompt_tokens_details\":{\"cached_tokens\":161},\"completion_tokens\":65,\"total_tokens\":327}}\n",
- "recorded_at": "2026-10-22T12:38:12+00:00"
+ "body": "{\"id\":\"chatcmpl-577\",\"object\":\"chat.completion\",\"created\":1792772504,\"model\":\"gemma4-12b-16k\",\"system_fingerprint\":\"fp_ollama\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"```json\\n{\\\"intent\\\": \\\"get_member_policies\\\", \\\"kind\\\": \\\"read\\\", \\\"parameters\\\": {\\\"member_id\\\": \\\"[[MEMBER_ID:c8bf68e8b6]]\\\"}}\\n```\",\"reasoning\":\"The user wants to find the policy number for a specific member's \\\"Basic Health\\\" policy.\\nThe member's name is [[PERSON:1158ed94c7]] and the member number is [[MEMBER_ID:c8bf68e8b6]].\\n\\nI need to:\\n1.  Identify the member's details using the member number.\\n2.  Find the \\\"Basic Health\\\" policy associated with that member.\\n3.  Extract the policy number.\\n\\nLooking at the available tools (implied by the prompt's context of a health insurer's member services portal):\\n- I should probably search for the member first or look up the policies for that member ID.\\n\\nThe task is to \\\"Look up the policy number\\\". This is a \\\"read\\\" operation.\\n\\nParameters:\\n- member_id: [[MEMBER_ID:c8bf68e8b6]]\\n- policy_type: \\\"Basic Health\\\" (or similar)\\n\\nI will start by searching for the member's policies.\"},\"finish_reason\":\"stop\"}],\"usage\":{\"prompt_tokens\":278,\"prompt_tokens_details\":{\"cached_tokens\":0},\"completion_tokens\":275,\"total_tokens\":553}}\n",
+ "recorded_at": "2026-10-23T16:21:44+00:00"
 }

@@ -245,9 +245,9 @@
    }
   ]
  },
- "served_by": "qwen2.5-14b-16k:latest",
+ "served_by": "gemma4-12b-16k",
  "status": 200,
  "stream": false,
- "body": "{\"id\":\"chatcmpl-556\",\"object\":\"chat.completion\",\"created\":1792674030,\"model\":\"qwen2.5-14b-16k:latest\",\"system_fingerprint\":\"fp_ollama\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"\",\"tool_calls\":[{\"id\":\"call_mr914th2\",\"index\":0,\"type\":\"function\",\"function\":{\"name\":\"browser_navigate\",\"arguments\":\"{\\\"url\\\":\\\"http://portal:8080/members/[[MEMBER_ID:7e779ff03e]]\\\"}\"}}]},\"finish_reason\":\"tool_calls\"}],\"usage\":{\"prompt_tokens\":1411,\"prompt_tokens_details\":{\"cached_tokens\":1062},\"completion_tokens\":46,\"total_tokens\":1457}}\n",
- "recorded_at": "2026-10-22T13:00:30+00:00"
+ "body": "{\"id\":\"chatcmpl-348\",\"object\":\"chat.completion\",\"created\":1792807064,\"model\":\"gemma4-12b-16k\",\"system_fingerprint\":\"fp_ollama\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"\",\"reasoning\":\"The user wants to find the policy number of a Vision Care policy for a specific member.\\nI have the member's name (placeholder) and member number (placeholder).\\nI need to:\\n1. Search for the member using the member number.\\n2. Navigate to the member's record.\\n3. Find the Vision Care policy and its policy number.\\n\\nStarting by searching for the member.\",\"tool_calls\":[{\"id\":\"call_hi7ug9n8\",\"index\":0,\"type\":\"function\",\"function\":{\"name\":\"browser_type\",\"arguments\":\"{\\\"element\\\":\\\"Member name or number\\\",\\\"submit\\\":true,\\\"target\\\":\\\"e14\\\",\\\"text\\\":\\\"[[MEMBER_ID:7e779ff03e]]\\\"}\"}}]},\"finish_reason\":\"tool_calls\"}],\"usage\":{\"prompt_tokens\":1473,\"prompt_tokens_details\":{\"cached_tokens\":0},\"completion_tokens\":139,\"total_tokens\":1612}}\n",
+ "recorded_at": "2026-10-24T01:57:44+00:00"
 }

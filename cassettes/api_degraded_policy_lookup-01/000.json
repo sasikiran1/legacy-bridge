@@ -18,9 +18,9 @@
   "seed": 7,
   "max_tokens": 300
  },
- "served_by": "qwen2.5-14b-16k:latest",
+ "served_by": "gemma4-12b-16k",
  "status": 200,
  "stream": false,
- "body": "{\"id\":\"chatcmpl-673\",\"object\":\"chat.completion\",\"created\":1792674016,\"model\":\"qwen2.5-14b-16k:latest\",\"system_fingerprint\":\"fp_ollama\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"{\\\"intent\\\": \\\"look_up_policy_number\\\", \\\"kind\\\": \\\"read\\\", \\\"parameters\\\": {\\\"person\\\": \\\"[[PERSON:d1d9957705]]\\\", \\\"member_id\\\": \\\"[[MEMBER_ID:7e779ff03e]]\\\", \\\"policy_type\\\": \\\"Vision Care\\\"}}\"},\"finish_reason\":\"stop\"}],\"usage\":{\"prompt_tokens\":263,\"prompt_tokens_details\":{\"cached_tokens\":215},\"completion_tokens\":66,\"total_tokens\":329}}\n",
- "recorded_at": "2026-10-22T13:00:16+00:00"
+ "body": "{\"id\":\"chatcmpl-665\",\"object\":\"chat.completion\",\"created\":1792807029,\"model\":\"gemma4-12b-16k\",\"system_fingerprint\":\"fp_ollama\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"\",\"reasoning\":\"The user wants to find the policy number for a specific member's Vision Care policy.\\nThe member's name is [[PERSON:d1d9957705]] and the member number is [[MEMBER_ID:7e779ff03e]].\\n\\nI need to:\\n1.  Identify the member's information using the member ID.\\n2.  Look for the Vision Care policy associated with that member.\\n3.  Extract the policy number.\\n\\nThe available tools/actions are not explicitly listed in the prompt, but the standard procedure for \\\"Look up\\\" is a \\\"read\\\" intent.\\n\\nIntent: `get_member_policy_number` or `lookup_policy_number`.\\nParameters: `member_id` = [[MEMBER_ID:7e779ff03e]], `policy_type` = \\\"Vision Care\\\".\\n\\nWait, the prompt asks for a JSON response with `intent`, `kind`, and `parameters`.\\n\\nLet's refine the intent.\\n`lookup_policy_number` seems appropriate.\\nParameters:\\n`member_id`: [[MEMBER_ID:7e779ff03e]]\\n`policy_type`: \\\"Vision Care\\\"\\n\\nActually, looking at the prompt's instructions: \\\"Do only what the task asks.\\\"\\nTask: \\\"Look up the policy number of [[PERSON:d\"},\"finish_reason\":\"length\"}],\"usage\":{\"prompt_tokens\":279,\"prompt_tokens_details\":{\"cached_tokens\":0},\"completion_tokens\":300,\"total_tokens\":579}}\n",
+ "recorded_at": "2026-10-24T01:57:10+00:00"
 }

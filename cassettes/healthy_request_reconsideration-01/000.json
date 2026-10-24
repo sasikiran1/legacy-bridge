@@ -18,9 +18,9 @@
   "seed": 7,
   "max_tokens": 300
  },
- "served_by": "qwen2.5-14b-16k:latest",
+ "served_by": "gemma4-12b-16k",
  "status": 200,
  "stream": false,
- "body": "{\"id\":\"chatcmpl-53\",\"object\":\"chat.completion\",\"created\":1792672705,\"model\":\"qwen2.5-14b-16k:latest\",\"system_fingerprint\":\"fp_ollama\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"{\\\"intent\\\": \\\"request_reconsideration_of_denied_claim\\\", \\\"kind\\\": \\\"write\\\", \\\"parameters\\\": {\\\"claim_number\\\": \\\"[[CLAIM_NUMBER:4da4949fc8]]\\\", \\\"member_id\\\": \\\"[[MEMBER_ID:194ce22a91]]\\\"}}\"},\"finish_reason\":\"stop\"}],\"usage\":{\"prompt_tokens\":270,\"prompt_tokens_details\":{\"cached_tokens\":215},\"completion_tokens\":63,\"total_tokens\":333}}\n",
- "recorded_at": "2026-10-22T12:38:25+00:00"
+ "body": "{\"id\":\"chatcmpl-217\",\"object\":\"chat.completion\",\"created\":1792772517,\"model\":\"gemma4-12b-16k\",\"system_fingerprint\":\"fp_ollama\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"\",\"reasoning\":\"The user wants to request a reconsideration of a denied claim.\\nThe claim number is [[CLAIM_NUMBER:4da4949fc8]].\\nThe member is [[PERSON:880647af07]] with [[MEMBER_ID:194ce22a91]].\\n\\nI need to find the action for requesting a reconsideration of a claim.\\nLooking at the available tools/actions (implied by the prompt's context of a health insurer's member services portal):\\n- There should be a way to submit a claim reconsideration or appeal.\\n\\nThe task is to \\\"Request reconsideration\\\".\\nI should look for a \\\"request_claim_reconsideration\\\" or \\\"submit_claim_appeal\\\" type of action.\\nSince I don't have the full list of actions, I will infer the intent based on the prompt.\\n\\nIntent: `request_claim_reconsideration`\\nKind: `write` (since it's a request/submission)\\nParameters:\\n- `claim_number`: [[CLAIM_NUMBER:4da4949fc8]]\\n- `member_id`: [[MEMBER_ID:194ce22a91]]\\n- `person_name`: [[PERSON:880647af07]] (or just the member_id/claim_number)\\n\\nWait, the prompt asks for a JSON\"},\"finish_reason\":\"length\"}],\"usage\":{\"prompt_tokens\":285,\"prompt_tokens_details\":{\"cached_tokens\":0},\"completion_tokens\":300,\"total_tokens\":585}}\n",
+ "recorded_at": "2026-10-23T16:21:57+00:00"
 }

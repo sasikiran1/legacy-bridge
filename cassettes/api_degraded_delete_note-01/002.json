@@ -1,7 +1,7 @@
 {
  "task_id": "api_degraded/delete_note-01",
  "call": 2,
- "request_sha256": "562c590fd1081055c602a7cc482edd2a5c033b6a267662830b765b500752704c",
+ "request_sha256": "f1229fe1381fd9816bedffb53eed4fe7a88900f1ffb369e18177747e93e6383e",
  "request": {
   "model": "local_text",
   "messages": [
@@ -11,26 +11,26 @@
    },
    {
     "role": "user",
-    "content": "Task: Delete the note on the record of [[PERSON:54fd47e8cd]] ([[MEMBER_ID:dee6ee156d]]) that reads: \"Member requested that statements go to [[EMAIL_ADDRESS:3721b9f91f]] going forward.\"\nPlan: {\"intent\": \"delete_note\", \"kind\": \"write\", \"parameters\": {\"person_id\": \"54fd47e8cd\", \"note_text\": \"Member requested that statements go to [[EMAIL_ADDRESS:3721b9f91f]] going forward.\"}}"
+    "content": "Task: Delete the note on the record of [[PERSON:54fd47e8cd]] ([[MEMBER_ID:dee6ee156d]]) that reads: \"Member requested that statements go to [[EMAIL_ADDRESS:3721b9f91f]] going forward.\"\nPlan: {}"
    },
    {
     "role": "assistant",
-    "content": "To complete the task, I need to first retrieve the list of notes for the member with ID [[MEMBER_ID:dee6ee156d]] and then identify the note that matches the text \"Member requested that statements go to [[EMAIL_ADDRESS:3721b9f91f]] going forward.\" Once identified, I will delete the note.\n\nFirst, I will list the notes for the member.\n",
+    "content": "",
     "tool_calls": [
      {
-      "id": "call_120ubfzl",
+      "id": "call_tzc9wodo",
       "type": "function",
       "function": {
        "name": "listNotes",
-       "arguments": "{\"memberNumber\": \"[[MEMBER_ID:dee6ee156d]]\"}"
+       "arguments": "{\"memberNumber\": \"[[MEMBER_ID:43fd6c189f]]\"}"
       }
      }
     ]
    },
    {
     "role": "tool",
-    "tool_call_id": "call_120ubfzl",
-    "content": "<untrusted_content source=\"portal-api\">\nHTTP 200: [{\"id\": 73, \"author\": \"[[PERSON:2e33a421a1]]\", \"body\": \"Member requested that statements go to [[EMAIL_ADDRESS:3721b9f91f]] going forward.\", \"createdAt\": \"2026-01-12T10:33:14Z\"}]\n</untrusted_content>"
+    "tool_call_id": "call_tzc9wodo",
+    "content": "<untrusted_content source=\"portal-api\">\nHTTP 0 (policy_denied): 'dee6ee156d' is part of a placeholder: write it in full, as [[MEMBER_ID:dee6ee156d]]\n</untrusted_content>"
    }
   ],
   "temperature": 0,
@@ -377,9 +377,9 @@
    }
   ]
  },
- "served_by": "qwen2.5-14b-16k:latest",
+ "served_by": "gemma4-12b-16k",
  "status": 200,
  "stream": false,
- "body": "{\"id\":\"chatcmpl-559\",\"object\":\"chat.completion\",\"created\":1792675932,\"model\":\"qwen2.5-14b-16k:latest\",\"system_fingerprint\":\"fp_ollama\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"\",\"tool_calls\":[{\"id\":\"call_l8suoajz\",\"index\":0,\"type\":\"function\",\"function\":{\"name\":\"deleteNote\",\"arguments\":\"{\\\"noteId\\\":73}\"}}]},\"finish_reason\":\"tool_calls\"}],\"usage\":{\"prompt_tokens\":1621,\"prompt_tokens_details\":{\"cached_tokens\":1503},\"completion_tokens\":22,\"total_tokens\":1643}}\n",
- "recorded_at": "2026-10-22T13:32:12+00:00"
+ "body": "{\"id\":\"chatcmpl-944\",\"object\":\"chat.completion\",\"created\":1792806880,\"model\":\"gemma4-12b-16k\",\"system_fingerprint\":\"fp_ollama\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"\",\"tool_calls\":[{\"id\":\"call_ozxi1bff\",\"index\":0,\"type\":\"function\",\"function\":{\"name\":\"listNotes\",\"arguments\":\"{\\\"memberNumber\\\":\\\"[[MEMBER_ID:dee6ee156d]]\\\"}\"}}]},\"finish_reason\":\"tool_calls\"}],\"usage\":{\"prompt_tokens\":1554,\"prompt_tokens_details\":{\"cached_tokens\":1447},\"completion_tokens\":29,\"total_tokens\":1583}}\n",
+ "recorded_at": "2026-10-24T01:54:40+00:00"
 }

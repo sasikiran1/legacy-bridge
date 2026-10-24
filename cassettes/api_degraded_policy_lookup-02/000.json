@@ -18,9 +18,9 @@
   "seed": 7,
   "max_tokens": 300
  },
- "served_by": "qwen2.5-14b-16k:latest",
+ "served_by": "gemma4-12b-16k",
  "status": 200,
  "stream": false,
- "body": "{\"id\":\"chatcmpl-583\",\"object\":\"chat.completion\",\"created\":1792674061,\"model\":\"qwen2.5-14b-16k:latest\",\"system_fingerprint\":\"fp_ollama\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"{\\\"intent\\\": \\\"look_up_policy_number\\\", \\\"kind\\\": \\\"read\\\", \\\"parameters\\\": {\\\"person\\\": \\\"[[PERSON:b66881ef3b]]\\\", \\\"member_id\\\": \\\"[[MEMBER_ID:a4ac7792ee]]\\\", \\\"policy_type\\\": \\\"Basic Health\\\"}}\"},\"finish_reason\":\"stop\"}],\"usage\":{\"prompt_tokens\":260,\"prompt_tokens_details\":{\"cached_tokens\":223},\"completion_tokens\":63,\"total_tokens\":323}}\n",
- "recorded_at": "2026-10-22T13:01:01+00:00"
+ "body": "{\"id\":\"chatcmpl-774\",\"object\":\"chat.completion\",\"created\":1792807141,\"model\":\"gemma4-12b-16k\",\"system_fingerprint\":\"fp_ollama\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"```json\\n{\\\"intent\\\": \\\"search_member\\\", \\\"kind\\\": \\\"read\\\", \\\"parameters\\\": {\\\"member_id\\\": \\\"a4ac7792ee\\\"}}\\n```\",\"reasoning\":\"The user wants to find the policy number for a specific member's \\\"Basic Health\\\" policy.\\nThe member's name is [[PERSON:b66881ef3b]] and the member number is [[MEMBER_ID:a4ac7792ee]].\\n\\nI need to:\\n1. Search for the member using the member ID [[MEMBER_ID:a4ac7792ee]].\\n2. Identify the \\\"Basic Health\\\" policy associated with this member.\\n3. Extract the policy number.\\n\\nFirst step: Search for the member.\"},\"finish_reason\":\"stop\"}],\"usage\":{\"prompt_tokens\":277,\"prompt_tokens_details\":{\"cached_tokens\":0},\"completion_tokens\":165,\"total_tokens\":442}}\n",
+ "recorded_at": "2026-10-24T01:59:01+00:00"
 }

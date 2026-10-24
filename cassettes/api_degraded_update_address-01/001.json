@@ -1,7 +1,7 @@
 {
  "task_id": "api_degraded/update_address-01",
  "call": 1,
- "request_sha256": "18dd4b0190ba93c1827dec40471d5f5557ef788ed9834fce9c405b72de75ffd2",
+ "request_sha256": "878358345c2be6e876194f20cc87faa17b5e9ba4d6d035bea04722a918de840c",
  "request": {
   "model": "local_text",
   "messages": [
@@ -11,7 +11,7 @@
    },
    {
     "role": "user",
-    "content": "Task: Update the mailing address for [[PERSON:bc5b9ece21]] (member number [[MEMBER_ID:6b318fde30]]) to [[STREET_ADDRESS:aa3d00ee32]], Danielleville, WA 25854.\nPlan: {\"intent\": \"update_mailing_address\", \"kind\": \"write\", \"parameters\": {\"person\": \"[[PERSON:bc5b9ece21]]\", \"member_id\": \"[[MEMBER_ID:6b318fde30]]\", \"street_address\": \"[[STREET_ADDRESS:aa3d00ee32]]\", \"city\": \"Danielleville\", \"state\": \"WA\", \"zip_code\": \"25854\"}}"
+    "content": "Task: Update the mailing address for [[PERSON:bc5b9ece21]] (member number [[MEMBER_ID:6b318fde30]]) to [[STREET_ADDRESS:aa3d00ee32]], Danielleville, WA 25854.\nPlan: {}"
    }
   ],
   "temperature": 0,
@@ -358,9 +358,9 @@
    }
   ]
  },
- "served_by": "qwen2.5-14b-16k:latest",
+ "served_by": "gemma4-12b-16k",
  "status": 200,
  "stream": false,
- "body": "{\"id\":\"chatcmpl-404\",\"object\":\"chat.completion\",\"created\":1792674270,\"model\":\"qwen2.5-14b-16k:latest\",\"system_fingerprint\":\"fp_ollama\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"\",\"tool_calls\":[{\"id\":\"call_yz2p5a0b\",\"index\":0,\"type\":\"function\",\"function\":{\"name\":\"updateAddress\",\"arguments\":\"{\\\"postalCode\\\":\\\"25854\\\",\\\"memberNumber\\\":\\\"[[MEMBER_ID:6b318fde30]]\\\",\\\"street\\\":\\\"[[STREET_ADDRESS:aa3d00ee32]]\\\",\\\"city\\\":\\\"Danielleville\\\",\\\"state\\\":\\\"WA\\\"}\"}}]},\"finish_reason\":\"tool_calls\"}],\"usage\":{\"prompt_tokens\":1458,\"prompt_tokens_details\":{\"cached_tokens\":1290},\"completion_tokens\":79,\"total_tokens\":1537}}\n",
- "recorded_at": "2026-10-22T13:04:30+00:00"
+ "body": "{\"id\":\"chatcmpl-957\",\"object\":\"chat.completion\",\"created\":1792807582,\"model\":\"gemma4-12b-16k\",\"system_fingerprint\":\"fp_ollama\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"\",\"reasoning\":\"The user wants to update the mailing address for a specific member.\\nI have the member's name (placeholder), member number (placeholder), and the new address details.\\n\\nPlan:\\n1. Use `updateAddress` to update the mailing address for member `[[MEMBER_ID:6b318fde30]]`.\\n2. The new address details are:\\n   - Street: `[[STREET_ADDRESS:aa3d00ee32]]`\\n   - City: Danielleville\\n   - State: WA\\n   - Postal Code: 25854\",\"tool_calls\":[{\"id\":\"call_nziln452\",\"index\":0,\"type\":\"function\",\"function\":{\"name\":\"updateAddress\",\"arguments\":\"{\\\"city\\\":\\\"Danielleville\\\",\\\"memberNumber\\\":\\\"[[MEMBER_ID:6b318fde30]]\\\",\\\"postalCode\\\":\\\"25854\\\",\\\"state\\\":\\\"WA\\\",\\\"street\\\":\\\"[[STREET_ADDRESS:aa3d00ee32]]\\\"}\"}}]},\"finish_reason\":\"tool_calls\"}],\"usage\":{\"prompt_tokens\":1448,\"prompt_tokens_details\":{\"cached_tokens\":976},\"completion_tokens\":207,\"total_tokens\":1655}}\n",
+ "recorded_at": "2026-10-24T02:06:22+00:00"
 }

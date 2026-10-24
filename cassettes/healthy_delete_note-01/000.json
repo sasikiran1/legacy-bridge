@@ -18,9 +18,9 @@
   "seed": 7,
   "max_tokens": 300
  },
- "served_by": "qwen2.5-14b-16k:latest",
+ "served_by": "gemma4-12b-16k",
  "status": 200,
  "stream": false,
- "body": "{\"id\":\"chatcmpl-969\",\"object\":\"chat.completion\",\"created\":1792672565,\"model\":\"qwen2.5-14b-16k:latest\",\"system_fingerprint\":\"fp_ollama\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"{\\\"intent\\\": \\\"delete_note\\\", \\\"kind\\\": \\\"write\\\", \\\"parameters\\\": {\\\"person\\\": \\\"[[PERSON:dbd29fa5f5]]\\\", \\\"member_id\\\": \\\"[[MEMBER_ID:1bdfa72579]]\\\", \\\"note_text\\\": \\\"Member requested that statements go to [[EMAIL_ADDRESS:530fc4a024]] going forward.\\\"}}\"},\"finish_reason\":\"stop\"}],\"usage\":{\"prompt_tokens\":280,\"prompt_tokens_details\":{\"cached_tokens\":161},\"completion_tokens\":83,\"total_tokens\":363}}\n",
- "recorded_at": "2026-10-22T12:36:05+00:00"
+ "body": "{\"id\":\"chatcmpl-669\",\"object\":\"chat.completion\",\"created\":1792772413,\"model\":\"gemma4-12b-16k\",\"system_fingerprint\":\"fp_ollama\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"\",\"reasoning\":\"The user wants to delete a specific note from a member's record.\\nMember ID: [[MEMBER_ID:1bdfa72579]]\\nMember Name: [[PERSON:dbd29fa5f5]]\\nNote content: \\\"Member requested that statements go to [[EMAIL_ADDRESS:530fc4a024]] going forward.\\\"\\n\\nI need to find the note first to get its ID, then delete it.\\nHowever, the prompt asks for the action to delete the note.\\nThe available tools (implied by the context of a member services portal) would likely involve listing notes and then deleting a note.\\n\\nLooking at the instructions: \\\"Do only what the task asks.\\\"\\nTask: \\\"Delete the note...\\\"\\n\\nI should first identify the note.\\nI'll start by listing the notes for the member [[MEMBER_ID:1bdfa72579]].\\n\\nWait, the prompt asks for a JSON response representing the intent.\\nThe intent is to delete a note.\\nI need to know the note ID to delete it, but I don't have it yet.\\nUsually, in these multi-turn scenarios, I'd first list notes.\\nBut the prompt asks for the action to \\\"Delete the note\\\".\\nIf I can't do it in one step because I lack the ID, I should probably list the notes first.\\n\\n\"},\"finish_reason\":\"length\"}],\"usage\":{\"prompt_tokens\":298,\"prompt_tokens_details\":{\"cached_tokens\":0},\"completion_tokens\":300,\"total_tokens\":598}}\n",
+ "recorded_at": "2026-10-23T16:20:13+00:00"
 }

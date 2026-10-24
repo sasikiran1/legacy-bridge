@@ -18,9 +18,9 @@
   "seed": 7,
   "max_tokens": 300
  },
- "served_by": "qwen2.5-14b-16k:latest",
+ "served_by": "gemma4-12b-16k",
  "status": 200,
  "stream": false,
- "body": "{\"id\":\"chatcmpl-593\",\"object\":\"chat.completion\",\"created\":1792674471,\"model\":\"qwen2.5-14b-16k:latest\",\"system_fingerprint\":\"fp_ollama\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"{\\\"intent\\\": \\\"change_email_address\\\", \\\"kind\\\": \\\"write\\\", \\\"parameters\\\": {\\\"person\\\": \\\"[[PERSON:3b36c15f59]]\\\", \\\"member_id\\\": \\\"[[MEMBER_ID:a10558bf36]]\\\", \\\"new_email\\\": \\\"[[EMAIL_ADDRESS:f1698c3ebe]]\\\"}}\"},\"finish_reason\":\"stop\"}],\"usage\":{\"prompt_tokens\":267,\"prompt_tokens_details\":{\"cached_tokens\":215},\"completion_tokens\":76,\"total_tokens\":343}}\n",
- "recorded_at": "2026-10-22T13:07:51+00:00"
+ "body": "{\"id\":\"chatcmpl-651\",\"object\":\"chat.completion\",\"created\":1792807917,\"model\":\"gemma4-12b-16k\",\"system_fingerprint\":\"fp_ollama\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"```json\\n{\\\"intent\\\": \\\"update_member_email\\\", \\\"kind\\\": \\\"write\\\", \\\"parameters\\\": {\\\"member_id\\\": \\\"[[MEMBER_ID:a10558bf36]]\\\", \\\"email_address\\\": \\\"[[EMAIL_ADDRESS:f1698c3ebe]]\\\"}}\\n```\",\"reasoning\":\"The user wants to change the email address for a specific member.\\nMember ID: [[MEMBER_ID:a10558bf36]]\\nNew Email: [[EMAIL_ADDRESS:f1698c3ebe]]\\nThe action is to update a record (write).\\n\\nThe intent should be `update_member_email` or `change_email_address`. Looking at the prompt's instructions, I need to provide a JSON response.\\n\\nParameters:\\n- member_id: [[MEMBER_ID:a10558bf36]]\\n- email_address: [[EMAIL_ADDRESS:f1698c3ebe]]\\n\\nWait, the prompt asks for \\\"intent\\\" in snake_case.\\nIntent: `update_member_email`\\nKind: `write`\\nParameters: `{\\\"member_id\\\": \\\"[[MEMBER_ID:a10558bf36]]\\\", \\\"email_address\\\": \\\"[[EMAIL_ADDRESS:f1698c3ebe]]\\\"}`\"},\"finish_reason\":\"stop\"}],\"usage\":{\"prompt_tokens\":285,\"prompt_tokens_details\":{\"cached_tokens\":0},\"completion_tokens\":296,\"total_tokens\":581}}\n",
+ "recorded_at": "2026-10-24T02:11:57+00:00"
 }

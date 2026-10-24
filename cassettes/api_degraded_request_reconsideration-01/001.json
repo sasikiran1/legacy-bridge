@@ -1,7 +1,7 @@
 {
  "task_id": "api_degraded/request_reconsideration-01",
  "call": 1,
- "request_sha256": "2080cb33473f490ef5af2a5846c6dedd0279da2da7c6c6335ef96238437175eb",
+ "request_sha256": "1bc9b655850a988f9daf8ce1fc29c5be1568e124be7a43dbc8be908575b0b644",
  "request": {
   "model": "local_text",
   "messages": [
@@ -11,7 +11,7 @@
    },
    {
     "role": "user",
-    "content": "Task: Request reconsideration of the denied claim [[CLAIM_NUMBER:1cd578c4e6]] for [[PERSON:ace239fef5]] ([[MEMBER_ID:5b3799b676]]).\nPlan: {\"intent\": \"request_reconsideration_of_denied_claim\", \"kind\": \"write\", \"parameters\": {\"claim_number\": \"[[CLAIM_NUMBER:1cd578c4e6]]\", \"member_id\": \"[[MEMBER_ID:5b3799b676]]\", \"person\": \"[[PERSON:ace239fef5]]\"}}"
+    "content": "Task: Request reconsideration of the denied claim [[CLAIM_NUMBER:1cd578c4e6]] for [[PERSON:ace239fef5]] ([[MEMBER_ID:5b3799b676]]).\nPlan: {}"
    }
   ],
   "temperature": 0,
@@ -358,9 +358,9 @@
    }
   ]
  },
- "served_by": "qwen2.5-14b-16k:latest",
+ "served_by": "gemma4-12b-16k",
  "status": 200,
  "stream": false,
- "body": "{\"id\":\"chatcmpl-560\",\"object\":\"chat.completion\",\"created\":1792674108,\"model\":\"qwen2.5-14b-16k:latest\",\"system_fingerprint\":\"fp_ollama\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"\",\"tool_calls\":[{\"id\":\"call_0ehc2nrb\",\"index\":0,\"type\":\"function\",\"function\":{\"name\":\"requestReconsideration\",\"arguments\":\"{\\\"claimNumber\\\":\\\"[[CLAIM_NUMBER:1cd578c4e6]]\\\"}\"}}]},\"finish_reason\":\"tool_calls\"}],\"usage\":{\"prompt_tokens\":1425,\"prompt_tokens_details\":{\"cached_tokens\":1290},\"completion_tokens\":36,\"total_tokens\":1461}}\n",
- "recorded_at": "2026-10-22T13:01:48+00:00"
+ "body": "{\"id\":\"chatcmpl-990\",\"object\":\"chat.completion\",\"created\":1792807258,\"model\":\"gemma4-12b-16k\",\"system_fingerprint\":\"fp_ollama\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"\",\"reasoning\":\"The user wants to request reconsideration for a specific claim.\\nI have the claim number `[[CLAIM_NUMBER:1cd578c4e6]]` and the member ID `[[MEMBER_ID:5b3799b676]]`.\\nThe tool `requestReconsideration` takes a `claimNumber` as a path parameter.\\n\\nPlan:\\n1. Call `requestReconsideration` with `claimNumber` = `[[CLAIM_NUMBER:1cd578c4e6]]`.\\n2. Finish the task.\",\"tool_calls\":[{\"id\":\"call_06bprh1d\",\"index\":0,\"type\":\"function\",\"function\":{\"name\":\"requestReconsideration\",\"arguments\":\"{\\\"claimNumber\\\":\\\"[[CLAIM_NUMBER:1cd578c4e6]]\\\"}\"}}]},\"finish_reason\":\"tool_calls\"}],\"usage\":{\"prompt_tokens\":1435,\"prompt_tokens_details\":{\"cached_tokens\":945},\"completion_tokens\":155,\"total_tokens\":1590}}\n",
+ "recorded_at": "2026-10-24T02:00:58+00:00"
 }

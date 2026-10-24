@@ -18,9 +18,9 @@
   "seed": 7,
   "max_tokens": 300
  },
- "served_by": "qwen2.5-14b-16k:latest",
+ "served_by": "gemma4-12b-16k",
  "status": 200,
  "stream": false,
- "body": "{\"id\":\"chatcmpl-277\",\"object\":\"chat.completion\",\"created\":1792674144,\"model\":\"qwen2.5-14b-16k:latest\",\"system_fingerprint\":\"fp_ollama\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"{\\\"intent\\\": \\\"submit_reimbursement\\\", \\\"kind\\\": \\\"write\\\", \\\"parameters\\\": {\\\"amount\\\": \\\"354.81\\\", \\\"member_id\\\": \\\"[[MEMBER_ID:c75f03ad5f]]\\\", \\\"claim_number\\\": \\\"[[CLAIM_NUMBER:99c13eb85a]]\\\", \\\"payee\\\": \\\"[[PERSON:96086ccc79]]\\\", \\\"routing_number\\\": \\\"[[ROUTING_NUMBER:b0b9bdb214]]\\\", \\\"account_number\\\": \\\"[[BANK_ACCOUNT:dfdf80be30]]\\\"}}\"},\"finish_reason\":\"stop\"}],\"usage\":{\"prompt_tokens\":318,\"prompt_tokens_details\":{\"cached_tokens\":215},\"completion_tokens\":126,\"total_tokens\":444}}\n",
- "recorded_at": "2026-10-22T13:02:24+00:00"
+ "body": "{\"id\":\"chatcmpl-643\",\"object\":\"chat.completion\",\"created\":1792807330,\"model\":\"gemma4-12b-16k\",\"system_fingerprint\":\"fp_ollama\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"\",\"reasoning\":\"The user wants to submit a reimbursement for a specific member and claim.\\nI need to identify the action (intent), the type (read/write), and the parameters.\\n\\n- Action: Submit a reimbursement.\\n- Amount: $354.81\\n- Member: [[PERSON:96086ccc79]] ([[MEMBER_ID:c75f03ad5f]])\\n- Claim: [[CLAIM_NUMBER:99c13eb85a]]\\n- Payable to: [[PERSON:96086ccc79]]\\n- Routing number: [[ROUTING_NUMBER:b0b9bdb214]]\\n- Account number: [[BANK_ACCOUNT:dfdf80be30]]\\n\\nIntent: `submit_reimbursement`\\nKind: `write`\\nParameters:\\n- `amount`: \\\"354.81\\\"\\n- `member_id`: \\\"c75f03ad5f\\\"\\n- `claim_number`: \\\"99c13eb85a\\\"\\n- `routing_number`: \\\"b0b9bdb214\\\"\\n- `account_number`: \\\"dfdf80be30\\\"\\n\\nWait, the prompt says \\\"Submit a reimbursement of $354.81 for [[PERSON:96086ccc79]] ([[MEMBER_\"},\"finish_reason\":\"length\"}],\"usage\":{\"prompt_tokens\":339,\"prompt_tokens_details\":{\"cached_tokens\":0},\"completion_tokens\":300,\"total_tokens\":639}}\n",
+ "recorded_at": "2026-10-24T02:02:10+00:00"
 }

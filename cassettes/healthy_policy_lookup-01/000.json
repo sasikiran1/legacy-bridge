@@ -18,9 +18,9 @@
   "seed": 7,
   "max_tokens": 300
  },
- "served_by": "qwen2.5-14b-16k:latest",
+ "served_by": "gemma4-12b-16k",
  "status": 200,
  "stream": false,
- "body": "{\"id\":\"chatcmpl-544\",\"object\":\"chat.completion\",\"created\":1792672667,\"model\":\"qwen2.5-14b-16k:latest\",\"system_fingerprint\":\"fp_ollama\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"{\\\"intent\\\": \\\"look_up_policy_number\\\", \\\"kind\\\": \\\"read\\\", \\\"parameters\\\": {\\\"person\\\": \\\"[[PERSON:bffd78bb8c]]\\\", \\\"member_id\\\": \\\"[[MEMBER_ID:5c9eda2c59]]\\\", \\\"policy_type\\\": \\\"Vision Care\\\"}}\"},\"finish_reason\":\"stop\"}],\"usage\":{\"prompt_tokens\":259,\"prompt_tokens_details\":{\"cached_tokens\":215},\"completion_tokens\":62,\"total_tokens\":321}}\n",
- "recorded_at": "2026-10-22T12:37:47+00:00"
+ "body": "{\"id\":\"chatcmpl-283\",\"object\":\"chat.completion\",\"created\":1792772491,\"model\":\"gemma4-12b-16k\",\"system_fingerprint\":\"fp_ollama\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"\",\"reasoning\":\"The user wants to find the policy number for a specific member's Vision Care policy.\\nThe member's name is [[PERSON:bffd78bb8c]] and the member number is [[MEMBER_ID:5c9eda2c59]].\\n\\nI need to:\\n1.  Identify the intent: `get_policy_number` or `lookup_policy_number`. Looking at the available tools/actions (implied by the prompt's context of a health insurer's member services portal), I should look for a way to retrieve policy details.\\n2.  Identify the parameters: `member_id` and `policy_type` (Vision Care).\\n3.  The action is a \\\"read\\\" operation.\\n\\nPlan:\\n- Call a function to get policy details for the given member ID.\\n- Filter or specify the policy type as \\\"Vision Care\\\".\\n\\nLet's check the expected JSON format.\\n`{\\\"intent\\\": \\\"lookup_policy_number\\\", \\\"kind\\\": \\\"read\\\", \\\"parameters\\\": {\\\"member_id\\\": \\\"[[MEMBER_ID:5c9eda2c59]]\\\", \\\"policy_type\\\": \\\"Vision Care\\\"}}`\\n\\nWait, I should check if there's a specific tool name. Usually, it's `get_member_policies` or similar. Since I don't have a tool list, I'll use a descriptive\"},\"finish_reason\":\"length\"}],\"usage\":{\"prompt_tokens\":275,\"prompt_tokens_details\":{\"cached_tokens\":0},\"completion_tokens\":300,\"total_tokens\":575}}\n",
+ "recorded_at": "2026-10-23T16:21:31+00:00"
 }

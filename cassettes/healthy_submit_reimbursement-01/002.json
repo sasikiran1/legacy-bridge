@@ -245,9 +245,9 @@
    }
   ]
  },
- "served_by": "qwen2.5-14b-16k:latest",
+ "served_by": "gemma4-12b-16k",
  "status": 200,
  "stream": false,
- "body": "{\"id\":\"chatcmpl-72\",\"object\":\"chat.completion\",\"created\":1792672764,\"model\":\"qwen2.5-14b-16k:latest\",\"system_fingerprint\":\"fp_ollama\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"\",\"tool_calls\":[{\"id\":\"call_6f0xsu5c\",\"index\":0,\"type\":\"function\",\"function\":{\"name\":\"browser_navigate\",\"arguments\":\"{\\\"url\\\":\\\"http://portal:8080/reimbursements/new\\\"}\"}}]},\"finish_reason\":\"tool_calls\"}],\"usage\":{\"prompt_tokens\":1471,\"prompt_tokens_details\":{\"cached_tokens\":1062},\"completion_tokens\":33,\"total_tokens\":1504}}\n",
- "recorded_at": "2026-10-22T12:39:24+00:00"
+ "body": "{\"id\":\"chatcmpl-358\",\"object\":\"chat.completion\",\"created\":1792772613,\"model\":\"gemma4-12b-16k\",\"system_fingerprint\":\"fp_ollama\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"\",\"reasoning\":\"The user wants to submit a reimbursement for a specific member and claim.\\nI need to:\\n1. Navigate to the \\\"New Reimbursement\\\" page.\\n2. Fill in the reimbursement details:\\n    - Member ID: [[MEMBER_ID:975008917f]]\\n    - Claim Number: [[CLAIM_NUMBER:4fc7e999d3]]\\n    - Amount: $354.81\\n    - Payee: [[PERSON:ec587d4f24]]\\n    - Routing Number: [[ROUTING_NUMBER:110ca76222]]\\n    - Account Number: [[BANK_ACCOUNT:cef2b95fc6]]\\n3. Submit the form.\\n\\nStarting from the current page:\\n- Click \\\"New Reimbursement\\\" [ref=e9].\",\"tool_calls\":[{\"id\":\"call_f3pvtgvu\",\"index\":0,\"type\":\"function\",\"function\":{\"name\":\"browser_click\",\"arguments\":\"{\\\"element\\\":\\\"New Reimbursement\\\",\\\"target\\\":\\\"e9\\\"}\"}}]},\"finish_reason\":\"tool_calls\"}],\"usage\":{\"prompt_tokens\":1535,\"prompt_tokens_details\":{\"cached_tokens\":454},\"completion_tokens\":214,\"total_tokens\":1749}}\n",
+ "recorded_at": "2026-10-23T16:23:33+00:00"
 }

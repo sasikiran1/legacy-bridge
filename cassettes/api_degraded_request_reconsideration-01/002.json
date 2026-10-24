@@ -245,9 +245,9 @@
    }
   ]
  },
- "served_by": "qwen2.5-14b-16k:latest",
+ "served_by": "gemma4-12b-16k",
  "status": 200,
  "stream": false,
- "body": "{\"id\":\"chatcmpl-389\",\"object\":\"chat.completion\",\"created\":1792674118,\"model\":\"qwen2.5-14b-16k:latest\",\"system_fingerprint\":\"fp_ollama\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"\",\"tool_calls\":[{\"id\":\"call_46bmvnii\",\"index\":0,\"type\":\"function\",\"function\":{\"name\":\"browser_navigate\",\"arguments\":\"{\\\"url\\\":\\\"http://portal:8080/claims/[[CLAIM_NUMBER:1cd578c4e6]]\\\"}\"}}]},\"finish_reason\":\"tool_calls\"}],\"usage\":{\"prompt_tokens\":1415,\"prompt_tokens_details\":{\"cached_tokens\":1062},\"completion_tokens\":45,\"total_tokens\":1460}}\n",
- "recorded_at": "2026-10-22T13:01:58+00:00"
+ "body": "{\"id\":\"chatcmpl-759\",\"object\":\"chat.completion\",\"created\":1792807282,\"model\":\"gemma4-12b-16k\",\"system_fingerprint\":\"fp_ollama\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"\",\"reasoning\":\"The user wants to request a reconsideration of a denied claim for a specific member.\\nI need to:\\n1.  Navigate to the claim page for `[[CLAIM_NUMBER:1cd578c4e6]]`.\\n2.  Check the status of the claim.\\n3.  Find the option to request reconsideration.\\n4.  Submit the request.\\n\\nFirst, I'll navigate to the claim page.\",\"tool_calls\":[{\"id\":\"call_dg2ay9ss\",\"index\":0,\"type\":\"function\",\"function\":{\"name\":\"browser_navigate\",\"arguments\":\"{\\\"url\\\":\\\"http://portal:8080/claims/[[CLAIM_NUMBER:1cd578c4e6]]\\\"}\"}}]},\"finish_reason\":\"tool_calls\"}],\"usage\":{\"prompt_tokens\":1478,\"prompt_tokens_details\":{\"cached_tokens\":959},\"completion_tokens\":134,\"total_tokens\":1612}}\n",
+ "recorded_at": "2026-10-24T02:01:22+00:00"
 }

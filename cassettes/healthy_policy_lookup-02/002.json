@@ -1,7 +1,7 @@
 {
  "task_id": "healthy/policy_lookup-02",
  "call": 2,
- "request_sha256": "c21f403554f2a0fbd46a0f23fc787a7b936580d0823271474f3009ce777ec1b6",
+ "request_sha256": "0905463e94d0af8868fd69868fbcc1dc8d9989e150b435e80fe43780e1bba2da",
  "request": {
   "model": "local_text",
   "messages": [
@@ -11,14 +11,14 @@
    },
    {
     "role": "user",
-    "content": "Task: Look up the policy number of [[PERSON:1158ed94c7]]'s Basic Health policy (member number [[MEMBER_ID:c8bf68e8b6]]).\nPlan: {\"intent\": \"look_up_policy_number\", \"kind\": \"read\", \"parameters\": {\"person\": \"[[PERSON:1158ed94c7]]\", \"member_id\": \"[[MEMBER_ID:c8bf68e8b6]]\", \"policy_type\": \"Basic Health\"}}"
+    "content": "Task: Look up the policy number of [[PERSON:1158ed94c7]]'s Basic Health policy (member number [[MEMBER_ID:c8bf68e8b6]]).\nPlan: {\"intent\": \"get_member_policies\", \"kind\": \"read\", \"parameters\": {\"member_id\": \"[[MEMBER_ID:c8bf68e8b6]]\"}}"
    },
    {
     "role": "assistant",
     "content": "",
     "tool_calls": [
      {
-      "id": "call_ghbok47d",
+      "id": "call_yfcqto6u",
       "type": "function",
       "function": {
        "name": "listPolicies",
@@ -29,7 +29,7 @@
    },
    {
     "role": "tool",
-    "tool_call_id": "call_ghbok47d",
+    "tool_call_id": "call_yfcqto6u",
     "content": "<untrusted_content source=\"portal-api\">\nHTTP 200: [{\"policyNumber\": \"[[POLICY_NUMBER:f5d9fb17c6]]\", \"memberNumber\": \"[[MEMBER_ID:c8bf68e8b6]]\", \"product\": \"Basic Health\", \"status\": \"ACTIVE\", \"effectiveDate\": \"2026-01-08\", \"monthlyPremium\": 635.88}]\n</untrusted_content>"
    }
   ],
@@ -377,9 +377,9 @@
    }
   ]
  },
- "served_by": "qwen2.5-14b-16k:latest",
+ "served_by": "gemma4-12b-16k",
  "status": 200,
  "stream": false,
- "body": "{\"id\":\"chatcmpl-225\",\"object\":\"chat.completion\",\"created\":1792672700,\"model\":\"qwen2.5-14b-16k:latest\",\"system_fingerprint\":\"fp_ollama\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"\",\"tool_calls\":[{\"id\":\"call_49fuyynz\",\"index\":0,\"type\":\"function\",\"function\":{\"name\":\"finish\",\"arguments\":\"{\\\"summary\\\":\\\"Found the policy number for [[PERSON:1158ed94c7]]'s Basic Health policy.\\\",\\\"answer\\\":\\\"[[POLICY_NUMBER:f5d9fb17c6]]\\\"}\"}}]},\"finish_reason\":\"tool_calls\"}],\"usage\":{\"prompt_tokens\":1555,\"prompt_tokens_details\":{\"cached_tokens\":1419},\"completion_tokens\":60,\"total_tokens\":1615}}\n",
- "recorded_at": "2026-10-22T12:38:20+00:00"
+ "body": "{\"id\":\"chatcmpl-793\",\"object\":\"chat.completion\",\"created\":1792772510,\"model\":\"gemma4-12b-16k\",\"system_fingerprint\":\"fp_ollama\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"\",\"tool_calls\":[{\"id\":\"call_4ba0ma7u\",\"index\":0,\"type\":\"function\",\"function\":{\"name\":\"finish\",\"arguments\":\"{\\\"answer\\\":\\\"[[POLICY_NUMBER:f5d9fb17c6]]\\\",\\\"summary\\\":\\\"Retrieved the policy number for the Basic Health policy of member [[MEMBER_ID:c8bf68e8b6]].\\\"}\"}}]},\"finish_reason\":\"tool_calls\"}],\"usage\":{\"prompt_tokens\":1622,\"prompt_tokens_details\":{\"cached_tokens\":1469},\"completion_tokens\":61,\"total_tokens\":1683}}\n",
+ "recorded_at": "2026-10-23T16:21:50+00:00"
 }

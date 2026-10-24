@@ -18,9 +18,9 @@
   "seed": 7,
   "max_tokens": 300
  },
- "served_by": "qwen2.5-14b-16k:latest",
+ "served_by": "gemma4-12b-16k",
  "status": 200,
  "stream": false,
- "body": "{\"id\":\"chatcmpl-118\",\"object\":\"chat.completion\",\"created\":1792674264,\"model\":\"qwen2.5-14b-16k:latest\",\"system_fingerprint\":\"fp_ollama\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"{\\\"intent\\\": \\\"update_mailing_address\\\", \\\"kind\\\": \\\"write\\\", \\\"parameters\\\": {\\\"person\\\": \\\"[[PERSON:bc5b9ece21]]\\\", \\\"member_id\\\": \\\"[[MEMBER_ID:6b318fde30]]\\\", \\\"street_address\\\": \\\"[[STREET_ADDRESS:aa3d00ee32]]\\\", \\\"city\\\": \\\"Danielleville\\\", \\\"state\\\": \\\"WA\\\", \\\"zip_code\\\": \\\"25854\\\"}}\"},\"finish_reason\":\"stop\"}],\"usage\":{\"prompt_tokens\":281,\"prompt_tokens_details\":{\"cached_tokens\":215},\"completion_tokens\":101,\"total_tokens\":382}}\n",
- "recorded_at": "2026-10-22T13:04:24+00:00"
+ "body": "{\"id\":\"chatcmpl-664\",\"object\":\"chat.completion\",\"created\":1792807572,\"model\":\"gemma4-12b-16k\",\"system_fingerprint\":\"fp_ollama\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"```json\\n{\\\"\",\"reasoning\":\"The user wants to update the mailing address for a specific member.\\nMember Name: [[PERSON:bc5b9ece21]]\\nMember ID: [[MEMBER_ID:6b318fde30]]\\nNew Address: [[STREET_ADDRESS:aa3d00ee32]], Danielleville, WA 25854.\\n\\nI need to identify the correct tool/action for updating a member's address.\\nThe task is to \\\"Update the mailing address\\\".\\n\\nParameters:\\n- member_id: [[MEMBER_ID:6b318fde30]]\\n- street_address: [[STREET_ADDRESS:aa3d00ee32]]\\n- city: Danielleville\\n- state: WA\\n- zip_code: 25854\\n\\nThe intent should be `update_member_address`.\\nThe kind is `write`.\\n\\nJSON structure:\\n{\\\"intent\\\": \\\"update_member_address\\\", \\\"kind\\\": \\\"write\\\", \\\"parameters\\\": {\\\"member_id\\\": \\\"[[MEMBER_ID:6b318fde30]]\\\", \\\"street_address\\\": \\\"[[STREET_ADDRESS:aa3d00ee32]]\\\", \\\"city\\\": \\\"Danielleville\\\", \\\"state\\\": \\\"WA\\\", \\\"zip_code\\\": \\\"25854\\\"}}\"},\"finish_reason\":\"length\"}],\"usage\":{\"prompt_tokens\":298,\"prompt_tokens_details\":{\"cached_tokens\":0},\"completion_tokens\":300,\"total_tokens\":598}}\n",
+ "recorded_at": "2026-10-24T02:06:12+00:00"
 }

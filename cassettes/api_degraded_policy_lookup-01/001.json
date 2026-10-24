@@ -1,7 +1,7 @@
 {
  "task_id": "api_degraded/policy_lookup-01",
  "call": 1,
- "request_sha256": "df6d26a956db73889bc8c37cf185687d62d8e4f2a4f091ef8052e0e829ea032c",
+ "request_sha256": "094431a3a03619c14774d68e078a9f2835c135fcfbffb3669fb0e2507dea6e76",
  "request": {
   "model": "local_text",
   "messages": [
@@ -11,7 +11,7 @@
    },
    {
     "role": "user",
-    "content": "Task: Look up the policy number of [[PERSON:d1d9957705]]'s Vision Care policy (member number [[MEMBER_ID:7e779ff03e]]).\nPlan: {\"intent\": \"look_up_policy_number\", \"kind\": \"read\", \"parameters\": {\"person\": \"[[PERSON:d1d9957705]]\", \"member_id\": \"[[MEMBER_ID:7e779ff03e]]\", \"policy_type\": \"Vision Care\"}}"
+    "content": "Task: Look up the policy number of [[PERSON:d1d9957705]]'s Vision Care policy (member number [[MEMBER_ID:7e779ff03e]]).\nPlan: {}"
    }
   ],
   "temperature": 0,
@@ -358,9 +358,9 @@
    }
   ]
  },
- "served_by": "qwen2.5-14b-16k:latest",
+ "served_by": "gemma4-12b-16k",
  "status": 200,
  "stream": false,
- "body": "{\"id\":\"chatcmpl-85\",\"object\":\"chat.completion\",\"created\":1792674020,\"model\":\"qwen2.5-14b-16k:latest\",\"system_fingerprint\":\"fp_ollama\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"\",\"tool_calls\":[{\"id\":\"call_tony3k8j\",\"index\":0,\"type\":\"function\",\"function\":{\"name\":\"listPolicies\",\"arguments\":\"{\\\"memberNumber\\\":\\\"[[MEMBER_ID:7e779ff03e]]\\\"}\"}}]},\"finish_reason\":\"tool_calls\"}],\"usage\":{\"prompt_tokens\":1405,\"prompt_tokens_details\":{\"cached_tokens\":1290},\"completion_tokens\":36,\"total_tokens\":1441}}\n",
- "recorded_at": "2026-10-22T13:00:20+00:00"
+ "body": "{\"id\":\"chatcmpl-9\",\"object\":\"chat.completion\",\"created\":1792807039,\"model\":\"gemma4-12b-16k\",\"system_fingerprint\":\"fp_ollama\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"\",\"reasoning\":\"The user wants to find the policy number for a specific member's \\\"Vision Care\\\" policy.\\nI have the member number: `[[MEMBER_ID:7e779ff03e]]`.\\nI should first list the policies for this member to find the one corresponding to \\\"Vision Care\\\".\\n\\nPlan:\\n1. List the policies for member `[[MEMBER_ID:7e779ff03e]]`.\\n2. Identify the policy number for the \\\"Vision Care\\\" policy from the list.\\n3. Provide the policy number.\",\"tool_calls\":[{\"id\":\"call_v89sh30g\",\"index\":0,\"type\":\"function\",\"function\":{\"name\":\"listPolicies\",\"arguments\":\"{\\\"memberNumber\\\":\\\"[[MEMBER_ID:7e779ff03e]]\\\"}\"}}]},\"finish_reason\":\"tool_calls\"}],\"usage\":{\"prompt_tokens\":1429,\"prompt_tokens_details\":{\"cached_tokens\":934},\"completion_tokens\":154,\"total_tokens\":1583}}\n",
+ "recorded_at": "2026-10-24T01:57:19+00:00"
 }

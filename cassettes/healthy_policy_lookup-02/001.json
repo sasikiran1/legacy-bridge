@@ -1,7 +1,7 @@
 {
  "task_id": "healthy/policy_lookup-02",
  "call": 1,
- "request_sha256": "e9f5ac421d2e6a2441213aa0cb7899c0decf99fd3a48023db1bde8aa98976607",
+ "request_sha256": "66d5c8e647828f22f17bde4af9fe0cda296b38f7a744b5425eb7bfc6411a4aae",
  "request": {
   "model": "local_text",
   "messages": [
@@ -11,7 +11,7 @@
    },
    {
     "role": "user",
-    "content": "Task: Look up the policy number of [[PERSON:1158ed94c7]]'s Basic Health policy (member number [[MEMBER_ID:c8bf68e8b6]]).\nPlan: {\"intent\": \"look_up_policy_number\", \"kind\": \"read\", \"parameters\": {\"person\": \"[[PERSON:1158ed94c7]]\", \"member_id\": \"[[MEMBER_ID:c8bf68e8b6]]\", \"policy_type\": \"Basic Health\"}}"
+    "content": "Task: Look up the policy number of [[PERSON:1158ed94c7]]'s Basic Health policy (member number [[MEMBER_ID:c8bf68e8b6]]).\nPlan: {\"intent\": \"get_member_policies\", \"kind\": \"read\", \"parameters\": {\"member_id\": \"[[MEMBER_ID:c8bf68e8b6]]\"}}"
    }
   ],
   "temperature": 0,
@@ -358,9 +358,9 @@
    }
   ]
  },
- "served_by": "qwen2.5-14b-16k:latest",
+ "served_by": "gemma4-12b-16k",
  "status": 200,
  "stream": false,
- "body": "{\"id\":\"chatcmpl-858\",\"object\":\"chat.completion\",\"created\":1792672696,\"model\":\"qwen2.5-14b-16k:latest\",\"system_fingerprint\":\"fp_ollama\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"\",\"tool_calls\":[{\"id\":\"call_ghbok47d\",\"index\":0,\"type\":\"function\",\"function\":{\"name\":\"listPolicies\",\"arguments\":\"{\\\"memberNumber\\\":\\\"[[MEMBER_ID:c8bf68e8b6]]\\\"}\"}}]},\"finish_reason\":\"tool_calls\"}],\"usage\":{\"prompt_tokens\":1403,\"prompt_tokens_details\":{\"cached_tokens\":1290},\"completion_tokens\":35,\"total_tokens\":1438}}\n",
- "recorded_at": "2026-10-22T12:38:16+00:00"
+ "body": "{\"id\":\"chatcmpl-518\",\"object\":\"chat.completion\",\"created\":1792772508,\"model\":\"gemma4-12b-16k\",\"system_fingerprint\":\"fp_ollama\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"\",\"reasoning\":\"The user wants to find the policy number for a specific member's \\\"Basic Health\\\" policy.\\nI have the member number: `[[MEMBER_ID:c8bf68e8b6]]`.\\nI should first list the policies for this member to find the \\\"Basic Health\\\" policy.\",\"tool_calls\":[{\"id\":\"call_yfcqto6u\",\"index\":0,\"type\":\"function\",\"function\":{\"name\":\"listPolicies\",\"arguments\":\"{\\\"memberNumber\\\":\\\"[[MEMBER_ID:c8bf68e8b6]]\\\"}\"}}]},\"finish_reason\":\"tool_calls\"}],\"usage\":{\"prompt_tokens\":1469,\"prompt_tokens_details\":{\"cached_tokens\":424},\"completion_tokens\":98,\"total_tokens\":1567}}\n",
+ "recorded_at": "2026-10-23T16:21:48+00:00"
 }
