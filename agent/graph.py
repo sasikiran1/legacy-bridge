@@ -51,6 +51,7 @@ class AgentState(TypedDict, total=False):
     llm_calls: int
     tokens_in: int
     tokens_out: int
+    llm_seconds: float
     cassette_mismatches: int
     models: list[str]
     plan: dict[str, Any]
@@ -160,6 +161,7 @@ def _usage(state: AgentState, reply: LlmReply) -> dict[str, Any]:
         "llm_calls": state.get("llm_calls", 0) + 1,
         "tokens_in": state.get("tokens_in", 0) + reply.input_tokens,
         "tokens_out": state.get("tokens_out", 0) + reply.output_tokens,
+        "llm_seconds": round(state.get("llm_seconds", 0.0) + reply.latency_ms / 1000, 2),
         "cassette_mismatches": state.get("cassette_mismatches", 0) + (reply.cassette == "mismatch"),
         "models": sorted({*state.get("models", []), reply.model}),
     }

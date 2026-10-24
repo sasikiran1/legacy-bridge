@@ -93,6 +93,8 @@ class TaskRun(BaseModel):
     llm_calls: int
     tokens_in: int
     tokens_out: int
+    llm_seconds: float = 0.0
+    """Time spent waiting on the model (local GPU time for Ollama), reported beside the $0 notional cost."""
     cassette_mismatches: int
     models: list[str]
     seconds: float
@@ -300,6 +302,7 @@ async def run_task(
         llm_calls=int(state.get("llm_calls", 0)),
         tokens_in=int(state.get("tokens_in", 0)),
         tokens_out=int(state.get("tokens_out", 0)),
+        llm_seconds=float(state.get("llm_seconds", 0.0)),
         cassette_mismatches=int(state.get("cassette_mismatches", 0)),
         models=list(state.get("models", [])),
         seconds=round(seconds, 2),
