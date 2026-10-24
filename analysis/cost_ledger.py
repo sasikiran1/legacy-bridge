@@ -35,7 +35,8 @@ def price_on(model: str, day: dt.date) -> dict[str, Any]:
 
 
 def agent_rows(labels: list[str]) -> list[dict[str, Any]]:
-    rows = []
+    """The latest row per (label, scenario, task): a re-recorded task replaces its earlier runs."""
+    rows: dict[tuple[str, str, str], dict[str, Any]] = {}
     for directory in sorted(RESULTS_DIR.glob("*-agent-run")):
         manifest = json.loads((directory / "manifest.json").read_text(encoding="utf-8"))
         label = manifest["config"].get("label")
@@ -43,8 +44,8 @@ def agent_rows(labels: list[str]) -> list[dict[str, Any]]:
             continue
         for line in (directory / "agent_runs.jsonl").read_text(encoding="utf-8").splitlines():
             row = json.loads(line)
-            rows.append({**row, "label": label, "run": directory.name})
-    return rows
+            rows[(label, row["scenario"], row["task_id"])] = {**row, "label": label, "run": directory.name}
+    return list(rows.values())
 
 
 def path(row: dict[str, Any]) -> str:
