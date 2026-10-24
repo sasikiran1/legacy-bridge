@@ -9,7 +9,7 @@ from collections import OrderedDict
 from collections.abc import Sequence
 
 from proxy.audit import Action, AuditLog
-from proxy.detection import Detector, Span, resolve_overlaps
+from proxy.detection import NUMERIC_TYPES, Detector, Span, resolve_overlaps
 from proxy.policy import PiiPolicy
 from proxy.tokens import TOKEN_RE, TokenMinter
 from proxy.vault import Vault, VaultEntry
@@ -20,6 +20,20 @@ MIN_KNOWN_VALUE_LENGTH = 4
 CACHE_SIZE = 4096
 """Masked results kept per (task, text). Executors mask tool results and the proxy masks the same text again
 when it reaches an LLM; the cache keeps that second pass from re-running detection."""
+
+MIN_TRUSTED_DIGITS = 6
+"""A one-word NER span still propagates if it is a numeric type with this many digits: an account number
+detected beside "Bank account number" must also be caught beside the drifted label "Account no."."""
+
+
+def trusted(span: Span, value: str) -> bool:
+    """Whether a masked value is re-matched wherever it reappears in the task: structured fields and pattern
+    rules, multi-word NER spans, and long numbers. Single words from NER are not, because a mis-tagged word
+    ("Member") would then be masked on every page."""
+    if not span.source.startswith("presidio") or len(value.split()) > 1:
+        return True
+    return span.entity_type in NUMERIC_TYPES and sum(ch.isdigit() for ch in value) >= MIN_TRUSTED_DIGITS
+
 
 JsonValue = None | bool | int | float | str | list["JsonValue"] | dict[str, "JsonValue"]
 
@@ -123,9 +137,9 @@ class Masker:
     async def _known_values(self, text: str, task_id: str) -> list[Span]:
         """Values already tokenized in this task get the same token wherever they reappear.
 
-        Only trusted values are propagated: structured fields, pattern rules and multi-word NER spans.
-        A single-word NER guess ("Member" read as a person) is masked where it was found but not spread, or it
-        would re-tokenize that word on every later page.
+        Only trusted values are propagated (see `trusted`). A single-word NER guess ("Member" read as a
+        person) is masked where it was found but not spread, or it would re-tokenize that word on every later
+        page.
         """
         spans = []
         trusted = self._propagate.get(task_id, set())
@@ -161,8 +175,9 @@ class Masker:
         for span in sorted(spans, key=lambda s: s.start):
             pieces.append(text[cursor : span.start])
             value = text[span.start : span.end]
-            propagate = not span.source.startswith("presidio") or len(value.split()) > 1
-            pieces.append(await self._token_for(value, span.entity_type, task_id, destination, propagate))
+            pieces.append(
+                await self._token_for(value, span.entity_type, task_id, destination, trusted(span, value))
+            )
             cursor = span.end
         pieces.append(text[cursor:])
         return "".join(pieces)

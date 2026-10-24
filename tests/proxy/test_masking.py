@@ -116,3 +116,25 @@ async def test_single_word_ner_guesses_are_masked_but_not_spread(tmp_path: Path)
     k = kit(tmp_path, detector=_GuessingDetector())
     assert "Member" not in await k.masker.mask_text("Member called.", "t1", "groq")
     assert await k.masker.mask_text("Member Services Portal", "t1", "groq") == "Member Services Portal"
+
+
+class _AccountOnlyInInstruction:
+    """NER finds the account number beside its usual wording, as GLiNER did, not beside a drifted label."""
+
+    name = "account-guesser"
+
+    def detect(self, text: str) -> list[Span]:
+        start = text.find("440091773312")
+        if start == -1 or "account number" not in text:
+            return []
+        return [
+            Span(start=start, end=start + 12, entity_type="BANK_ACCOUNT", score=0.9, source="presidio:GLiNER")
+        ]
+
+
+async def test_a_long_number_from_ner_is_caught_beside_a_drifted_label(tmp_path: Path) -> None:
+    """Regression: a canary bank account reached a recorded prompt from a DOM-drift review page."""
+    k = kit(tmp_path, detector=_AccountOnlyInInstruction())
+    await k.masker.mask_text("Pay to bank account number 440091773312.", "t1", "groq")
+    page = await k.masker.mask_text('- rowheader "Account no."\n- cell "440091773312"', "t1", "groq")
+    assert "440091773312" not in page
