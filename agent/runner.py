@@ -50,6 +50,8 @@ from agent.guardrails import (
 )
 from agent.llm import LlmClient, LlmError
 from agent.masking import MaskClient, MaskingUnavailable
+from agent.replay import REPLAY_DIR, CompileError, Compiler, ReplayScript, load_script, script_key
+from agent.replay_runner import ReplayResult, run_script
 from agent.settings import AgentSettings, agent_settings
 from agent.telemetry import flush, tracer
 from analysis.manifest import Run
@@ -57,6 +59,8 @@ from proxy.audit import AuditLog
 from proxy.cassettes import CASSETTE_DIR
 from proxy.policy import load_policy
 from proxy.rehydrate import Rehydrator, ToolArgumentResolver
+from proxy.settings import load_settings as load_proxy_settings
+from proxy.tokens import TokenMinter
 from proxy.vault import RedisVault, Sealer
 from testbed.portal import PortalAdmin
 from testbed.postconditions import check, snapshot
@@ -95,6 +99,8 @@ class TaskRun(BaseModel):
     missing: list[str]
     unexpected: list[str]
     error: str | None = None
+    replay_outcome: str | None = None
+    compiled: str | None = None
 
 
 def decide(task: Task, request: dict[str, Any], policy: str) -> dict[str, Any]:
@@ -118,13 +124,15 @@ def load_index() -> dict[str, dict[str, Any]]:
     return index
 
 
-def record_index(rows: list[TaskRun], scanner: str = "none") -> None:
-    """Stores what each recorded task did, and with which injection scanner, so a replay can be checked."""
+def record_index(rows: list[TaskRun], scanner: str = "none", scripts: bool = False) -> None:
+    """Stores what each recorded task did, with which injection scanner and whether compiled scripts were on,
+    so a replay can be checked under the same conditions."""
     index = load_index()
     for row in rows:
         index[f"{row.scenario}/{row.task_id}"] = {
             **row.model_dump(include=set(REPLAY_FIELDS)),
             "scanner": scanner,
+            "scripts": scripts,
         }
     CASSETTE_INDEX.write_text(json.dumps(index, indent=1, sort_keys=True) + "\n", encoding="utf-8")
 
@@ -180,6 +188,8 @@ async def run_task(
     resolve_walls: bool,
     record: bool,
     replay: bool = False,
+    use_scripts: bool = False,
+    compile_scripts: bool = False,
 ) -> TaskRun:
     admin: PortalAdmin = services["admin"]
     task_key = f"{scenario.name}/{task.id}"
@@ -202,6 +212,20 @@ async def run_task(
         session = BrowserSession(settings.portal_origin, settings.portal_host, services["resolver"], masker)
         return await session.start()
 
+    script_path = REPLAY_DIR / f"{script_key(task.intent.value, task.params)}.yaml"
+    script = load_script(script_path) if use_scripts and script_path.exists() else None
+
+    async def run_compiled() -> ReplayResult:
+        assert script is not None
+
+        def approve(kind: ApprovalKind, name: str) -> bool:
+            return bool(decide(task, {"actions": [{"approval": kind.value}]}, approvals)["approved"])
+
+        params = {**task.params, "member_number": task.member_number}
+        return await run_script(
+            script, params, settings.portal_origin, task.user, settings.test_user_password, approve
+        )
+
     runtime = Runtime(
         settings=settings,
         llm=services["llm"],
@@ -210,6 +234,8 @@ async def run_task(
         scanner=scanner,
         password=settings.test_user_password,
         open_browser=open_browser,
+        replay=run_compiled if script is not None else None,
+        replay_hint=describe(script) if script is not None else "",
     )
     graph = build_graph(runtime, services["checkpointer"])
     config: RunnableConfig = {"configurable": {"thread_id": f"{run_id}/{task_key}"}}
@@ -247,6 +273,10 @@ async def run_task(
         answer = await services["rehydrator"].text(answer, task_key, "operator")
     result = check(task.expected, before, await snapshot(services["db_url"]), answer)
     outcome = "error" if error else (state.get("outcome") or "incomplete")
+    compiled = None
+    if compile_scripts and outcome == "success" and "explore" in state.get("tiers", []):
+        # Heal or learn: a browser run the agent verified becomes the next version of the intent's script.
+        compiled = compile_script(task, task_key, script)
     return TaskRun(
         task_id=task.id,
         intent=task.intent.value,
@@ -270,7 +300,47 @@ async def run_task(
         missing=list(result.missing),
         unexpected=list(result.unexpected),
         error=error,
+        replay_outcome=state.get("replay_outcome"),
+        compiled=compiled,
     )
+
+
+def compile_script(task: Task, task_key: str, previous: ReplayScript | None) -> str:
+    """Compiles this task's cassettes into a script; returns 'key vN' or why it could not compile."""
+    proxy = load_proxy_settings()
+    compiler = Compiler(TokenMinter(proxy.token_key, proxy.run_seed), list(load_policy().entities))
+    try:
+        script = compiler.compile(
+            CASSETTE_DIR / task_key.replace("/", "_"),
+            task_key,
+            task.intent.value,
+            task.params,
+            task.member_number,
+        )
+    except CompileError as e:
+        return f"not compiled: {e}"[:300]
+    if previous is not None:
+        script = script.model_copy(update={"version": previous.version + 1})
+    REPLAY_DIR.mkdir(exist_ok=True)
+    (REPLAY_DIR / f"{script.key}.yaml").write_text(script.dump(), encoding="utf-8")
+    return f"{script.key} v{script.version}"
+
+
+def describe(script: ReplayScript) -> str:
+    """The script's steps as templates, for the browser tier's hint; no parameter values."""
+    parts = []
+    for step in script.steps:
+        target = f"{step.target.role} '{step.target.name}'" if step.target else ""
+        parts.append(
+            {
+                "navigate": f"open {step.url}",
+                "click": f"click {target}",
+                "type": f"type {step.value} into {target}",
+                "select": f"choose {step.value} in {target}",
+                "press": f"press {step.value}",
+            }[step.action]
+        )
+    return "; ".join(parts)
 
 
 async def main_async(args: argparse.Namespace) -> int:
@@ -337,6 +407,11 @@ async def main_async(args: argparse.Namespace) -> int:
                 args.resolve_walls,
                 args.record,
                 args.check_replay,
+                # A replay check runs scripts only if the recording did, or the model calls fall out of step.
+                load_index().get(f"{scenario.name}/{task.id}", {}).get("scripts", False)
+                if args.check_replay
+                else args.scripts,
+                args.compile,
             )
             rows.append(row)
             print(
@@ -374,7 +449,7 @@ async def main_async(args: argparse.Namespace) -> int:
         f"{sum(r.cassette_mismatches for r in rows)} cassette mismatches -> {destination}"
     )
     if args.record:
-        record_index(rows, settings.injection_scanner)
+        record_index(rows, settings.injection_scanner, args.scripts)
     if args.check_replay:
         differences = replay_differences(rows)
         for line in differences:
@@ -398,10 +473,20 @@ def main(argv: list[str] | None = None) -> int:
         action="store_true",
         help="run the scenario's recorded tasks (proxy in replay mode) and fail if any outcome differs",
     )
+    parser.add_argument(
+        "--scripts", action="store_true", help="run a compiled replay script when the API tier falls back"
+    )
+    parser.add_argument(
+        "--compile",
+        action="store_true",
+        help="compile each verified browser run into a script (with --record)",
+    )
     parser.add_argument("--label", default="")
     args = parser.parse_args(argv)
     if args.record and args.check_replay:
         parser.error("--record and --check-replay are exclusive")
+    if args.compile and not args.record:
+        parser.error("--compile needs --record: scripts are compiled from the recorded cassettes")
     if not args.all and not args.tasks and not args.check_replay:
         parser.error("pass --tasks, --all or --check-replay")
     return asyncio.run(main_async(args))

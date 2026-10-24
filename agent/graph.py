@@ -2,9 +2,11 @@
 
     plan -> api_step <-> api_act -> verify
                  \\           \\
-                  `-> to_explore -> browser_start -> explore_step <-> explore_act -> verify
-                                          |                 |              |
-                                          `------------> human <----------'
+                  `-> replay --> verify          (a compiled script, no model; ADR 0005)
+                        |   \\
+                        |    `-> to_explore -> browser_start -> explore_step <-> explore_act -> verify
+                        |                            |                 |              |
+                        `-------------------------> human <------------+--------------'
 
 State is plain, JSON-serialisable and tokenized: executors live in `Runtime`, outside the checkpoint, and mask
 every result before it is stored. Interrupts (approvals, verification walls, exhausted budgets) pause the
@@ -71,6 +73,21 @@ class AgentState(TypedDict, total=False):
     finished: bool
     verified: bool | None
     outcome: str | None
+    replay_outcome: str | None
+    replay_failure: str | None
+
+
+class ReplayRun(Protocol):
+    """The result of running a compiled script (agent.replay_runner.ReplayResult)."""
+
+    @property
+    def outcome(self) -> str: ...
+    @property
+    def failed_step(self) -> int | None: ...
+    @property
+    def error(self) -> str | None: ...
+    @property
+    def approvals(self) -> list[dict[str, object]]: ...
 
 
 class Browser(Protocol):
@@ -121,6 +138,11 @@ class Runtime:
     password: str
     open_browser: Callable[[], Awaitable[Browser]]
     browser: Browser | None = None
+    replay: Callable[[], Awaitable[ReplayRun]] | None = None
+    """Runs this task's compiled script, if there is one. It holds the task's real parameter values, which is
+    why it lives here and not in the checkpointed state (ADR 0012)."""
+    replay_hint: str = ""
+    """The script's steps as templates, no values: what the browser tier is told when a step breaks."""
 
     async def ensure_browser(self) -> Browser:
         if self.browser is None:
@@ -364,6 +386,33 @@ def build_graph(rt: Runtime, checkpointer: BaseCheckpointSaver[Any] | None = Non
             "quarantined": quarantined,
         }
 
+    async def replay(state: AgentState) -> dict[str, Any]:
+        """Runs the compiled script with no model; a broken step falls through to the browser tier."""
+        if rt.replay is None:
+            return {}
+        with tracer().start_as_current_span("node replay"):
+            result = await rt.replay()
+        update: dict[str, Any] = {
+            "tier": "replay",
+            "tiers": [*state.get("tiers", []), "replay"],
+            "replay_outcome": result.outcome,
+            "approvals": [*state.get("approvals", []), *result.approvals],
+        }
+        if result.outcome == "success":
+            writes = [*state.get("writes", []), {"tier": "replay", "action": "script", "ok": True}]
+            return {
+                **update,
+                "writes": writes,
+                "finished": True,
+                "summary": "Completed by the replay script.",
+            }
+        if result.outcome == "declined":
+            return {**update, "finished": True, "summary": "A reviewer declined the script's action."}
+        if result.outcome == "handoff":
+            return {**update, "handoff_reason": "verification wall during replay"}
+        step = "" if result.failed_step is None else f"step {result.failed_step + 1} "
+        return {**update, "replay_failure": f"{step}{result.outcome}: {result.error or 'no confirmation'}"}
+
     async def to_explore(state: AgentState) -> dict[str, Any]:
         return {
             "tier": "explore",
@@ -382,11 +431,17 @@ def build_graph(rt: Runtime, checkpointer: BaseCheckpointSaver[Any] | None = Non
     async def explore_step(state: AgentState) -> dict[str, Any]:
         if state.get("explore_steps", 0) >= settings.max_explore_steps:
             return {"handoff_reason": "browser step budget exhausted"}
+        heal = ""
+        if state.get("replay_failure") and rt.replay_hint:
+            heal = (
+                f"\n\nA recorded script for this kind of task stopped at {state['replay_failure']}. "
+                f"Its steps were: {rt.replay_hint}. The page may have changed; do the task in the browser.\n"
+            )
         messages = state.get("messages") or [
             {"role": "system", "content": EXPLORE.format(origin=settings.portal_origin)},
             {
                 "role": "user",
-                "content": f"Task: {state['instruction']}\n\nCurrent page:\n"
+                "content": f"Task: {state['instruction']}{heal}\n\nCurrent page:\n"
                 + spotlight(state.get("last_observation", ""), "portal-page"),
             },
         ]
@@ -518,12 +573,17 @@ def build_graph(rt: Runtime, checkpointer: BaseCheckpointSaver[Any] | None = Non
         return {"verified": verified, "outcome": "success" if verified else "unverified"}
 
     def after_api_step(state: AgentState) -> str:
-        return "to_explore" if state.get("fallback_reason") else "api_act"
+        return "replay" if state.get("fallback_reason") else "api_act"
 
     def after_api_act(state: AgentState) -> str:
         if state.get("finished"):
             return "verify"
-        return "to_explore" if state.get("fallback_reason") else "api_step"
+        return "replay" if state.get("fallback_reason") else "api_step"
+
+    def after_replay(state: AgentState) -> str:
+        if state.get("finished"):
+            return "verify"
+        return "human" if state.get("handoff_reason") else "to_explore"
 
     def after_browser_start(state: AgentState) -> str:
         return "human" if state.get("handoff_reason") else "explore_step"
@@ -544,6 +604,7 @@ def build_graph(rt: Runtime, checkpointer: BaseCheckpointSaver[Any] | None = Non
         ("plan", plan),
         ("api_step", api_step),
         ("api_act", api_act),
+        ("replay", replay),
         ("to_explore", to_explore),
         ("browser_start", browser_start),
         ("explore_step", explore_step),
@@ -554,8 +615,9 @@ def build_graph(rt: Runtime, checkpointer: BaseCheckpointSaver[Any] | None = Non
         graph.add_node(name, node)
     graph.add_edge(START, "plan")
     graph.add_edge("plan", "api_step")
-    graph.add_conditional_edges("api_step", after_api_step, ["to_explore", "api_act"])
-    graph.add_conditional_edges("api_act", after_api_act, ["verify", "to_explore", "api_step"])
+    graph.add_conditional_edges("api_step", after_api_step, ["replay", "api_act"])
+    graph.add_conditional_edges("api_act", after_api_act, ["verify", "replay", "api_step"])
+    graph.add_conditional_edges("replay", after_replay, ["verify", "human", "to_explore"])
     graph.add_edge("to_explore", "browser_start")
     graph.add_conditional_edges("browser_start", after_browser_start, ["human", "explore_step"])
     graph.add_conditional_edges("explore_step", after_explore_step, ["human", "explore_act"])

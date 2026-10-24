@@ -301,3 +301,67 @@ async def test_a_change_task_that_wrote_nothing_is_unverified() -> None:
     state, _ = await run(llm, FakeApi({"getMember": ok("getMember")}))
     assert state["outcome"] == "unverified"
     assert state["verified"] is False
+
+
+class Replayed:
+    def __init__(self, outcome: str, failed_step: int | None = None, error: str | None = None) -> None:
+        self.outcome = outcome
+        self.failed_step = failed_step
+        self.error = error
+        self.approvals: list[dict[str, object]] = []
+
+
+async def run_with_replay(
+    llm: ScriptedLlm, api: FakeApi, browser: FakeBrowser | None, result: Replayed
+) -> dict[str, Any]:
+    async def open_browser() -> Browser:
+        assert browser is not None
+        return browser
+
+    async def replay() -> Replayed:
+        return result
+
+    runtime = Runtime(
+        settings=SETTINGS,
+        llm=llm,
+        api=api,
+        masker=Identity(),
+        scanner=NoScanner(),
+        password="pw",
+        open_browser=open_browser,
+        replay=replay,
+        replay_hint="click button 'Save contact details'",
+    )
+    graph = build_graph(runtime, InMemorySaver())
+    config: RunnableConfig = {"configurable": {"thread_id": "t"}}
+    return await graph.ainvoke(
+        {"task_key": "healthy/t-01", "username": "clerk01", "instruction": "do it"}, config
+    )
+
+
+async def test_a_compiled_script_completes_the_task_without_the_browser_tier() -> None:
+    llm = ScriptedLlm([WRITE_PLAN, reply(("updateContact", {"memberNumber": "m"}))])
+    api = FakeApi({"updateContact": failed("updateContact", Failure.NOT_IMPLEMENTED, 501)})
+    state = await run_with_replay(llm, api, None, Replayed("success"))
+    assert state["tiers"] == ["api", "replay"]
+    assert state["outcome"] == "success"
+    assert llm.calls == [0, 1]
+
+
+async def test_a_broken_script_step_heals_in_the_browser_with_a_hint() -> None:
+    llm = ScriptedLlm(
+        [
+            WRITE_PLAN,
+            reply(("updateContact", {"memberNumber": "m"})),
+            reply(("browser_click", {"target": "e5"})),
+            reply(("finish", {"summary": "saved"})),
+        ]
+    )
+    api = FakeApi({"updateContact": failed("updateContact", Failure.NOT_IMPLEMENTED, 501)})
+    browser = FakeBrowser('- heading "Member Search"', ["- status [ref=e9]: Address saved."])
+    state = await run_with_replay(llm, api, browser, Replayed("step_failed", 1, "no single button 'Save'"))
+    assert state["tiers"] == ["api", "replay", "explore"]
+    assert state["outcome"] == "success"
+    opening = next(m["content"] for m in state["messages"] if m["role"] == "user")
+    assert "stopped at step 2 step_failed" in opening
+    assert "click button 'Save contact details'" in opening
