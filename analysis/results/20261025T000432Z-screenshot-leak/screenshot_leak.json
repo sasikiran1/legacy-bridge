@@ -1,0 +1,40 @@
+{
+  "canary_members": 10,
+  "canaries": 125,
+  "document": {
+    "screenshots": 10,
+    "values_painted": 142,
+    "canaries_readable": 100,
+    "canaries_leaked": 0,
+    "readable_by_type": {
+      "CLAIM_NUMBER": 26,
+      "DATE_OF_BIRTH": 10,
+      "EMAIL_ADDRESS": 9,
+      "MEMBER_ID": 10,
+      "PERSON": 10,
+      "PHONE_NUMBER": 10,
+      "POLICY_NUMBER": 15,
+      "STREET_ADDRESS": 10
+    },
+    "leaked_by_type": {},
+    "leaked_canaries": []
+  },
+  "member": {
+    "screenshots": 10,
+    "values_painted": 136,
+    "canaries_readable": 100,
+    "canaries_leaked": 0,
+    "readable_by_type": {
+      "CLAIM_NUMBER": 26,
+      "DATE_OF_BIRTH": 10,
+      "EMAIL_ADDRESS": 9,
+      "MEMBER_ID": 10,
+      "PERSON": 10,
+      "PHONE_NUMBER": 10,
+      "POLICY_NUMBER": 15,
+      "STREET_ADDRESS": 10
+    },
+    "leaked_by_type": {},
+    "leaked_canaries": []
+  }
+}

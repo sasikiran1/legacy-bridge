@@ -1,0 +1,27 @@
+{
+  "run_id": "20261025T000432Z-screenshot-leak",
+  "kind": "screenshot-leak",
+  "git": {
+    "sha": "52cdcd5b4e47e388f32e0281ffb66cb8ebfa66a4",
+    "dirty": false
+  },
+  "started": "2026-10-25T00:04:32.252214+00:00",
+  "finished": "2026-10-25T00:13:33.568878+00:00",
+  "python": "3.14.7",
+  "machine": "x86_64",
+  "models": {
+    "ner": "urchade/gliner_multi_pii-v1",
+    "ocr": "tesseract 5.3.4"
+  },
+  "config": {
+    "scopes": [
+      "document",
+      "member"
+    ],
+    "detector": "full",
+    "viewport": {
+      "width": 1280,
+      "height": 900
+    }
+  }
+}
