@@ -225,12 +225,6 @@ def _nudge(state: AgentState, give_up: dict[str, Any]) -> dict[str, Any]:
     return {**update, **give_up} if nudges >= MAX_NUDGES else update
 
 
-def _plan_summary(state: AgentState) -> dict[str, Any]:
-    """Intent and kind only: planner parameters can contain invented placeholders, the instruction cannot."""
-    plan = state.get("plan", {})
-    return {"intent": plan.get("intent"), "kind": plan.get("kind")}
-
-
 def _compact(messages: list[dict[str, Any]]) -> list[dict[str, Any]]:
     """Keeps the last few page observations verbatim and stubs older ones, to bound context growth."""
     observation_indexes = [i for i, m in enumerate(messages) if m.get("role") == "tool"]

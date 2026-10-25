@@ -10,28 +10,23 @@ snapshot. Per call, because the two arms may take different numbers of steps. Re
 from __future__ import annotations
 
 import argparse
-import json
 import statistics
 import sys
 from typing import Any
 
-from analysis.manifest import RESULTS_DIR, Run
+from analysis.manifest import RESULTS_DIR, Run, agent_run_manifests, agent_run_rows
 
 
 def arm(label: str) -> tuple[dict[tuple[str, str], dict[str, Any]], dict[str, Any]]:
     rows: dict[tuple[str, str], dict[str, Any]] = {}
     manifests: dict[str, Any] = {}
-    for directory in sorted(RESULTS_DIR.glob("*-agent-run")):
-        manifest = json.loads((directory / "manifest.json").read_text(encoding="utf-8"))
-        if manifest["config"].get("label") != label:
-            continue
+    for directory, manifest in agent_run_manifests(RESULTS_DIR, [label]):
         manifests[directory.name] = {
             "snapshots": manifest["config"].get("snapshots", "raw"),
             "runtime": manifest["models"].get("runtime"),
             "served": manifest["models"].get("served"),
         }
-        for line in (directory / "agent_runs.jsonl").read_text(encoding="utf-8").splitlines():
-            row = json.loads(line)
+        for row in agent_run_rows(directory):
             rows[(row["scenario"], row["task_id"])] = row
     return rows, manifests
 

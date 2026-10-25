@@ -27,7 +27,7 @@ import shutil
 import sys
 import time
 from pathlib import Path
-from typing import Any
+from typing import Any, TypedDict
 
 import httpx
 import psycopg
@@ -72,6 +72,19 @@ AGENT_AUDIT = Path(__file__).resolve().parent.parent / ".cache" / "audit" / "age
 CASSETTE_INDEX = CASSETTE_DIR / "index.json"
 READ_INTENTS = {Intent.CLAIM_STATUS, Intent.POLICY_LOOKUP}
 REPLAY_FIELDS = ("outcome", "passed", "wrong_action", "tiers", "llm_calls", "quarantined")
+
+
+class RunnerServices(TypedDict):
+    admin: PortalAdmin
+    db_url: str
+    masker: MaskClient
+    llm: LlmClient
+    api: ApiExecutor
+    resolver: ToolArgumentResolver
+    scanner: InjectionScanner
+    checkpointer: AsyncPostgresSaver
+    proxy_http: httpx.AsyncClient
+    rehydrator: Rehydrator
 
 
 class TaskRun(BaseModel):
@@ -184,7 +197,7 @@ async def run_task(
     task: Task,
     scenario: Scenario,
     settings: AgentSettings,
-    services: dict[str, Any],
+    services: RunnerServices,
     run_id: str,
     approvals: str,
     resolve_walls: bool,
@@ -406,7 +419,7 @@ async def main_async(args: argparse.Namespace) -> int:
     runtime = await ollama_version()
     async with PortalAdmin(tb) as admin, AsyncPostgresSaver.from_conn_string(settings.agent_db_url) as saver:
         await saver.setup()
-        services: dict[str, Any] = {
+        services: RunnerServices = {
             "admin": admin,
             "db_url": tb.portal_db_url,
             "masker": masker,
@@ -426,15 +439,15 @@ async def main_async(args: argparse.Namespace) -> int:
                 settings,
                 services,
                 run.run_id,
-                args.approvals,
-                args.resolve_walls,
-                args.record,
-                args.check_replay,
+                approvals=args.approvals,
+                resolve_walls=args.resolve_walls,
+                record=args.record,
+                replay=args.check_replay,
                 # A replay check runs scripts only if the recording did, or the model calls fall out of step.
-                load_index().get(f"{scenario.name}/{task.id}", {}).get("scripts", False)
+                use_scripts=load_index().get(f"{scenario.name}/{task.id}", {}).get("scripts", False)
                 if args.check_replay
                 else args.scripts,
-                args.compile,
+                compile_scripts=args.compile,
             )
             rows.append(row)
             print(

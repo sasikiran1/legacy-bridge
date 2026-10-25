@@ -6,11 +6,31 @@ import datetime as dt
 import json
 import platform
 import subprocess
+from collections.abc import Collection, Iterator
 from dataclasses import dataclass, field
 from pathlib import Path
+from typing import Any
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 RESULTS_DIR = REPO_ROOT / "analysis" / "results"
+
+
+def agent_run_manifests(
+    root: Path, labels: Collection[str], *, recorded_only: bool = False
+) -> Iterator[tuple[Path, dict[str, Any]]]:
+    """Selected agent runs in chronological filename order; row files are read separately."""
+    for directory in sorted(root.glob("*-agent-run")):
+        manifest = json.loads((directory / "manifest.json").read_text(encoding="utf-8"))
+        config = manifest["config"]
+        if recorded_only and not config.get("record"):
+            continue
+        if config.get("label") in labels:
+            yield directory, manifest
+
+
+def agent_run_rows(directory: Path) -> Iterator[dict[str, Any]]:
+    for line in (directory / "agent_runs.jsonl").read_text(encoding="utf-8").splitlines():
+        yield json.loads(line)
 
 
 def git_state() -> dict[str, object]:

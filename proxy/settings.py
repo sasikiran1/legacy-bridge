@@ -3,13 +3,13 @@
 from __future__ import annotations
 
 import base64
-import os
+from functools import partial
 from pathlib import Path
 
 from pydantic import BaseModel, ConfigDict
 
 from proxy.detection import DetectorConfig
-from testbed.settings import ENV_FILE, read_dotenv
+from testbed.settings import ENV_FILE, environment_value, read_dotenv
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
@@ -38,13 +38,7 @@ def _key(name: str, raw: str) -> bytes:
 
 
 def load_settings() -> ProxySettings:
-    file = read_dotenv(ENV_FILE)
-
-    def get(name: str, default: str | None = None) -> str:
-        value = os.environ.get(name) or file.get(name) or default
-        if not value:
-            raise RuntimeError(f"{name} is not set (environment or .env)")
-        return value
+    get = partial(environment_value, read_dotenv(ENV_FILE))
 
     return ProxySettings(
         redis_url=get("REDIS_URL"),

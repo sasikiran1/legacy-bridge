@@ -74,7 +74,8 @@ class Masker:
         if key in self._cache:
             self._cache.move_to_end(key)
             return self._cache[key]
-        masked = await self._mask_uncached(text, task_id, destination, model_authored)
+        spans = await self._spans(text, task_id, model_authored)
+        masked = await self._replace(text, spans, task_id, destination)
         self._cache[key] = masked
         if len(self._cache) > CACHE_SIZE:
             self._cache.popitem(last=False)
@@ -84,10 +85,6 @@ class Masker:
         for key in [k for k in self._cache if k[0] == task_id]:
             del self._cache[key]
         self._propagate.pop(task_id, None)
-
-    async def _mask_uncached(self, text: str, task_id: str, destination: str, model_authored: bool) -> str:
-        spans = await self._spans(text, task_id, model_authored)
-        return await self._replace(text, spans, task_id, destination)
 
     async def _spans(self, text: str, task_id: str, model_authored: bool) -> list[Span]:
         detector = self._light if model_authored else self._detector

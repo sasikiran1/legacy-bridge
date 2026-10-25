@@ -11,12 +11,11 @@ separately, as are runs on different runtime (Ollama) releases.
 from __future__ import annotations
 
 import argparse
-import json
 import sys
 from typing import Any
 
 from analysis.agent_summary import summarise
-from analysis.manifest import RESULTS_DIR, Run
+from analysis.manifest import RESULTS_DIR, Run, agent_run_manifests, agent_run_rows
 
 
 def rows_by_model(
@@ -24,14 +23,10 @@ def rows_by_model(
 ) -> tuple[dict[tuple[str, str, str], dict[str, Any]], dict[tuple[str, str], set[str]]]:
     rows: dict[tuple[str, str, str], dict[str, Any]] = {}
     sources: dict[tuple[str, str], set[str]] = {}
-    for directory in sorted(RESULTS_DIR.glob("*-agent-run")):
-        manifest = json.loads((directory / "manifest.json").read_text(encoding="utf-8"))
-        if manifest["config"].get("label") != label:
-            continue
+    for directory, manifest in agent_run_manifests(RESULTS_DIR, [label]):
         # Runs on different runtime releases are kept apart; manifests before M3 did not record it.
         runtime = manifest.get("models", {}).get("runtime", "runtime not recorded")
-        for line in (directory / "agent_runs.jsonl").read_text(encoding="utf-8").splitlines():
-            row = json.loads(line)
+        for row in agent_run_rows(directory):
             model = f"{' + '.join(row['models']) or 'no model call'} @ {runtime}"
             rows[(model, row["scenario"], row["task_id"])] = row
             sources.setdefault((model, row["scenario"]), set()).add(directory.name)

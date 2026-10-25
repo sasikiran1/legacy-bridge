@@ -16,20 +16,15 @@ import sys
 from collections import Counter
 from typing import Any
 
-from analysis.manifest import RESULTS_DIR, Run
+from analysis.manifest import RESULTS_DIR, Run, agent_run_manifests, agent_run_rows
 from proxy.cassettes import CASSETTE_DIR
 
 
 def latest_rows(label: str) -> tuple[dict[tuple[str, str], dict[str, Any]], dict[tuple[str, str], str]]:
     rows: dict[tuple[str, str], dict[str, Any]] = {}
     sources: dict[tuple[str, str], str] = {}
-    for directory in sorted(RESULTS_DIR.glob("*-agent-run")):
-        manifest = json.loads((directory / "manifest.json").read_text(encoding="utf-8"))
-        config = manifest["config"]
-        if not config.get("record") or config.get("label") != label:
-            continue
-        for line in (directory / "agent_runs.jsonl").read_text(encoding="utf-8").splitlines():
-            row = json.loads(line)
+    for directory, _ in agent_run_manifests(RESULTS_DIR, [label], recorded_only=True):
+        for row in agent_run_rows(directory):
             key = (row["scenario"], row["task_id"])
             rows[key] = row
             sources[key] = directory.name

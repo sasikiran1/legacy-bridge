@@ -3,14 +3,13 @@
 from __future__ import annotations
 
 import base64
-import os
 from enum import StrEnum
-from functools import cache
+from functools import cache, partial
 from urllib.parse import urlparse
 
 from pydantic import BaseModel, ConfigDict
 
-from testbed.settings import ENV_FILE, read_dotenv
+from testbed.settings import ENV_FILE, environment_value, read_dotenv
 
 
 class Profile(StrEnum):
@@ -59,13 +58,7 @@ class AgentSettings(BaseModel):
 
 @cache
 def agent_settings() -> AgentSettings:
-    file = read_dotenv(ENV_FILE)
-
-    def get(name: str, default: str | None = None) -> str:
-        value = os.environ.get(name) or file.get(name) or default
-        if not value:
-            raise RuntimeError(f"{name} is not set (environment or .env)")
-        return value
+    get = partial(environment_value, read_dotenv(ENV_FILE))
 
     return AgentSettings(
         proxy_url=get("PROXY_URL", "http://localhost:8090").rstrip("/"),

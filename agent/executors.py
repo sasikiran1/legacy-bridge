@@ -75,6 +75,26 @@ class ApiResult(BaseModel):
         return f"HTTP {self.status} ({self.failure}): {self.detail}"
 
 
+def _request_parts(
+    operation: Operation, resolved: dict[str, object]
+) -> tuple[str, dict[str, str], dict[str, object]]:
+    path = operation.path
+    query = {}
+    for parameter in operation.parameters:
+        if parameter.name not in resolved:
+            continue
+        if parameter.location == "path":
+            path = path.replace("{" + parameter.name + "}", quote(str(resolved[parameter.name]), safe=""))
+        elif parameter.location == "query":
+            query[parameter.name] = str(resolved[parameter.name])
+    body = {
+        field: resolved[field]
+        for field in operation.body_fields
+        if field in resolved and resolved[field] is not None
+    }
+    return path, query, body
+
+
 class ApiExecutor:
     def __init__(
         self,
@@ -131,16 +151,7 @@ class ApiExecutor:
                 operation=op.id, status=0, failure=Failure.POLICY_DENIED, body=None, detail=str(e)
             )
 
-        path = op.path
-        query = {}
-        for p in op.parameters:
-            if p.name not in resolved:
-                continue
-            if p.location == "path":
-                path = path.replace("{" + p.name + "}", quote(str(resolved[p.name]), safe=""))
-            elif p.location == "query":
-                query[p.name] = str(resolved[p.name])
-        body = {f: resolved[f] for f in op.body_fields if f in resolved and resolved[f] is not None}
+        path, query, body = _request_parts(op, resolved)
         try:
             response = await self._http.request(
                 op.method,
@@ -534,7 +545,10 @@ class BrowserSession:
         except KeyError, TypeError, ValueError:
             return "x and y must be numbers from the unlabeled elements list"
         element = next((e for e in self.layout if e.contains(x, y)), None)
-        if element is None or (tool == "type_at") != (element.kind == "input") or element.kind == "text":
+        wrong_kind = False
+        if element is not None:
+            wrong_kind = element.kind != "input" if tool == "type_at" else element.kind in ("input", "text")
+        if element is None or wrong_kind:
             wanted = "an input" if tool == "type_at" else "a button"
             return f"no unlabeled {wanted} at x={x:.0f} y={y:.0f}; use the listed coordinates or a ref"
         cx, cy = element.center

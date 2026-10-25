@@ -19,7 +19,7 @@ from typing import Any
 
 import yaml
 
-from analysis.manifest import RESULTS_DIR, Run
+from analysis.manifest import RESULTS_DIR, Run, agent_run_manifests, agent_run_rows
 from proxy.providers import MODELS_YAML
 
 
@@ -37,13 +37,9 @@ def price_on(model: str, day: dt.date) -> dict[str, Any]:
 def agent_rows(labels: list[str]) -> list[dict[str, Any]]:
     """The latest row per (label, scenario, task): a re-recorded task replaces its earlier runs."""
     rows: dict[tuple[str, str, str], dict[str, Any]] = {}
-    for directory in sorted(RESULTS_DIR.glob("*-agent-run")):
-        manifest = json.loads((directory / "manifest.json").read_text(encoding="utf-8"))
+    for directory, manifest in agent_run_manifests(RESULTS_DIR, labels):
         label = manifest["config"].get("label")
-        if label not in labels:
-            continue
-        for line in (directory / "agent_runs.jsonl").read_text(encoding="utf-8").splitlines():
-            row = json.loads(line)
+        for row in agent_run_rows(directory):
             rows[(label, row["scenario"], row["task_id"])] = {**row, "label": label, "run": directory.name}
     return list(rows.values())
 

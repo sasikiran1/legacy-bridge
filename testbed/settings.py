@@ -3,7 +3,8 @@
 from __future__ import annotations
 
 import os
-from functools import cache
+from collections.abc import Mapping
+from functools import cache, partial
 from pathlib import Path
 
 from pydantic import BaseModel, ConfigDict
@@ -23,6 +24,13 @@ def read_dotenv(path: Path) -> dict[str, str]:
     return values
 
 
+def environment_value(file: Mapping[str, str], name: str, default: str | None = None) -> str:
+    value = os.environ.get(name) or file.get(name) or default
+    if not value:
+        raise RuntimeError(f"{name} is not set (environment or .env)")
+    return value
+
+
 class Settings(BaseModel):
     model_config = ConfigDict(frozen=True)
 
@@ -34,13 +42,7 @@ class Settings(BaseModel):
 
 @cache
 def settings() -> Settings:
-    file = read_dotenv(ENV_FILE)
-
-    def get(key: str) -> str:
-        value = os.environ.get(key) or file.get(key)
-        if not value:
-            raise RuntimeError(f"{key} is not set (environment or .env)")
-        return value
+    get = partial(environment_value, read_dotenv(ENV_FILE))
 
     return Settings(
         portal_base_url=get("PORTAL_BASE_URL").rstrip("/"),
