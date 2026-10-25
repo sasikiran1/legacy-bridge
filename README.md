@@ -172,8 +172,23 @@ Screenshots sent to a model are redacted in the proxy: each value detected in th
 make demo-replay     # scripts at $0 on the healthy portal, clean step failures under DOM drift, then the cost ledger
 ```
 
+## Operator console
+
+A local page for running one task and watching it ([agent/console.py](agent/console.py)):
+- pick a scenario and task
+- follow each graph step as it happens: tool calls, page observations, tier changes
+- approve or decline payments and deletes yourself
+- see the database-diff verdict
+
+The page shows what agent state holds, which is placeholders only, never raw values. With the proxy in replay mode it replays recorded tasks with no model. In live mode it runs the local model.
+
+```bash
+make console         # http://localhost:8095
+```
+
 ## Design documents
 
+- Deep dives: [the PII proxy](docs/deep-dives/01-pii-proxy.md), [fallback and replay](docs/deep-dives/02-fallback-and-replay.md), [cost and evaluation](docs/deep-dives/03-cost-and-evaluation.md)
 - [Threat model](docs/threat-model.md)
 - [Architecture decision records](docs/adr/README.md)
 - [Verified environment and free-tier facts](docs/environment.md)
