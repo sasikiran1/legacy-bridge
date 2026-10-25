@@ -159,6 +159,18 @@ Each milestone ends with green tests, a demo command, and an interview brief (wh
 
 ## M5: Experiments and report
 
+**Closed early, 2026-10-25, by decision to wrap up.** What exists:
+- **Coverage:** the healthy scenario recorded on all 50 tasks, plus `api_degraded_dom_drift` on the 10-task subset. A second laptop recorded both.
+  - healthy, other 40 tasks: 37 / 40 passed, 0 wrong actions
+  - `api_degraded_dom_drift`: 9 / 10 passed, 0 wrong actions
+  - Two of the healthy misses were reimbursements whose routing number was masked as a phone number, a detection bug since fixed and not re-recorded.
+- **Operator console:** `make console`, built in place of the Grafana dashboard. It runs one task, shows token-only steps, puts approvals to a person, and grades against the database diff.
+- **Not done:**
+  - the full matrix (50 tasks × 7 scenarios) with repeated runs and bootstrap CIs
+  - the hosted arm (no keys)
+  - the report site, the Grafana dashboard, the demo GIF
+  - the CI regression gate beyond replay
+
 - **Experiment runner:** writes `analysis/results/<run_id>/` with a manifest.
 - **Metrics and bootstrap CIs** for every metric in the spec.
 - **`make report` builds a static site in `docs/report/`** with the seven panels. Publishing to GitHub Pages happens only after Sasi approves.
@@ -167,6 +179,10 @@ Each milestone ends with green tests, a demo command, and an interview brief (wh
 - **CI regression gate:** smoke run vs. `main` on success rate and wrong-action rate.
 
 ## M6: Deep dives
+
+**Done 2026-10-25.**
+- **Three drafts in `docs/deep-dives/`:** the PII proxy, fallback and replay, cost and evaluation. Every figure comes from a committed result file.
+- **ADRs:** the Proposed ADRs 0004, 0005 and 0008 are accepted with their evidence.
 
 - **"API-first, browser-second"; "Tokenize before you prompt"; "Pay for intelligence once".** Drafts for Sasi to rewrite. Every number links to its result file.
 - **ADR polish:** close out the Proposed ADRs with the evidence gathered.
