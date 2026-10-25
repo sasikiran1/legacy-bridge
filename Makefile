@@ -116,6 +116,10 @@ demo-replay: agent-stack ## M4 demo: compiled scripts at $0 on the healthy porta
 	$(TESTBED) uv run python -W ignore -m analysis.replay_eval --scenarios healthy,dom_drift
 	$(TESTBED) uv run python -W ignore -m analysis.cost_ledger
 
+console: agent-stack ## Operator console at http://localhost:8095: run a task, watch token-only steps, approve or decline
+	$(COMPOSE) --profile test run --rm -p 127.0.0.1:8095:8095 testbed \
+		uv run uvicorn agent.console:app --host 0.0.0.0 --port 8095
+
 traces: LLM_MODE := replay
 traces: agent-stack ## Replay recorded healthy tasks with tracing to Phoenix (http://localhost:6006), then check spans for canaries
 	$(COMPOSE) up -d phoenix
