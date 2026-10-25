@@ -28,3 +28,11 @@ async def test_detector_finds_pii_in_free_text() -> None:
     assert found.get("(415) 555-0132") == "PHONE_NUMBER"
     assert found.get("margaret.o@example.org") == "EMAIL_ADDRESS"
     assert any(v == "STREET_ADDRESS" and "12 Elm Street" in k for k, v in found.items())
+
+
+async def test_routing_numbers_starting_with_zero_are_not_phone_numbers() -> None:
+    """The policy refuses a PHONE_NUMBER placeholder in bankRouting, so this mistyping stalled two tasks."""
+    detector = build_detector(DetectorConfig.FULL, load_policy())
+    text = "payable to Rebekah Wallace, routing number 074255580, account number 878600057058."
+    found = {text[s.start : s.end]: s.entity_type for s in detector.detect(text)}
+    assert found.get("074255580") == "ROUTING_NUMBER"

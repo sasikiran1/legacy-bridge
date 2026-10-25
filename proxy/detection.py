@@ -250,6 +250,17 @@ def plausible(span: Span, text: str) -> bool:
     return sum(ch.isdigit() for ch in value) >= 2
 
 
+def retype(span: Span, text: str) -> Span:
+    """A bare nine-digit number passing the ABA checksum is a routing number, whatever Presidio's phone
+    recognizer says: a US phone number has ten digits. Phone scored above the routing rule and won the
+    overlap, so routing numbers starting with 0 were masked as phones and the policy refused them in the
+    bankRouting field. Retyped, not dropped, so the value stays masked without the "routing" context."""
+    value = text[span.start : span.end]
+    if span.entity_type == "PHONE_NUMBER" and value.isdigit() and aba_checksum(value):
+        return span.model_copy(update={"entity_type": "ROUTING_NUMBER"})
+    return span
+
+
 def trim_street_spans(spans: Sequence[Span], text: str) -> list[Span]:
     """Cuts a street-address span at its first comma when the part before is a complete street address, and
     drops spans that are only "City, ST 12345".
@@ -343,7 +354,9 @@ class RegexDetector:
                             source=f"presidio:{type(recognizer).__name__}",
                         )
                     )
-        return trim_street_spans(resolve_overlaps(spans), text)
+        retyped_spans = [retype(span, text) for span in spans]
+        resolved_spans = resolve_overlaps(retyped_spans)
+        return trim_street_spans(resolved_spans, text)
 
 
 class PresidioDetector:
@@ -414,7 +427,9 @@ class PresidioDetector:
                 and s.score >= policy.min_score(s.entity_type)
                 and plausible(s, text)
             ]
-        return trim_street_spans(resolve_overlaps(spans), text)
+        retyped_spans = [retype(span, text) for span in spans]
+        resolved_spans = resolve_overlaps(retyped_spans)
+        return trim_street_spans(resolved_spans, text)
 
 
 def build_detector(config: DetectorConfig, policy: PiiPolicy) -> Detector:

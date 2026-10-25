@@ -3,7 +3,7 @@ from __future__ import annotations
 import pytest
 from pydantic import ValidationError
 
-from proxy.detection import Span, resolve_overlaps, trim_street_spans
+from proxy.detection import Span, resolve_overlaps, retype, trim_street_spans
 from proxy.policy import PiiPolicy, load_policy
 from proxy.tokens import TOKEN_RE, TokenMinter
 from tests.proxy.fakes import TOKEN_KEY
@@ -110,3 +110,17 @@ def test_role_nouns_are_not_names() -> None:
     assert not plausible(_span(0, 14, "STREET_ADDRESS", 0.9), "Street address")
     assert plausible(_span(0, 10, "STREET_ADDRESS", 0.9), "12 Elm St.")
     assert plausible(_span(40, 50, "PERSON", 0.9), text)
+
+
+@pytest.mark.parametrize(
+    ("value", "expected"),
+    [
+        ("074255580", "ROUTING_NUMBER"),  # a routing number Presidio's phone recognizer claimed
+        ("074255581", "PHONE_NUMBER"),  # fails the ABA checksum
+        ("(415) 555-0132", "PHONE_NUMBER"),  # not bare digits
+    ],
+)
+def test_a_nine_digit_aba_number_tagged_as_a_phone_is_a_routing_number(value: str, expected: str) -> None:
+    text = f"routing number {value}."
+    span = Span(start=15, end=15 + len(value), entity_type="PHONE_NUMBER", score=0.75, source="presidio")
+    assert retype(span, text).entity_type == expected
