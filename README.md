@@ -135,7 +135,7 @@ make traces          # replay with OpenTelemetry GenAI spans to Phoenix (localho
 
 ### Limitations
 
-- **Ten tasks, one recording each.** Single runs moved by one or two tasks for the other models in the bake-off. The full 50-task set, repeated runs and hosted models are not measured yet.
+- **Mostly ten tasks, one recording each.** Single runs moved by one or two tasks for the other models in the bake-off. The healthy scenario was also recorded on the other 40 tasks: 37 / 40 passed, 0 wrong actions ([results](analysis/results/20261025T030431Z-agent-run/agent_runs.jsonl)). Two of the three misses came from routing numbers masked as phone numbers, a detection bug fixed afterwards and not re-recorded. The full matrix, repeated runs and hosted models are not measured.
 - **No planted injection succeeded, but the classifier did not stop them.** The approvals, allowlists and post-conditions did. One scenario with ten tasks is a small sample of attacks.
 - **The agent's own check trusts the page.** In the bake-off, weaker models reported three tasks done that the database showed were not: a wrong answer, a wrong city and postal code, and a note left undeleted. Each was graded as failed. gemma4 had none, but the agent's verification step would not have caught them either.
 - **One leak was caught late.** Under DOM drift, a canary account number escaped detection beside a renamed label. The cassette leak gate stopped it before the recording was committed, and the masking now re-catches long numbers by value ([ADR 0012](docs/adr/0012-masking-boundaries-for-the-agent.md)).
