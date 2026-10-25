@@ -86,6 +86,10 @@ class Masker:
         self._propagate.pop(task_id, None)
 
     async def _mask_uncached(self, text: str, task_id: str, destination: str, model_authored: bool) -> str:
+        spans = await self._spans(text, task_id, model_authored)
+        return await self._replace(text, spans, task_id, destination)
+
+    async def _spans(self, text: str, task_id: str, model_authored: bool) -> list[Span]:
         detector = self._light if model_authored else self._detector
         detected = await asyncio.to_thread(detector.detect, text)
         candidates = [
@@ -95,10 +99,20 @@ class Masker:
         ]
         candidates += await self._known_values(text, task_id)
         protected = [(m.start(), m.end()) for m in TOKEN_RE.finditer(text)]
-        spans = [
+        return [
             s for s in resolve_overlaps(candidates) if all(s.end <= a or s.start >= b for a, b in protected)
         ]
-        return await self._replace(text, spans, task_id, destination)
+
+    async def tokenize_spans(self, text: str, task_id: str, destination: str) -> list[tuple[int, int, str]]:
+        """(start, end, token) for every value masking would replace in `text`: for OCR text, where the
+        caller redacts pixels rather than characters. Vaulted and audited like any other masking."""
+        spans = await self._spans(text, task_id, model_authored=False)
+        located = []
+        for span in sorted(spans, key=lambda s: s.start):
+            value = text[span.start : span.end]
+            token = await self._token_for(value, span.entity_type, task_id, destination, trusted(span, value))
+            located.append((span.start, span.end, token))
+        return located
 
     async def mask_value(
         self,

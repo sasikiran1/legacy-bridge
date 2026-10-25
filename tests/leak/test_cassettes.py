@@ -1,13 +1,16 @@
-"""Recorded LLM exchanges, run results and replay scripts are committed: none may contain a canary value."""
+"""Recorded LLM exchanges, screenshots, run results and replay scripts are committed: none may contain a
+canary value."""
 
 from __future__ import annotations
 
 import json
+import shutil
 from pathlib import Path
 
 import pytest
 
 from proxy.cassettes import CASSETTE_DIR
+from proxy.vision import ocr_text
 from testbed.seed import load_canaries
 
 RESULTS_DIR = Path(__file__).resolve().parents[2] / "analysis" / "results"
@@ -47,3 +50,15 @@ def leaks(root: Path, patterns: tuple[str, ...]) -> list[tuple[str, str]]:
 )
 def test_no_committed_file_contains_a_canary_value(root: Path, patterns: tuple[str, ...]) -> None:
     assert leaks(root, patterns) == []
+
+
+@pytest.mark.skipif(shutil.which("tesseract") is None, reason="needs tesseract-ocr")
+async def test_no_recorded_screenshot_shows_a_canary_value() -> None:
+    """Screenshots are stored as the provider received them (redacted); OCR must not read a canary on any."""
+    canaries = load_canaries()
+    found = []
+    for root in (CASSETTE_DIR, RESULTS_DIR):
+        for path in sorted(root.rglob("*.png")):
+            text = await ocr_text(path.read_bytes())
+            found += [(str(path.relative_to(root)), str(c.entity_type)) for c in canaries if c.value in text]
+    assert found == []

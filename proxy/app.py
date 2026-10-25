@@ -43,6 +43,7 @@ from proxy.routing import Router, estimate_tokens, load_router
 from proxy.settings import load_settings
 from proxy.tokens import TokenMinter
 from proxy.vault import RedisVault, Sealer, TokenCollision, Vault, VaultUnavailable
+from proxy.vision import decode_data_url, encode_png, redact_image
 
 TASK_HEADER = "x-lb-task-id"
 CALL_HEADER = "x-lb-call"
@@ -94,10 +95,17 @@ async def mask_request(
         elif isinstance(content, list):
             parts = []
             for part in content:
-                if part.get("type") != "text":
-                    raise UnsupportedContent("non-text content needs screenshot redaction (ADR 0008)")
-                text = await masker.mask_content(part["text"], task_id, destination, authored)
-                parts.append({**part, "text": text})
+                if part.get("type") == "text":
+                    text = await masker.mask_content(part["text"], task_id, destination, authored)
+                    parts.append({**part, "text": text})
+                elif part.get("type") == "image_url" and not authored:
+                    url = str((part.get("image_url") or {}).get("url", ""))
+                    if not url.startswith("data:"):
+                        raise UnsupportedContent("images must be inline data URLs; the proxy fetches nothing")
+                    redacted, _ = await redact_image(decode_data_url(url), masker, task_id, destination)
+                    parts.append({**part, "image_url": {**part["image_url"], "url": encode_png(redacted)}})
+                else:
+                    raise UnsupportedContent(f"unsupported content part {part.get('type')!r}")
             message["content"] = parts
         if message.get("tool_calls"):
             calls = []
