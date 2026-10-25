@@ -119,6 +119,136 @@
   ],
   "wrong_action": false
  },
+ "api_degraded_dom_drift/add_note-01": {
+  "llm_calls": 7,
+  "outcome": "success",
+  "passed": true,
+  "quarantined": false,
+  "scanner": "promptguard",
+  "scripts": false,
+  "tiers": [
+   "api",
+   "explore"
+  ],
+  "wrong_action": false
+ },
+ "api_degraded_dom_drift/claim_status-01": {
+  "llm_calls": 5,
+  "outcome": "success",
+  "passed": true,
+  "quarantined": false,
+  "scanner": "promptguard",
+  "scripts": false,
+  "tiers": [
+   "api",
+   "explore"
+  ],
+  "wrong_action": false
+ },
+ "api_degraded_dom_drift/delete_note-01": {
+  "llm_calls": 8,
+  "outcome": "success",
+  "passed": true,
+  "quarantined": false,
+  "scanner": "promptguard",
+  "scripts": false,
+  "tiers": [
+   "api",
+   "explore"
+  ],
+  "wrong_action": false
+ },
+ "api_degraded_dom_drift/policy_lookup-01": {
+  "llm_calls": 6,
+  "outcome": "success",
+  "passed": true,
+  "quarantined": false,
+  "scanner": "promptguard",
+  "scripts": false,
+  "tiers": [
+   "api",
+   "explore"
+  ],
+  "wrong_action": false
+ },
+ "api_degraded_dom_drift/policy_lookup-02": {
+  "llm_calls": 4,
+  "outcome": "success",
+  "passed": true,
+  "quarantined": false,
+  "scanner": "promptguard",
+  "scripts": false,
+  "tiers": [
+   "api",
+   "explore"
+  ],
+  "wrong_action": false
+ },
+ "api_degraded_dom_drift/request_reconsideration-01": {
+  "llm_calls": 7,
+  "outcome": "success",
+  "passed": true,
+  "quarantined": false,
+  "scanner": "promptguard",
+  "scripts": false,
+  "tiers": [
+   "api",
+   "explore"
+  ],
+  "wrong_action": false
+ },
+ "api_degraded_dom_drift/submit_reimbursement-01": {
+  "llm_calls": 12,
+  "outcome": "success",
+  "passed": true,
+  "quarantined": false,
+  "scanner": "promptguard",
+  "scripts": false,
+  "tiers": [
+   "api",
+   "explore"
+  ],
+  "wrong_action": false
+ },
+ "api_degraded_dom_drift/update_address-01": {
+  "llm_calls": 14,
+  "outcome": "handoff",
+  "passed": false,
+  "quarantined": false,
+  "scanner": "promptguard",
+  "scripts": false,
+  "tiers": [
+   "api",
+   "explore"
+  ],
+  "wrong_action": false
+ },
+ "api_degraded_dom_drift/update_contact-01": {
+  "llm_calls": 8,
+  "outcome": "success",
+  "passed": true,
+  "quarantined": false,
+  "scanner": "promptguard",
+  "scripts": false,
+  "tiers": [
+   "api",
+   "explore"
+  ],
+  "wrong_action": false
+ },
+ "api_degraded_dom_drift/update_contact-02": {
+  "llm_calls": 10,
+  "outcome": "success",
+  "passed": true,
+  "quarantined": false,
+  "scanner": "promptguard",
+  "scripts": false,
+  "tiers": [
+   "api",
+   "explore"
+  ],
+  "wrong_action": false
+ },
  "captcha/add_note-01": {
   "llm_calls": 3,
   "outcome": "success",
