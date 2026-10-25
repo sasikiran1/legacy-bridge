@@ -379,6 +379,9 @@ async def main_async(args: argparse.Namespace) -> int:
     resolver = ToolArgumentResolver(vault, audit, policy, frozenset({settings.portal_host}))
     masker = MaskClient(settings.proxy_url)
     proxy_http = httpx.AsyncClient(base_url=settings.proxy_url, timeout=60)
+    async with PortalAdmin(tb) as admin:
+        # Compose starts the portal without waiting for Spring Boot; CI once fetched the spec too early.
+        await admin.wait_ready()
     spec = (await httpx.AsyncClient().get(f"{settings.portal_url}/v3/api-docs")).json()
     api = ApiExecutor(
         settings.portal_url, settings.portal_host, openapi.parse(spec), BreakerRegistry(), resolver, masker
