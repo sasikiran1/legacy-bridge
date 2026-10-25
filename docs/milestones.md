@@ -126,6 +126,30 @@ Each milestone ends with green tests, a demo command, and an interview brief (wh
 
 ## M4: Cost
 
+**Done 2026-10-25.** Deviations from the plan below:
+- **Replay (ADR 0005):** six scripts compiled from the `api_degraded` recordings.
+  - On the healthy portal they pass 27 of 27 runs with 0 model calls, median 1.8 s.
+  - Under DOM drift all 27 stop cleanly at the broken step, with 0 wrong actions.
+  - One intent did not compile: its source run never set `state`, and the compiler refuses a script that would skip a parameter.
+- **Self-heal:** under DOM drift, 12 of 12 tasks passed.
+  - The two broken scripts fell back to the browser once (8 and 9 model calls) and compiled a version 2.
+  - Later tasks replayed version 2 with 2 to 3 calls.
+- **Snapshot trimming stays off by default.**
+  - Offline, trimming removed 40.6% of snapshot tokens and lost no actionable ref.
+  - Live, it cut prompt tokens per call by 17.7%, but passed 17 of 20 tasks against 19 of 20 untrimmed.
+  - Both extra misses made the right database change without seeing a confirmation. Ten tasks per scenario cannot separate that from noise, so M5 repeats it.
+- **Routing by tier is built but not exercised:** there are still no hosted keys. It moves to M5's hosted arm.
+- **The vision tier is OCR feeding the text model, not a vision model** (ADR 0008).
+  - Screenshots are redacted in the proxy: 0 of 100 readable canaries survive on real member pages.
+  - On the poor-accessibility form, one task was run to completion and passed. The other six were stopped by request.
+  - A vision-model arm is open.
+- **Cost ledger (ADR 0007):** local runs cost $0, reported with model seconds.
+  - At the gpt-oss-120b list price, a browser-tier task would cost about $0.004 to $0.006, an API-only task about $0.001, and a replayed task $0.
+- **The demo replays scripts and prints the ledger.** It has no live cold run and no self-heal replay: the self-heal recordings are not in the replay index.
+- **Added during M4:**
+  - the runner saves results after every task, so an interrupted run keeps what it finished
+  - Tesseract in the Python image, Pillow for redaction
+
 - **Replay:** compiler and runner, plus self-heal (ADR 0005).
 - **Snapshot trimming,** raw vs. trimmed.
 - **Routing** by tier.

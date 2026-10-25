@@ -139,7 +139,38 @@ make traces          # replay with OpenTelemetry GenAI spans to Phoenix (localho
 - **No planted injection succeeded, but the classifier did not stop them.** The approvals, allowlists and post-conditions did. One scenario with ten tasks is a small sample of attacks.
 - **The agent's own check trusts the page.** In the bake-off, weaker models reported three tasks done that the database showed were not: a wrong answer, a wrong city and postal code, and a note left undeleted. Each was graded as failed. gemma4 had none, but the agent's verification step would not have caught them either.
 - **One leak was caught late.** Under DOM drift, a canary account number escaped detection beside a renamed label. The cassette leak gate stopped it before the recording was committed, and the masking now re-catches long numbers by value ([ADR 0012](docs/adr/0012-masking-boundaries-for-the-agent.md)).
-- **Replays are not bit-identical.** GLiNER on CPU masks a few borderline spans differently between runs, so up to three requests per scenario differed from their recordings. They are served and counted, and every outcome matched.
+- **Replays are not bit-identical.** GLiNER on CPU masks a few borderline spans differently between runs, so some requests in every scenario differ from their recordings on each replay. They are served and counted, and every outcome matches.
+
+## Cost
+
+Successful browser runs compile into replay scripts: YAML steps that locate elements by role and accessible name, and fill values from the task's parameters, never from the run they came from ([ADR 0005](docs/adr/0005-replay-script-format.md)). The agent tries a script before the browser tier. When a step breaks, the browser tier finishes the task with the script's steps as a hint, and the fixed run compiles into the next version.
+
+| Measurement | Result |
+|---|---|
+| Six scripts on the healthy portal ([replay eval](analysis/results/20261024T171309Z-replay-eval/replay_eval.json)) | 27 / 27 passed, 0 model calls, median 1.8 s |
+| The same scripts under DOM drift | 0 / 27 passed, all 27 stopped at the broken step, 0 wrong actions |
+| Self-heal under DOM drift ([ledger](analysis/results/20261024T224315Z-cost-ledger/cost_ledger.json)) | 12 / 12 passed; each broken script healed once, later tasks replayed the new version |
+| Trimmed page snapshots, offline ([measurement](analysis/results/20261024T180841Z-snapshot-trim/snapshot_trim.json)) | 40.6% fewer snapshot tokens, no actionable element lost |
+| Trimmed page snapshots, live ([A/B](analysis/results/20261024T224238Z-snapshot-ab/snapshot_ab.json)) | 17.7% fewer prompt tokens per call, 17 / 20 passed against 19 / 20 untrimmed |
+
+Local runs cost $0. The ledger reports model time beside them and prices the same tokens at gpt-oss-120b's list price ([ADR 0007](docs/adr/0007-notional-pricing.md)). At that price, a task that needs the browser would cost about $0.004 to $0.006, an API-only task about $0.001, and a replayed task nothing.
+
+Trimming stays off by default. Both extra misses changed the database correctly but never saw a confirmation, and ten tasks per scenario cannot tell that from noise.
+
+### Pages without an accessibility tree
+
+One portal form paints its labels and buttons on canvases and leaves its inputs unnamed. There, the browser executor:
+- finds the unnamed elements in the DOM
+- reads each canvas by OCR (Tesseract)
+- lists them for the model with their screen positions
+
+The model acts on them with `click_at` and `type_at`. An input's label is the caption beside it on screen, and the data policy and approvals apply to it as to a named element ([ADR 0008](docs/adr/0008-vision-fallback-and-redaction.md)). One reimbursement on that form was run to completion and passed; the other six are not yet measured.
+
+Screenshots sent to a model are redacted in the proxy: each value detected in the OCR text is painted over with its token. On real member pages of the 10 canary members, OCR reads 100 canary values before redaction and 0 after ([measurement](analysis/results/20261025T000432Z-screenshot-leak/screenshot_leak.json)). A value OCR cannot read is not redacted either, and that path is not measured.
+
+```bash
+make demo-replay     # scripts at $0 on the healthy portal, clean step failures under DOM drift, then the cost ledger
+```
 
 ## Design documents
 
