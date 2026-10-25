@@ -73,11 +73,12 @@ def summarise(rows: list[dict[str, Any]], price: dict[str, Any]) -> dict[str, An
 
 
 def replay_rows() -> list[dict[str, Any]]:
-    rows = []
-    for directory in sorted(RESULTS_DIR.glob("*-replay-eval")):
-        data = json.loads((directory / "replay_eval.json").read_text(encoding="utf-8"))
-        rows += [{**r, "run": directory.name} for r in data["runs"]]
-    return rows
+    """The latest replay evaluation only: each replays the same scripts, so summing them double-counts."""
+    directories = sorted(RESULTS_DIR.glob("*-replay-eval"))
+    if not directories:
+        return []
+    data = json.loads((directories[-1] / "replay_eval.json").read_text(encoding="utf-8"))
+    return [{**r, "run": directories[-1].name} for r in data["runs"]]
 
 
 def main(argv: list[str] | None = None) -> int:
