@@ -9,7 +9,7 @@ from langchain_core.runnables import RunnableConfig
 from langgraph.checkpoint.memory import InMemorySaver
 from langgraph.types import Command
 
-from agent.executors import ApiResult, BrowserObservation, Failure
+from agent.executors import LAYOUT_HEADER, ApiResult, BrowserObservation, Failure
 from agent.graph import Browser, Runtime, build_graph
 from agent.guardrails import NoScanner
 from agent.llm import LlmReply, ToolCall
@@ -49,6 +49,7 @@ class ScriptedLlm:
     def __init__(self, replies: list[LlmReply]) -> None:
         self.replies = list(replies)
         self.calls: list[int] = []
+        self.offered: list[set[str]] = []
 
     async def chat(
         self,
@@ -60,6 +61,7 @@ class ScriptedLlm:
         max_tokens: int = 1024,
     ) -> LlmReply:
         self.calls.append(call)
+        self.offered.append({t["function"]["name"] for t in tools or []})
         return self.replies.pop(0)
 
 
@@ -103,6 +105,9 @@ class FakeBrowser:
 
     def describe(self, ref: str) -> tuple[str, str] | None:
         return {"e5": ("button", "Save address"), "e6": ("button", "Yes, delete note")}.get(ref)
+
+    def describe_point(self, x: float, y: float) -> tuple[str, str] | None:
+        return ("button", "Confirm submission") if (x, y) == (246, 279) else None
 
     async def act(self, task_id: str, tool: str, arguments: dict[str, Any]) -> BrowserObservation:
         self.actions.append(tool)
@@ -365,3 +370,31 @@ async def test_a_broken_script_step_heals_in_the_browser_with_a_hint() -> None:
     opening = next(m["content"] for m in state["messages"] if m["role"] == "user")
     assert "stopped at step 2 step_failed" in opening
     assert "click button 'Save contact details'" in opening
+
+
+async def test_unlabeled_elements_get_coordinate_tools_and_the_same_approvals() -> None:
+    form = (
+        f'- heading "New Reimbursement"\n- textbox\n\n{LAYOUT_HEADER}\n'
+        '- button "Confirm submission" at x=246 y=279'
+    )
+    llm = ScriptedLlm(
+        [
+            WRITE_PLAN,
+            reply(("submitReimbursement", {"memberNumber": "m"})),
+            reply(("click_at", {"x": 246, "y": 279})),
+            reply(("finish", {"summary": "submitted"})),
+        ]
+    )
+    api = FakeApi({"submitReimbursement": failed("submitReimbursement", Failure.NOT_FOUND, 404)})
+    done = (
+        f'- heading "New Reimbursement"\n\n{LAYOUT_HEADER}\n- text "Reimbursement submitted." at x=300 y=120'
+    )
+    browser = FakeBrowser(form, [done])
+    state, interrupts = await run(llm, api, browser, resume=[{"approved": True}, {"approved": True}])
+    assert {"click_at", "type_at"} <= llm.offered[2]
+    assert "click_at" not in llm.offered[1]
+    approval = {"tool": "click_at", "element": "Confirm submission", "approval": "payment"}
+    assert interrupts[1]["actions"] == [approval]
+    assert browser.actions == ["click_at"]
+    assert state["writes"] == [{"tier": "browser", "action": "click Confirm submission", "ok": True}]
+    assert state["outcome"] == "success"

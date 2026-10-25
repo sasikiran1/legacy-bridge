@@ -26,7 +26,14 @@ from langgraph.graph import END, START, StateGraph
 from langgraph.graph.state import CompiledStateGraph
 from langgraph.types import interrupt
 
-from agent.executors import FALLBACK, ApiResult, BrowserObservation, trim_snapshot
+from agent.executors import (
+    FALLBACK,
+    LAYOUT_HEADER,
+    LAYOUT_TOOLS,
+    ApiResult,
+    BrowserObservation,
+    trim_snapshot,
+)
 from agent.guardrails import (
     CONFIRMATION,
     InjectionScanner,
@@ -37,7 +44,7 @@ from agent.guardrails import (
 )
 from agent.llm import LlmReply, ToolCall
 from agent.openapi import Operation
-from agent.prompts import AGENT_TOOLS, API, BROWSER_TOOL_SPECS, EXPLORE, PLAN
+from agent.prompts import AGENT_TOOLS, API, BROWSER_TOOL_SPECS, EXPLORE, LAYOUT_TOOL_SPECS, PLAN
 from agent.settings import AgentSettings
 from agent.telemetry import tracer
 
@@ -95,6 +102,8 @@ class Browser(Protocol):
     async def login(self, username: str, password: str) -> str: ...
 
     def describe(self, ref: str) -> tuple[str, str] | None: ...
+
+    def describe_point(self, x: float, y: float) -> tuple[str, str] | None: ...
 
     async def act(self, task_id: str, tool: str, arguments: dict[str, Any]) -> BrowserObservation: ...
 
@@ -200,7 +209,9 @@ NUDGE = "Respond by calling one of the available tools. Use finish when the task
 
 
 MAX_NUDGES = 3
-PAGE_CHANGING = frozenset({"browser_navigate", "browser_navigate_back", "browser_click", "browser_press_key"})
+PAGE_CHANGING = frozenset(
+    {"browser_navigate", "browser_navigate_back", "browser_click", "browser_press_key", "click_at"}
+)
 
 
 def _nudge(state: AgentState, give_up: dict[str, Any]) -> dict[str, Any]:
@@ -248,6 +259,18 @@ def _finish(state: AgentState, call: ToolCall, calls: list[ToolCall]) -> tuple[d
             "Not recorded: this task asks a question. Call finish with the requested value in `answer`.",
         )
     return {"answer": answer, "summary": call.arguments.get("summary"), "finished": True}, "Recorded."
+
+
+def _clicked(browser: Browser, call: ToolCall) -> tuple[str, str] | None:
+    """(role, name) of the element a click targets: by ref, or by screen point for unlabeled elements."""
+    if call.name == "browser_click":
+        return browser.describe(str(call.arguments.get("target", "")))
+    if call.name == "click_at":
+        try:
+            return browser.describe_point(float(call.arguments["x"]), float(call.arguments["y"]))
+        except KeyError, TypeError, ValueError:
+            return None
+    return None
 
 
 def _parse_plan(text: str | None) -> dict[str, Any]:
@@ -449,6 +472,8 @@ def build_graph(rt: Runtime, checkpointer: BaseCheckpointSaver[Any] | None = Non
             },
         ]
         tools = [*BROWSER_TOOL_SPECS, AGENT_TOOLS["finish"], AGENT_TOOLS["request_human"]]
+        if LAYOUT_HEADER in state.get("last_observation", ""):
+            tools = [*tools, *LAYOUT_TOOL_SPECS]
         reply = _recover_text_call(await chat(state, "explore", _compact(messages), tools), tools)
         return {
             **_usage(state, reply),
@@ -465,10 +490,9 @@ def build_graph(rt: Runtime, checkpointer: BaseCheckpointSaver[Any] | None = Non
         quarantined = state.get("quarantined", False)
         needs = {}
         for c in calls:
-            if c.name == "browser_click":
-                element = browser.describe(str(c.arguments.get("target", "")))
-                if element and (kind := approval_for_click(*element, quarantined)):
-                    needs[c.id] = (kind.value, element[1])
+            element = _clicked(browser, c)
+            if element and (kind := approval_for_click(*element, quarantined)):
+                needs[c.id] = (kind.value, element[1])
         decision: dict[str, Any] = {}
         if needs:
             decision = interrupt(
@@ -492,7 +516,7 @@ def build_graph(rt: Runtime, checkpointer: BaseCheckpointSaver[Any] | None = Non
             if stop:
                 messages.append(_tool_message(call.id, "Not executed."))
                 continue
-            if page_changed and "target" in call.arguments:
+            if page_changed and ("target" in call.arguments or call.name in LAYOUT_TOOLS):
                 # Refs are renumbered on every snapshot; ones chosen before this turn's page change are stale.
                 messages.append(
                     _tool_message(
@@ -523,11 +547,7 @@ def build_graph(rt: Runtime, checkpointer: BaseCheckpointSaver[Any] | None = Non
                         _tool_message(call.id, "A reviewer declined this action. Do not retry it.")
                     )
                     continue
-            clicked = (
-                browser.describe(str(call.arguments.get("target", "")))
-                if call.name == "browser_click"
-                else None
-            )
+            clicked = _clicked(browser, call)
             result = await browser.act(state["task_key"], call.name, call.arguments)
             page_changed = page_changed or call.name in PAGE_CHANGING or bool(call.arguments.get("submit"))
             if result.error:

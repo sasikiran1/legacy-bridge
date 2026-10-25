@@ -5,6 +5,7 @@ rehydration policy) and tokenize every result before it reaches agent state (ADR
 from __future__ import annotations
 
 import asyncio
+import base64
 import glob
 import json
 import re
@@ -21,6 +22,7 @@ from agent.breaker import BreakerRegistry
 from agent.masking import MaskClient
 from agent.openapi import Operation
 from proxy.rehydrate import RehydrationDenied, ToolArgumentResolver
+from proxy.vision import ocr_region, open_image
 
 
 class Failure(StrEnum):
@@ -284,6 +286,80 @@ def page_state(text: str) -> str:
     return "\n".join(parts) if parts else text.strip()
 
 
+LAYOUT_TOOLS = ("click_at", "type_at")
+"""Screen-coordinate actions on elements the accessibility tree does not name (ADR 0008)."""
+
+LAYOUT_HEADER = (
+    "Unlabeled elements (read from the screen; act on them with click_at or type_at at their x, y):"
+)
+
+_LAYOUT_CODE = """async (page) => {
+  const elements = await page.evaluate(() => [...document.querySelectorAll(
+      'canvas, input:not([type=hidden]), textarea, select')]
+    .map(e => {
+      const r = e.getBoundingClientRect();
+      const named = (e.labels && e.labels.length) || e.getAttribute('aria-label')
+        || e.getAttribute('aria-labelledby');
+      return {tag: e.tagName.toLowerCase(), named: !!named,
+              pointer: getComputedStyle(e).cursor === 'pointer',
+              x: Math.round(r.x), y: Math.round(r.y), w: Math.round(r.width), h: Math.round(r.height)};
+    })
+    .filter(e => e.w > 0 && e.h > 0 && e.y + e.h > 0 && e.y < innerHeight
+      && (e.tag === 'canvas' || !e.named)));
+  if (!elements.length) return JSON.stringify({elements});
+  return JSON.stringify({elements, shot: (await page.screenshot()).toString('base64')});
+}"""
+
+_RESULT = re.compile(r"### Result\n(?P<value>.*?)(?:\n###|\Z)", re.S)
+
+
+class LayoutElement(BaseModel):
+    """An element the accessibility tree leaves unnamed, located on screen. `text` is read by OCR and holds
+    raw values; it stays in the executor, and the model sees it masked."""
+
+    model_config = ConfigDict(frozen=True)
+
+    kind: str  # text | button | input
+    x: int
+    y: int
+    w: int
+    h: int
+    text: str = ""
+
+    def contains(self, x: float, y: float) -> bool:
+        return self.x <= x <= self.x + self.w and self.y <= y <= self.y + self.h
+
+    @property
+    def center(self) -> tuple[int, int]:
+        return self.x + self.w // 2, self.y + self.h // 2
+
+
+def label_for(element: LayoutElement, layout: list[LayoutElement]) -> str | None:
+    """The caption an unlabeled input sits beside: the nearest text to its left on the same row, else the text
+    just above it. This is what a person reads as the field's label, and the data policy matches on it."""
+    _, middle = element.center
+    left = [
+        t
+        for t in layout
+        if t.kind == "text"
+        and t.text
+        and t.x + t.w <= element.x + 4
+        and abs(t.center[1] - middle) <= element.h
+    ]
+    if left:
+        return max(left, key=lambda t: t.x + t.w).text
+    above = [
+        t
+        for t in layout
+        if t.kind == "text"
+        and t.text
+        and element.y - 30 <= t.y + t.h <= element.y + 2
+        and t.x < element.x + element.w
+        and element.x < t.x + t.w
+    ]
+    return max(above, key=lambda t: t.y).text if above else None
+
+
 class BrowserObservation(BaseModel):
     model_config = ConfigDict(frozen=True)
 
@@ -318,6 +394,7 @@ class BrowserSession:
         )
         self._owner: asyncio.Task[None] | None = None
         self.last_snapshot = ""
+        self.layout: list[LayoutElement] = []
 
     def _parameters(self) -> StdioServerParameters:
         chrome = sorted(glob.glob("/ms-playwright/chromium-*/chrome-linux*/chrome"))
@@ -396,7 +473,99 @@ class BrowserSession:
     def describe(self, ref: str) -> tuple[str, str] | None:
         return element_index(self.last_snapshot).get(ref)
 
+    def describe_point(self, x: float, y: float) -> tuple[str, str] | None:
+        """(role, label) of the unlabeled element at a screen point, as read by OCR."""
+        element = next((e for e in self.layout if e.contains(x, y)), None)
+        if element is None:
+            return None
+        if element.kind == "input":
+            return "textbox", label_for(element, self.layout) or ""
+        return element.kind, element.text
+
+    async def read_layout(self) -> list[LayoutElement]:
+        """Locates elements the accessibility tree leaves unnamed and reads canvas text by OCR. Empty, and no
+        screenshot taken, on pages where everything is named."""
+        text, is_error = await self._call("browser_run_code_unsafe", {"code": _LAYOUT_CODE})
+        match = _RESULT.search(text)
+        if is_error or not match:
+            self.layout = []
+            return self.layout
+        payload = json.loads(json.loads(match["value"]))
+        elements = payload.get("elements", [])
+        image = open_image(base64.b64decode(payload["shot"])) if payload.get("shot") else None
+        layout = []
+        for e in elements:
+            box = (e["x"], e["y"], e["x"] + e["w"], e["y"] + e["h"])
+            if e["tag"] == "canvas":
+                read = await ocr_region(image, box) if image is not None else ""
+                layout.append(
+                    LayoutElement(
+                        kind="button" if e["pointer"] else "text",
+                        x=box[0],
+                        y=box[1],
+                        w=e["w"],
+                        h=e["h"],
+                        text=read,
+                    )
+                )
+            else:
+                layout.append(LayoutElement(kind="input", x=box[0], y=box[1], w=e["w"], h=e["h"]))
+        self.layout = layout
+        return layout
+
+    async def _layout_text(self, task_id: str) -> str:
+        if not self.layout:
+            return ""
+        lines = [LAYOUT_HEADER]
+        for e in self.layout:
+            x, y = e.center
+            where = f"x={x} y={y}"
+            if e.kind == "input":
+                label = label_for(e, self.layout)
+                lines.append(f"- input at {where}" + (f' beside "{label}"' if label else ""))
+            else:
+                lines.append(f'- {e.kind} "{e.text}" at {where}')
+        return "\n\n" + await self._masker.text(task_id, "\n".join(lines))
+
+    async def _act_at(self, task_id: str, tool: str, arguments: dict[str, Any]) -> str | None:
+        """click_at / type_at on a listed unlabeled element, never an arbitrary point. Returns an error."""
+        try:
+            x, y = float(arguments["x"]), float(arguments["y"])
+        except KeyError, TypeError, ValueError:
+            return "x and y must be numbers from the unlabeled elements list"
+        element = next((e for e in self.layout if e.contains(x, y)), None)
+        if element is None or (tool == "type_at") != (element.kind == "input") or element.kind == "text":
+            wanted = "an input" if tool == "type_at" else "a button"
+            return f"no unlabeled {wanted} at x={x:.0f} y={y:.0f}; use the listed coordinates or a ref"
+        cx, cy = element.center
+        if tool == "click_at":
+            code = f"async (page) => {{ await page.mouse.click({cx}, {cy}); }}"
+        else:
+            try:
+                value = await self._resolver.resolve_field(
+                    task_id, "browser_type", label_for(element, self.layout), str(arguments.get("text", ""))
+                )
+            except RehydrationDenied as e:
+                return f"refused by the data policy: {e}"
+            enter = "await page.keyboard.press('Enter');" if arguments.get("submit") else ""
+            code = (
+                f"async (page) => {{ await page.mouse.click({cx}, {cy}); "
+                f"await page.keyboard.press('ControlOrMeta+A'); await page.keyboard.press('Delete'); "
+                f"await page.keyboard.type({_js(value)}); {enter} }}"
+            )
+        # The code, and the value in it, never leaves the executor: only errors are returned, masked.
+        text, is_error = await self._call("browser_run_code_unsafe", {"code": code})
+        if is_error:
+            return str(await self._masker.text(task_id, page_state(text)[:800]))
+        return None
+
     async def act(self, task_id: str, tool: str, arguments: dict[str, Any]) -> BrowserObservation:
+        if tool in LAYOUT_TOOLS:
+            error = await self._act_at(task_id, tool, arguments)
+            if error:
+                return BrowserObservation(text="", error=error)
+            await self._settle()
+            return await self._observe(task_id)
         if tool not in BROWSER_TOOLS:
             return BrowserObservation(text="", error=f"{tool} is not available")
         target = arguments.get("target")
@@ -415,9 +584,14 @@ class BrowserSession:
                 error = await self._masker.text(task_id, page_state(text)[:800])
                 return BrowserObservation(text="", error=error)
             await self._settle()
+        return await self._observe(task_id)
+
+    async def _observe(self, task_id: str) -> BrowserObservation:
         raw = await self.snapshot()
         shown = trim_snapshot(raw) if self._trim else raw
-        return BrowserObservation(text=await self._masker.text(task_id, shown), raw=raw)
+        await self.read_layout()
+        text = await self._masker.text(task_id, shown) + await self._layout_text(task_id)
+        return BrowserObservation(text=text, raw=raw)
 
     async def _resolve(self, task_id: str, tool: str, arguments: dict[str, Any]) -> dict[str, Any]:
         if tool == "browser_navigate":

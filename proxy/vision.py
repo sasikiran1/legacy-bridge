@@ -113,6 +113,34 @@ async def ocr_lines(image: Image.Image) -> list[Line]:
     return [Line(tuple(words)) for words in lines.values()]
 
 
+async def ocr_region(image: Image.Image, box: tuple[int, int, int, int]) -> str:
+    """The text of one element (a canvas caption or button), read from its own crop as a single line.
+    Whole-page OCR misses text inside bordered boxes; a tight crop does not."""
+    left, top, right, bottom = box
+    crop = image.crop((left + PAD, top + PAD, right - PAD, bottom - PAD))
+    if crop.width < 4 or crop.height < 4:
+        return ""
+    scale = 3
+    scaled = crop.resize((crop.width * scale, crop.height * scale), Image.Resampling.LANCZOS)
+    buffer = io.BytesIO()
+    scaled.save(buffer, format="PNG")
+    try:
+        process = await asyncio.create_subprocess_exec(
+            "tesseract", "stdin", "stdout", "--psm", "7",
+            stdin=asyncio.subprocess.PIPE,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE,
+        )  # fmt: skip
+    except OSError as e:
+        raise DetectionError(f"tesseract unavailable: {e}") from e
+    out, _ = await process.communicate(buffer.getvalue())
+    return " ".join(out.decode(errors="replace").split())
+
+
+def open_image(image: bytes) -> Image.Image:
+    return _open(image)
+
+
 async def ocr_text(image: bytes) -> str:
     """All recognised text, one line per OCR line: what the leak test scans redacted screenshots for."""
     return "\n".join(line.text for line in await ocr_lines(_open(image)))

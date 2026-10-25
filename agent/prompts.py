@@ -111,6 +111,28 @@ def _tool(name: str, description: str, properties: dict[str, Any], required: lis
 _TARGET = {"type": "string", "description": "Element ref from the latest snapshot, e.g. e12"}
 _ELEMENT = {"type": "string", "description": "Short description of the element"}
 
+LAYOUT_TOOL_SPECS = [
+    _tool(
+        "click_at",
+        "Click an unlabeled element (canvas button) at the x, y given in the unlabeled elements list.",
+        {"x": {"type": "number"}, "y": {"type": "number"}},
+        ["x", "y"],
+    ),
+    _tool(
+        "type_at",
+        "Replace the text in an unlabeled input at the x, y given in the unlabeled elements list.",
+        {
+            "x": {"type": "number"},
+            "y": {"type": "number"},
+            "text": {"type": "string"},
+            "submit": {"type": "boolean", "description": "Press Enter afterwards"},
+        },
+        ["x", "y", "text"],
+    ),
+]
+"""Offered only while the page lists unlabeled elements (ADR 0008), so other prompts are unchanged."""
+
+
 BROWSER_TOOL_SPECS = [
     _tool("browser_navigate", "Open a URL on the portal.", {"url": {"type": "string"}}, ["url"]),
     _tool("browser_navigate_back", "Go back to the previous page.", {}, []),
