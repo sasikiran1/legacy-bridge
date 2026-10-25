@@ -15,6 +15,7 @@ dependencies = [
     "mcp>=2.3.0",
     "opentelemetry-exporter-otlp-proto-http>=1.45.1",
     "opentelemetry-sdk>=1.45.1",
+    "pillow>=13.0.0",
     "playwright>=1.64.0",
     "polars>=2.0.0",
     "presidio-analyzer[gliner]>=2.2.364",

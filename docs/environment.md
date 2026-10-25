@@ -51,6 +51,7 @@ Latest versions on PyPI as of the date above (`https://pypi.org/pypi/<name>/json
 | cryptography | 50.0.2 | Apache-2.0 OR BSD-3-Clause | AES-GCM for the vault |
 | Faker | 40.43.0 | MIT | |
 | PyYAML | 6.0.3 | MIT | |
+| Pillow | 13.0.0 (checked 2026-10-24) | MIT-CMU | Screenshot decoding and redaction boxes in the proxy (ADR 0008) |
 | tenacity | 9.2.1 | Apache-2.0 | |
 | langchain-openai | 1.7.2 | MIT | OpenAI-compatible client for Groq, Gemini, Ollama, via the proxy |
 | opentelemetry-sdk / exporter-otlp-proto-http | 1.45.1 | Apache-2.0 | |
@@ -87,6 +88,13 @@ Latest versions on npm as of the date above (`https://registry.npmjs.org/<name>/
 | `eclipse-temurin` (portal runtime) | `25-jre` | https://hub.docker.com/_/eclipse-temurin |
 | `mcr.microsoft.com/playwright/python` (testbed base) | `v1.64.0-noble` | https://mcr.microsoft.com/v2/playwright/python/tags/list |
 | `astral/uv` (copied into the testbed image) | `0.12.9` | https://hub.docker.com/r/astral/uv |
+
+System packages installed into the Python image with apt (Ubuntu 24.04 noble archive, checked 2026-10-24 with `apt-cache policy`):
+
+| Package | Version | License | Note |
+|---|---|---|---|
+| `tesseract-ocr` | 5.3.4-1build5 | Apache-2.0 | OCR word boxes for screenshot redaction (ADR 0008); https://github.com/tesseract-ocr/tesseract |
+| `tesseract-ocr-eng` | 1:4.1.0-2 | Apache-2.0 | English traineddata; https://github.com/tesseract-ocr/tessdata_fast |
 
 ## CI actions
 

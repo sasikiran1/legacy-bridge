@@ -10,6 +10,11 @@ FROM mcr.microsoft.com/playwright/python:v1.64.0-noble
 COPY --from=astral/uv:0.12.9 /uv /uvx /bin/
 COPY --from=mcp /usr/local/bin/node /usr/local/bin/node
 COPY --from=mcp /usr/local/lib/node_modules/@playwright/mcp /usr/local/lib/node_modules/@playwright/mcp
+# Tesseract OCR for screenshot redaction in the proxy (ADR 0008).
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends tesseract-ocr=5.3.4-1build5 tesseract-ocr-eng=1:4.1.0-2 \
+    && rm -rf /var/lib/apt/lists/* \
+    && tesseract --version | head -1
 RUN ln -s /usr/local/lib/node_modules/@playwright/mcp/cli.js /usr/local/bin/playwright-mcp \
     && node --version
 
