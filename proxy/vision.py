@@ -15,7 +15,7 @@ import re
 from collections.abc import Sequence
 from dataclasses import dataclass
 
-from PIL import Image, ImageDraw, ImageFont, UnidentifiedImageError
+from PIL import Image, ImageDraw, ImageFont, ImageOps, UnidentifiedImageError
 
 from proxy.detection import DetectionError
 from proxy.masking import Masker
@@ -116,12 +116,17 @@ async def ocr_lines(image: Image.Image) -> list[Line]:
 async def ocr_region(image: Image.Image, box: tuple[int, int, int, int]) -> str:
     """The text of one element (a canvas caption or button), read from its own crop as a single line.
     Whole-page OCR misses text inside bordered boxes; a tight crop does not."""
-    left, top, right, bottom = box
-    crop = image.crop((left + PAD, top + PAD, right - PAD, bottom - PAD))
+    # The whole box, never inset: canvas captions start at its left edge, and clipping a pixel turned
+    # "Claim" into "Slaim". The white margin keeps glyphs off the image border, which Tesseract misreads.
+    crop = image.crop(box)
     if crop.width < 4 or crop.height < 4:
         return ""
-    scale = 3
-    scaled = crop.resize((crop.width * scale, crop.height * scale), Image.Resampling.LANCZOS)
+    scale = 4
+    scaled = ImageOps.expand(
+        crop.resize((crop.width * scale, crop.height * scale), Image.Resampling.LANCZOS),
+        border=12,
+        fill="white",
+    )
     buffer = io.BytesIO()
     scaled.save(buffer, format="PNG")
     try:

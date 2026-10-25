@@ -16,7 +16,7 @@ from proxy.app import Services, create_app
 from proxy.cassettes import IMAGE_REF, CassetteStore, externalize_images, request_digest
 from proxy.detection import DetectionError
 from proxy.recording import RecordingProvider
-from proxy.vision import decode_data_url, encode_png, ocr_text, redact_image
+from proxy.vision import decode_data_url, encode_png, ocr_region, ocr_text, redact_image
 from tests.proxy.fakes import MOCK_MODEL, kit, services
 
 needs_tesseract = pytest.mark.skipif(shutil.which("tesseract") is None, reason="needs tesseract-ocr")
@@ -127,3 +127,13 @@ def test_cassettes_store_images_beside_the_exchange(tmp_path: Path) -> None:
             externalize_images(request)  # type: ignore[arg-type]
         )
     )
+
+
+@needs_tesseract
+async def test_element_text_starting_at_the_box_edge_keeps_its_first_letter() -> None:
+    image = Image.new("RGB", (400, 120), "white")
+    draw = ImageDraw.Draw(image)
+    font = ImageFont.load_default(size=13)
+    draw.text((100, 50), "Claim number", fill="black", font=font)
+    box = (100, 47, 270, 69)  # the caption is drawn from the box's left edge, as the portal's canvases are
+    assert await ocr_region(image, box) == "Claim number"
