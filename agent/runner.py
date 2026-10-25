@@ -352,6 +352,15 @@ def describe(script: ReplayScript) -> str:
     return "; ".join(parts)
 
 
+def save(run: Run, rows: list[TaskRun], api: ApiExecutor, settings: AgentSettings, runtime: str) -> None:
+    run.write("breakers.json", api.breakers.snapshot())
+    (run.directory / "agent_runs.jsonl").write_text(
+        "".join(r.model_dump_json() + "\n" for r in rows), encoding="utf-8"
+    )
+    served = sorted({m for r in rows for m in r.models})
+    run.finish(models={"profile": settings.profile.value, "served": ", ".join(served), "runtime": runtime})
+
+
 async def main_async(args: argparse.Namespace) -> int:
     settings = agent_settings()
     tb = testbed_settings()
@@ -391,6 +400,7 @@ async def main_async(args: argparse.Namespace) -> int:
         },
     )
     rows: list[TaskRun] = []
+    runtime = await ollama_version()
     async with PortalAdmin(tb) as admin, AsyncPostgresSaver.from_conn_string(settings.agent_db_url) as saver:
         await saver.setup()
         services: dict[str, Any] = {
@@ -427,27 +437,20 @@ async def main_async(args: argparse.Namespace) -> int:
             print(
                 f"{row.task_id:28} {row.outcome:11} passed={row.passed!s:5} wrong={row.wrong_action!s:5} "
                 f"tiers={'>'.join(row.tiers):12} llm={row.llm_calls:2} {row.seconds:6.1f}s "
-                f"{row.fallback_reason or ''}{(' | ' + row.error) if row.error else ''}"
+                f"{row.fallback_reason or ''}{(' | ' + row.error) if row.error else ''}",
+                flush=True,
             )
+            if not args.check_replay:
+                # Saved after every task, so an interrupted run keeps what it finished; the manifest's
+                # config.tasks against the rows shows how far it got.
+                save(run, rows, api, settings, runtime)
+                if args.record:
+                    record_index([row], settings.injection_scanner, args.scripts)
         await services["llm"].aclose()
         await admin.apply(load_scenarios()["healthy"].chaos)
 
-    destination = "not saved (replay check)"
-    if not args.check_replay:
-        # A replay check is a gate, not an experiment: its rows repeat the recording's and are not kept.
-        run.write("breakers.json", api.breakers.snapshot())
-        (run.directory / "agent_runs.jsonl").write_text(
-            "".join(r.model_dump_json() + "\n" for r in rows), encoding="utf-8"
-        )
-        served = sorted({m for r in rows for m in r.models})
-        run.finish(
-            models={
-                "profile": settings.profile.value,
-                "served": ", ".join(served),
-                "runtime": await ollama_version(),
-            }
-        )
-        destination = str(run.directory)
+    # A replay check is a gate, not an experiment: its rows repeat the recording's and are not kept.
+    destination = "not saved (replay check)" if args.check_replay else str(run.directory)
     await masker.aclose()
     await proxy_http.aclose()
     await api.aclose()
@@ -458,8 +461,6 @@ async def main_async(args: argparse.Namespace) -> int:
         f"{passed}/{len(rows)} passed, {sum(r.wrong_action for r in rows)} wrong actions, "
         f"{sum(r.cassette_mismatches for r in rows)} cassette mismatches -> {destination}"
     )
-    if args.record:
-        record_index(rows, settings.injection_scanner, args.scripts)
     if args.check_replay:
         differences = replay_differences(rows)
         for line in differences:
