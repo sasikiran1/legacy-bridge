@@ -110,15 +110,6 @@ PUBLIC_TYPES = {
     "policyNumber": "POLICY_NUMBER",
     "claimNumber": "CLAIM_NUMBER",
 }
-DRIFT_TYPES = {
-    "member_no": "MEMBER_ID",
-    "given": "PERSON",
-    "family": "PERSON",
-    "dob": "DATE_OF_BIRTH",
-    "email_address": "EMAIL_ADDRESS",
-    "phone_no": "PHONE_NUMBER",
-    "claimNo": "CLAIM_NUMBER",
-}
 
 
 def _us(date_iso: str) -> str:

@@ -9,7 +9,7 @@ import pytest
 from fastapi import FastAPI
 
 from proxy.app import Services, create_app
-from proxy.recording import RecordingProvider
+from proxy.offline import RecordingProvider
 from tests.proxy.fakes import MOCK_MODEL, services, tokens_in
 
 PROMPT = "Check claim CLM-2025-104233 for member M1234567, SSN 123-45-6789."

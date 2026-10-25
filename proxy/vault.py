@@ -9,6 +9,8 @@ from __future__ import annotations
 
 import json
 import os
+from collections.abc import Iterator
+from contextlib import contextmanager
 from typing import Protocol, cast
 
 import redis.asyncio as aioredis
@@ -73,6 +75,15 @@ class Vault(Protocol):
     async def ping(self) -> None: ...
 
 
+@contextmanager
+def _redis_errors() -> Iterator[None]:
+    """Turns any Redis failure into VaultUnavailable, so callers fail closed."""
+    try:
+        yield
+    except RedisError as e:
+        raise VaultUnavailable(str(e)) from e
+
+
 class RedisVault:
     def __init__(self, client: aioredis.Redis, sealer: Sealer, ttl_seconds: int) -> None:
         self._redis = client
@@ -85,43 +96,33 @@ class RedisVault:
 
     async def put(self, task_id: str, token: str, entry: VaultEntry) -> None:
         key = self._key(task_id)
-        try:
+        with _redis_errors():
             created = await self._redis.hsetnx(key, token, self._sealer.seal(task_id, token, entry))
             await self._redis.expire(key, self._ttl)
             if not created:
                 existing = await self.get(task_id, token)
                 if existing is not None and existing != entry:
                     raise TokenCollision(f"{token} already maps to a different value in task {task_id}")
-        except RedisError as e:
-            raise VaultUnavailable(str(e)) from e
 
     async def get(self, task_id: str, token: str) -> VaultEntry | None:
-        try:
+        with _redis_errors():
             blob = cast(bytes | None, await self._redis.hget(self._key(task_id), token))
-        except RedisError as e:
-            raise VaultUnavailable(str(e)) from e
         return None if blob is None else self._sealer.open(task_id, token, blob)
 
     async def entries(self, task_id: str) -> dict[str, VaultEntry]:
-        try:
+        with _redis_errors():
             raw = cast(dict[bytes, bytes], await self._redis.hgetall(self._key(task_id)))
-        except RedisError as e:
-            raise VaultUnavailable(str(e)) from e
         return {
             token.decode(): self._sealer.open(task_id, token.decode(), blob) for token, blob in raw.items()
         }
 
     async def drop(self, task_id: str) -> None:
-        try:
+        with _redis_errors():
             await self._redis.delete(self._key(task_id))
-        except RedisError as e:
-            raise VaultUnavailable(str(e)) from e
 
     async def ping(self) -> None:
-        try:
+        with _redis_errors():
             await self._redis.ping()
-        except RedisError as e:
-            raise VaultUnavailable(str(e)) from e
 
 
 class MemoryVault:

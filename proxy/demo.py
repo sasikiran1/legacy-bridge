@@ -24,9 +24,8 @@ import redis.asyncio as aioredis
 from proxy.app import REHYDRATE_HEADER, TASK_HEADER, Services, create_app
 from proxy.audit import verify
 from proxy.detection import DetectorConfig, build_detector
-from proxy.offline import RECORDING_MODEL, offline_services
+from proxy.offline import RECORDING_MODEL, RecordingProvider, offline_services
 from proxy.policy import load_policy
-from proxy.recording import RecordingProvider
 from proxy.rehydrate import RehydrationDenied, ToolArgumentResolver
 from proxy.tokens import TOKEN_RE
 from proxy.vault import RedisVault, Sealer, Vault

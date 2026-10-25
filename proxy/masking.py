@@ -160,9 +160,9 @@ class Masker:
         page.
         """
         spans = []
-        trusted = self._propagate.get(task_id, set())
+        propagated = self._propagate.get(task_id, set())
         for token, entry in (await self._vault.entries(task_id)).items():
-            if len(entry.value) < MIN_KNOWN_VALUE_LENGTH or token not in trusted:
+            if len(entry.value) < MIN_KNOWN_VALUE_LENGTH or token not in propagated:
                 continue
             start = text.find(entry.value)
             while start != -1:
@@ -172,13 +172,7 @@ class Masker:
                     start = text.find(entry.value, start + 1)
                     continue
                 spans.append(
-                    Span(
-                        start=start,
-                        end=start + len(entry.value),
-                        entity_type=entry.entity_type,
-                        score=1.0,
-                        source="known",
-                    )
+                    Span(start=start, end=end, entity_type=entry.entity_type, score=1.0, source="known")
                 )
                 start = text.find(entry.value, start + 1)
         return spans

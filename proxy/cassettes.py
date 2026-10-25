@@ -128,9 +128,3 @@ class CassetteStore:
         if not path.exists():
             raise CassetteMiss(f"no recorded exchange {call} for task {task_id}")
         return Exchange.model_validate_json(path.read_text(encoding="utf-8"))
-
-    def clear(self, task_id: str) -> None:
-        directory = self.root / _safe(task_id)
-        if directory.exists():
-            for file in [*directory.glob("*.json"), *directory.glob("*.png")]:
-                file.unlink()

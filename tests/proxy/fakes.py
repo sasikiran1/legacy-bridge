@@ -9,9 +9,8 @@ from proxy.app import Services
 from proxy.audit import AuditLog
 from proxy.detection import Detector, RegexDetector
 from proxy.masking import Masker
-from proxy.offline import RECORDING_MODEL, SYNTHETIC_TOKEN_KEY, offline_services
+from proxy.offline import RECORDING_MODEL, SYNTHETIC_TOKEN_KEY, RecordingProvider, offline_services
 from proxy.policy import PiiPolicy, load_policy
-from proxy.recording import RecordingProvider
 from proxy.rehydrate import Rehydrator, ToolArgumentResolver
 from proxy.tokens import TOKEN_RE, TokenMinter
 from proxy.vault import MemoryVault, Sealer

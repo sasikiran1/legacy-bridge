@@ -29,9 +29,8 @@ from analysis.manifest import Run
 from analysis.pii_corpus import Document, build_corpus
 from proxy.app import TASK_HEADER, Services, create_app
 from proxy.detection import GLINER_MODEL, Detector, DetectorConfig, build_detector
-from proxy.offline import RECORDING_MODEL, offline_services
+from proxy.offline import RECORDING_MODEL, RecordingProvider, offline_services
 from proxy.policy import load_policy
-from proxy.recording import RecordingProvider
 from testbed.seed import generate
 
 JSON_SURFACES = {"api_json", "api_drift_json"}

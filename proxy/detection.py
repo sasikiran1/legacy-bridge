@@ -315,6 +315,11 @@ def resolve_overlaps(spans: Sequence[Span]) -> list[Span]:
     return sorted(chosen, key=lambda s: s.start)
 
 
+def _clean_up(spans: Sequence[Span], text: str) -> list[Span]:
+    """The steps every detector ends with: fix known mistypes, settle overlaps, trim street spans."""
+    return trim_street_spans(resolve_overlaps([retype(span, text) for span in spans]), text)
+
+
 # --- detectors
 
 
@@ -354,9 +359,7 @@ class RegexDetector:
                             source=f"presidio:{type(recognizer).__name__}",
                         )
                     )
-        retyped_spans = [retype(span, text) for span in spans]
-        resolved_spans = resolve_overlaps(retyped_spans)
-        return trim_street_spans(resolved_spans, text)
+        return _clean_up(spans, text)
 
 
 class PresidioDetector:
@@ -427,9 +430,7 @@ class PresidioDetector:
                 and s.score >= policy.min_score(s.entity_type)
                 and plausible(s, text)
             ]
-        retyped_spans = [retype(span, text) for span in spans]
-        resolved_spans = resolve_overlaps(retyped_spans)
-        return trim_street_spans(resolved_spans, text)
+        return _clean_up(spans, text)
 
 
 def build_detector(config: DetectorConfig, policy: PiiPolicy) -> Detector:

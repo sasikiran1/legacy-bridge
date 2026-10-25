@@ -21,6 +21,8 @@ APPROVAL_OPERATIONS = {"submitReimbursement": ApprovalKind.PAYMENT, "deleteNote"
 WRITE_OPERATIONS_WORDS = re.compile(
     r"\b(save|update|add|submit|confirm|request|delete|remove|file|send|appeal|pay)\b", re.I
 )
+WRITE_CLICK = re.compile(r"\b(save|update|add|submit|confirm|request|appeal|delete|remove)\b", re.I)
+"""A click the agent counts as a browser write; it is verified only by the portal's confirmation."""
 _PAYMENT_CLICK = re.compile(r"\b(confirm submission|submit payment|pay now|send payment)\b", re.I)
 _DELETE_CLICK = re.compile(r"\b(delete|remove|confirm removal)\b", re.I)
 

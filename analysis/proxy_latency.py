@@ -25,9 +25,8 @@ from analysis.manifest import Run
 from analysis.pii_corpus import build_corpus
 from proxy.app import TASK_HEADER, Services, create_app
 from proxy.detection import GLINER_MODEL, DetectorConfig, build_detector
-from proxy.offline import RECORDING_MODEL, offline_services
+from proxy.offline import RECORDING_MODEL, RecordingProvider, offline_services
 from proxy.policy import load_policy
-from proxy.recording import RecordingProvider
 from proxy.vault import RedisVault, Sealer, Vault
 from testbed.seed import generate
 

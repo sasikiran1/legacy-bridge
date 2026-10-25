@@ -18,19 +18,6 @@ from opentelemetry.trace import Tracer
 SEMCONV_COMMIT = "9ffc7e00c639be7712e544e3e54331e885dccf84"
 """open-telemetry/semantic-conventions-genai, pinned in ADR 0006."""
 
-GEN_AI_ATTRIBUTES = (
-    "gen_ai.operation.name",
-    "gen_ai.provider.name",
-    "gen_ai.request.model",
-    "gen_ai.response.model",
-    "gen_ai.request.temperature",
-    "gen_ai.request.max_tokens",
-    "gen_ai.usage.input_tokens",
-    "gen_ai.usage.output_tokens",
-    "gen_ai.response.finish_reasons",
-)
-"""The gen_ai.* attributes this codebase emits; tests/agent checks spans use only these."""
-
 
 @cache
 def tracer() -> Tracer:

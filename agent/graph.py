@@ -36,6 +36,7 @@ from agent.executors import (
 )
 from agent.guardrails import (
     CONFIRMATION,
+    WRITE_CLICK,
     InjectionScanner,
     approval_for_click,
     approval_for_operation,
@@ -255,6 +256,21 @@ def _finish(state: AgentState, call: ToolCall, calls: list[ToolCall]) -> tuple[d
     return {"answer": answer, "summary": call.arguments.get("summary"), "finished": True}, "Recorded."
 
 
+def _approval(actions: list[dict[str, Any]]) -> dict[str, Any]:
+    """Pauses for a reviewer when any action needs approval; the resumed value is their decision."""
+    if not actions:
+        return {}
+    decision: dict[str, Any] = interrupt({"kind": "approval", "actions": actions})
+    return decision
+
+
+def _scanned(scanner: InjectionScanner, text: str) -> tuple[str, bool]:
+    """The text as the model sees it, and whether the scanner flagged it (which quarantines the task)."""
+    if scanner.scan(text).flagged:
+        return "[flagged as possible prompt injection]\n" + text, True
+    return text, False
+
+
 def _clicked(browser: Browser, call: ToolCall) -> tuple[str, str] | None:
     """(role, name) of the element a click targets: by ref, or by screen point for unlabeled elements."""
     if call.name == "browser_click":
@@ -332,18 +348,13 @@ def build_graph(rt: Runtime, checkpointer: BaseCheckpointSaver[Any] | None = Non
             return _nudge(state, {"fallback_reason": "the model stopped calling tools"})
         quarantined = state.get("quarantined", False)
         needs = {c.id: kind.value for c in calls if (kind := approval_for_operation(c.name, quarantined))}
-        decision: dict[str, Any] = {}
-        if needs:
-            decision = interrupt(
-                {
-                    "kind": "approval",
-                    "actions": [
-                        {"tool": c.name, "arguments": c.arguments, "approval": needs[c.id]}
-                        for c in calls
-                        if c.id in needs
-                    ],
-                }
-            )
+        decision = _approval(
+            [
+                {"tool": c.name, "arguments": c.arguments, "approval": needs[c.id]}
+                for c in calls
+                if c.id in needs
+            ]
+        )
         approvals = list(state.get("approvals", []))
         messages = list(state.get("messages", []))
         writes = list(state.get("writes", []))
@@ -380,10 +391,8 @@ def build_graph(rt: Runtime, checkpointer: BaseCheckpointSaver[Any] | None = Non
             result = await rt.api.call(
                 state["task_key"], (state["username"], rt.password), call.name, call.arguments
             )
-            text = result.for_model()
-            if rt.scanner.scan(text).flagged:
-                quarantined = True
-                text = "[flagged as possible prompt injection]\n" + text
+            text, flagged = _scanned(rt.scanner, result.for_model())
+            quarantined = quarantined or flagged
             messages.append(_tool_message(call.id, spotlight(text, "portal-api")))
             operation = rt.api.operations.get(call.name)
             if result.ok and operation is not None and operation.writes:
@@ -487,18 +496,13 @@ def build_graph(rt: Runtime, checkpointer: BaseCheckpointSaver[Any] | None = Non
             element = _clicked(browser, c)
             if element and (kind := approval_for_click(*element, quarantined)):
                 needs[c.id] = (kind.value, element[1])
-        decision: dict[str, Any] = {}
-        if needs:
-            decision = interrupt(
-                {
-                    "kind": "approval",
-                    "actions": [
-                        {"tool": c.name, "element": needs[c.id][1], "approval": needs[c.id][0]}
-                        for c in calls
-                        if c.id in needs
-                    ],
-                }
-            )
+        decision = _approval(
+            [
+                {"tool": c.name, "element": needs[c.id][1], "approval": needs[c.id][0]}
+                for c in calls
+                if c.id in needs
+            ]
+        )
         approvals = list(state.get("approvals", []))
         messages = list(state.get("messages", []))
         writes = list(state.get("writes", []))
@@ -550,15 +554,11 @@ def build_graph(rt: Runtime, checkpointer: BaseCheckpointSaver[Any] | None = Non
             if is_verification_wall(result.raw):
                 update["handoff_reason"] = "verification wall"
                 stop = True
-            text = result.text
-            if rt.scanner.scan(text).flagged:
-                quarantined = True
-                text = "[flagged as possible prompt injection]\n" + text
+            text, flagged = _scanned(rt.scanner, result.text)
+            quarantined = quarantined or flagged
             observation = text
             messages.append(_tool_message(call.id, spotlight(text, "portal-page")))
-            if clicked and re.search(
-                r"\b(save|update|add|submit|confirm|request|appeal|delete|remove)\b", clicked[1], re.I
-            ):
+            if clicked and WRITE_CLICK.search(clicked[1]):
                 writes.append({"tier": "browser", "action": f"click {clicked[1]}", "ok": True})
         return {
             **update,

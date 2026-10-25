@@ -55,10 +55,6 @@ class StreamRehydrator:
         self._destination = destination
         self._buffer = ""
 
-    @property
-    def pending(self) -> str:
-        return self._buffer
-
     async def feed(self, chunk: str) -> str:
         self._buffer += chunk
         out: list[str] = []

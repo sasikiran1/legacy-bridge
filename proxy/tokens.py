@@ -46,7 +46,3 @@ class TokenMinter:
             self._task_key(task_id), entity_type.encode() + b"\x1f" + value.encode(), hashlib.sha256
         ).digest()
         return Token(entity_type, uuid.UUID(bytes=digest[:16], version=8))
-
-
-def find_tokens(text: str) -> list[re.Match[str]]:
-    return list(TOKEN_RE.finditer(text))

@@ -21,11 +21,13 @@ from __future__ import annotations
 
 import argparse
 import asyncio
+import contextlib
 import json
 import os
 import shutil
 import sys
 import time
+from collections.abc import AsyncIterator, Awaitable, Callable
 from pathlib import Path
 from typing import Any, TypedDict
 
@@ -205,7 +207,11 @@ async def run_task(
     replay: bool = False,
     use_scripts: bool = False,
     compile_scripts: bool = False,
+    on_event: Callable[[dict[str, Any]], Awaitable[None]] | None = None,
+    ask: Callable[[dict[str, Any]], Awaitable[dict[str, Any]]] | None = None,
 ) -> TaskRun:
+    """`on_event` receives each graph step as it happens (token-only state, see `step_event`); `ask` puts
+    approvals and handoffs to a person instead of the approval policy. Both are for the operator console."""
     admin: PortalAdmin = services["admin"]
     task_key = f"{scenario.name}/{task.id}"
     scans = CASSETTE_DIR / task_key.replace("/", "_") / "scans.json"
@@ -271,12 +277,22 @@ async def run_task(
                 "instruction": await masker.text(task_key, task.instruction),
             }
             while True:
-                state = await graph.ainvoke(payload, config)
+                if on_event is None:
+                    state = await graph.ainvoke(payload, config)
+                else:
+                    async for update in graph.astream(payload, config, stream_mode="updates"):
+                        for node, delta in update.items():
+                            if node != "__interrupt__" and isinstance(delta, dict):
+                                await on_event(step_event(node, delta))
+                    snap = await graph.aget_state(config)
+                    state = {**snap.values, "__interrupt__": snap.interrupts}
                 pending = state.get("__interrupt__")
                 if not pending:
                     break
                 request = pending[0].value
-                if request.get("kind") == "approval":
+                if ask is not None:
+                    payload = Command(resume=await ask(request))
+                elif request.get("kind") == "approval":
                     payload = Command(resume=decide(task, request, approvals))
                 elif resolve_walls and "wall" in str(request.get("reason", "")):
                     await admin.clear_wall(task.user)
@@ -327,6 +343,30 @@ async def run_task(
     )
 
 
+def step_event(node: str, delta: dict[str, Any]) -> dict[str, Any]:
+    """One graph step for display. Agent state holds tokens only (ADR 0012), so nothing here is raw PII."""
+    event: dict[str, Any] = {"node": node}
+    for key in (
+        "tier",
+        "outcome",
+        "fallback_reason",
+        "handoff_reason",
+        "replay_outcome",
+        "answer",
+        "verified",
+    ):
+        if delta.get(key) is not None:
+            event[key] = delta[key]
+    if delta.get("pending"):
+        event["calls"] = [{"tool": c.get("name"), "arguments": c.get("arguments")} for c in delta["pending"]]
+    messages = delta.get("messages") or []
+    if messages and messages[-1].get("role") == "tool":
+        event["result"] = str(messages[-1].get("content", ""))[-1500:]
+    if delta.get("writes"):
+        event["writes"] = delta["writes"]
+    return event
+
+
 def compile_script(task: Task, task_key: str, previous: ReplayScript | None) -> str:
     """Compiles this task's cassettes into a script; returns 'key vN' or why it could not compile."""
     proxy = load_proxy_settings()
@@ -374,9 +414,56 @@ def save(run: Run, rows: list[TaskRun], api: ApiExecutor, settings: AgentSetting
     run.finish(models={"profile": settings.profile.value, "served": ", ".join(served), "runtime": runtime})
 
 
+@contextlib.asynccontextmanager
+async def open_services(settings: AgentSettings, scanner: str) -> AsyncIterator[RunnerServices]:
+    """Everything a task run needs. Every client is closed on the way out, including when a task raises."""
+    tb = testbed_settings()
+    async with contextlib.AsyncExitStack() as stack:
+        redis_client = aioredis.Redis.from_url(settings.redis_url)
+        stack.push_async_callback(redis_client.aclose)
+        vault = RedisVault(redis_client, Sealer(settings.vault_master_key), settings.vault_task_ttl_seconds)
+        audit = AuditLog(AGENT_AUDIT)
+        resolver = ToolArgumentResolver(vault, audit, load_policy(), frozenset({settings.portal_host}))
+        masker = MaskClient(settings.proxy_url)
+        stack.push_async_callback(masker.aclose)
+        llm = LlmClient(settings.proxy_url)
+        stack.push_async_callback(llm.aclose)
+        proxy_http = await stack.enter_async_context(
+            httpx.AsyncClient(base_url=settings.proxy_url, timeout=60)
+        )
+        admin = await stack.enter_async_context(PortalAdmin(tb))
+        # Compose starts the portal without waiting for Spring Boot; CI once fetched the spec too early.
+        await admin.wait_ready()
+        async with httpx.AsyncClient() as http:
+            spec = (await http.get(f"{settings.portal_url}/v3/api-docs")).json()
+        api = ApiExecutor(
+            settings.portal_url,
+            settings.portal_host,
+            openapi.parse(spec),
+            BreakerRegistry(),
+            resolver,
+            masker,
+        )
+        stack.push_async_callback(api.aclose)
+        await ensure_agent_database(settings.agent_db_url)
+        saver = await stack.enter_async_context(AsyncPostgresSaver.from_conn_string(settings.agent_db_url))
+        await saver.setup()
+        yield {
+            "admin": admin,
+            "db_url": tb.portal_db_url,
+            "masker": masker,
+            "llm": llm,
+            "api": api,
+            "resolver": resolver,
+            "scanner": build_scanner(scanner),
+            "checkpointer": saver,
+            "proxy_http": proxy_http,
+            "rehydrator": Rehydrator(vault, audit),
+        }
+
+
 async def main_async(args: argparse.Namespace) -> int:
     settings = agent_settings()
-    tb = testbed_settings()
     scenario = load_scenarios()[args.scenario]
     tasks = load_tasks()
     if args.check_replay and not args.tasks:
@@ -385,53 +472,26 @@ async def main_async(args: argparse.Namespace) -> int:
     elif not args.all:
         wanted = set(args.tasks.split(","))
         tasks = tuple(t for t in tasks if t.id in wanted)
-    policy = load_policy()
-    redis_client = aioredis.Redis.from_url(settings.redis_url)
-    vault = RedisVault(redis_client, Sealer(settings.vault_master_key), settings.vault_task_ttl_seconds)
-    audit = AuditLog(AGENT_AUDIT)
-    resolver = ToolArgumentResolver(vault, audit, policy, frozenset({settings.portal_host}))
-    masker = MaskClient(settings.proxy_url)
-    proxy_http = httpx.AsyncClient(base_url=settings.proxy_url, timeout=60)
-    async with PortalAdmin(tb) as admin:
-        # Compose starts the portal without waiting for Spring Boot; CI once fetched the spec too early.
-        await admin.wait_ready()
-    spec = (await httpx.AsyncClient().get(f"{settings.portal_url}/v3/api-docs")).json()
-    api = ApiExecutor(
-        settings.portal_url, settings.portal_host, openapi.parse(spec), BreakerRegistry(), resolver, masker
-    )
-    await ensure_agent_database(settings.agent_db_url)
-
-    run = Run(
-        kind="agent-run",
-        config={
-            "scenario": scenario.name,
-            "tasks": [t.id for t in tasks],
-            "profile": settings.profile.value,
-            "approvals": args.approvals,
-            "resolve_walls": args.resolve_walls,
-            "scanner": settings.injection_scanner,
-            "snapshots": settings.snapshots,
-            "record": args.record,
-            "label": args.label,
-        },
-    )
     rows: list[TaskRun] = []
-    runtime = await ollama_version()
-    async with PortalAdmin(tb) as admin, AsyncPostgresSaver.from_conn_string(settings.agent_db_url) as saver:
-        await saver.setup()
-        services: RunnerServices = {
-            "admin": admin,
-            "db_url": tb.portal_db_url,
-            "masker": masker,
-            "llm": LlmClient(settings.proxy_url),
-            "api": api,
-            "resolver": resolver,
-            # A replay check serves the recorded verdicts (ReplayScanner), so it never needs the gated model.
-            "scanner": build_scanner("none" if args.check_replay else settings.injection_scanner),
-            "checkpointer": saver,
-            "proxy_http": proxy_http,
-            "rehydrator": Rehydrator(vault, audit),
-        }
+    # A replay check serves the recorded verdicts (ReplayScanner), so it never needs the gated model.
+    scanner = "none" if args.check_replay else settings.injection_scanner
+    async with open_services(settings, scanner) as services:
+        api, admin = services["api"], services["admin"]
+        run = Run(
+            kind="agent-run",
+            config={
+                "scenario": scenario.name,
+                "tasks": [t.id for t in tasks],
+                "profile": settings.profile.value,
+                "approvals": args.approvals,
+                "resolve_walls": args.resolve_walls,
+                "scanner": settings.injection_scanner,
+                "snapshots": settings.snapshots,
+                "record": args.record,
+                "label": args.label,
+            },
+        )
+        runtime = await ollama_version()
         for task in tasks:
             row = await run_task(
                 task,
@@ -462,15 +522,10 @@ async def main_async(args: argparse.Namespace) -> int:
                 save(run, rows, api, settings, runtime)
                 if args.record:
                     record_index([row], settings.injection_scanner, args.scripts)
-        await services["llm"].aclose()
         await admin.apply(load_scenarios()["healthy"].chaos)
 
     # A replay check is a gate, not an experiment: its rows repeat the recording's and are not kept.
     destination = "not saved (replay check)" if args.check_replay else str(run.directory)
-    await masker.aclose()
-    await proxy_http.aclose()
-    await api.aclose()
-    await redis_client.aclose()
     flush()
     passed = sum(r.passed for r in rows)
     print(

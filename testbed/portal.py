@@ -49,8 +49,5 @@ class PortalAdmin:
     async def reset(self) -> None:
         (await self._client.post("/admin/reset")).raise_for_status()
 
-    async def expire_sessions(self) -> None:
-        (await self._client.post("/admin/sessions/expire")).raise_for_status()
-
     async def clear_wall(self, username: str) -> None:
         (await self._client.post("/admin/wall/clear", json={"username": username})).raise_for_status()

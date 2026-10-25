@@ -15,7 +15,7 @@ from PIL import Image, ImageDraw, ImageFont
 from proxy.app import Services, create_app
 from proxy.cassettes import IMAGE_REF, CassetteStore, externalize_images, request_digest
 from proxy.detection import DetectionError
-from proxy.recording import RecordingProvider
+from proxy.offline import RecordingProvider
 from proxy.vision import decode_data_url, encode_png, ocr_region, ocr_text, redact_image
 from tests.proxy.fakes import MOCK_MODEL, kit, services
 

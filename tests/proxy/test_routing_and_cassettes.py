@@ -10,8 +10,8 @@ import pytest
 from proxy import app as app_module
 from proxy.app import CALL_HEADER, REHYDRATE_HEADER, TASK_HEADER, Services, create_app
 from proxy.cassettes import CassetteStore, LlmMode
+from proxy.offline import RecordingProvider
 from proxy.providers import Provider, Registry
-from proxy.recording import RecordingProvider
 from proxy.routing import Budget, Limits, Router
 from tests.proxy.fakes import kit
 
