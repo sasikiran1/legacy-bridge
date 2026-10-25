@@ -111,6 +111,11 @@ demo-fallback: LLM_MODE := replay
 demo-fallback: agent-stack ## M3 demo: removed and retired endpoints push the agent to the browser (replayed, no model)
 	$(TESTBED) uv run python -W ignore -m agent.runner --scenario api_degraded --check-replay --label demo
 
+demo-replay: LLM_MODE := replay
+demo-replay: agent-stack ## M4 demo: compiled scripts at $0 on the healthy portal, clean step failures on DOM drift, cost ledger
+	$(TESTBED) uv run python -W ignore -m analysis.replay_eval --scenarios healthy,dom_drift
+	$(TESTBED) uv run python -W ignore -m analysis.cost_ledger
+
 traces: LLM_MODE := replay
 traces: agent-stack ## Replay recorded healthy tasks with tracing to Phoenix (http://localhost:6006), then check spans for canaries
 	$(COMPOSE) up -d phoenix
