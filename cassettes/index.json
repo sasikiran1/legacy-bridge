@@ -578,5 +578,18 @@
    "explore"
   ],
   "wrong_action": false
+ },
+ "poor_a11y/submit_reimbursement-01": {
+  "llm_calls": 13,
+  "outcome": "success",
+  "passed": true,
+  "quarantined": false,
+  "scanner": "promptguard",
+  "scripts": false,
+  "tiers": [
+   "api",
+   "explore"
+  ],
+  "wrong_action": false
  }
 }
